@@ -1,4 +1,15 @@
+PARAMETERS_TYPE = "--type"
+PARAMETERS_PORT = "--port"
+PARAMETERS_MASTER_HOST = "--master-host"
+PARAMETERS_MASTER_PORT = "--master-port"
+PARAMETERS_CONF = "--conf"
+PARAMETERS_HOST = "--host"
+
+KEYPHRASE = "hello"
+
+
 PYTHON_PATH = "python"
+THIS_HOST = "127.0.0.1"
 PORT = 5001
 MASTER_HOST = "127.0.0.1"
 MASTER_PORT = 5001
