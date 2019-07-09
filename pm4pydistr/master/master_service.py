@@ -6,6 +6,7 @@ from random import randrange
 from time import time
 from pm4pydistr.master.variable_container import MasterVariableContainer
 
+
 class MasterSocketListener(Thread):
     app = Flask(__name__)
     CORS(app)
@@ -26,7 +27,7 @@ def register_slave():
     port = request.args.get('port', type=str)
 
     if keyphrase == KEYPHRASE:
-        id = [randrange(0,10), randrange(0,10), randrange(0,10), randrange(0,10), randrange(0,10), randrange(0,10), randrange(0,10)]
+        id = [randrange(0, 10), randrange(0, 10), randrange(0, 10), randrange(0, 10), randrange(0, 10),
+              randrange(0, 10), randrange(0, 10)]
         MasterVariableContainer.master.slaves[str(id)] = [ip, port, time()]
         return jsonify({"id": str(id)})
-
