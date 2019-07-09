@@ -7,5 +7,7 @@ class Master:
     def __init__(self, parameters):
         self.parameters = parameters
         self.slaves = {}
-        self.socket_listener = MasterSocketListener(str(self.parameters[PARAMETERS_PORT]), self)
-        self.socket_listener.run()
+        self.service = MasterSocketListener(str(self.parameters[PARAMETERS_PORT]), self)
+        self.service.run()
+
+
