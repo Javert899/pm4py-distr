@@ -9,5 +9,3 @@ class Master:
         self.slaves = {}
         self.service = MasterSocketListener(str(self.parameters[PARAMETERS_PORT]), self)
         self.service.run()
-
-
