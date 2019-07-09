@@ -8,4 +8,4 @@ class Master:
         self.parameters = parameters
         self.slaves = {}
         self.service = MasterSocketListener(str(self.parameters[PARAMETERS_PORT]), self)
-        self.service.run()
+        self.service.start()

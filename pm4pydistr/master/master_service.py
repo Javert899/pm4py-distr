@@ -49,9 +49,7 @@ def update_slave():
 def ping_from_slave():
     keyphrase = request.args.get('keyphrase', type=str)
     id = request.args.get('id', type=str)
-    ip = request.args.get('ip', type=str)
-    port = request.args.get('port', type=str)
 
     if keyphrase == KEYPHRASE:
-        MasterVariableContainer.master.slaves[id] = [ip, port, time()]
+        MasterVariableContainer.master.slaves[id][2] = time()
         return jsonify({"id": id})

@@ -2,8 +2,10 @@ from pm4pydistr.configuration import PARAMETERS_PORT, PARAMETERS_HOST, PARAMETER
     PARAMETERS_CONF
 
 from pm4pydistr.slave.slave_service import SlaveSocketListener
+from pm4pydistr.slave.slave_requests import SlaveRequests
 
 import os
+
 
 class Slave:
     def __init__(self, parameters):
@@ -13,10 +15,17 @@ class Slave:
         self.master_host = parameters[PARAMETERS_MASTER_HOST]
         self.master_port = str(parameters[PARAMETERS_MASTER_PORT])
         self.conf = parameters[PARAMETERS_CONF]
+        self.id = None
 
         if not os.path.exists(self.conf):
             os.mkdir(self.conf)
 
-        self.service = SlaveSocketListener(self.host, self.port, self.master_host, self.master_port, self.conf)
-        self.service.run()
+        self.slave_requests = SlaveRequests(self, self.host, self.port, self.master_host, self.master_port, self.conf)
 
+        self.service = SlaveSocketListener(self, self.host, self.port, self.master_host, self.master_port, self.conf)
+        self.service.start()
+
+        self.slave_requests.register_to_webservice()
+
+    def load_log(self, log_name):
+        print("told to log "+str(log_name))

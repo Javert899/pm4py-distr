@@ -19,7 +19,8 @@ class SlaveSocketListener(Thread):
     app = Flask(__name__)
     CORS(app)
 
-    def __init__(self, host, port, master_host, master_port, conf):
+    def __init__(self, slave, host, port, master_host, master_port, conf):
+        SlaveVariableContainer.slave = slave
         SlaveVariableContainer.host = host
         SlaveVariableContainer.port = port
         SlaveVariableContainer.master_host = master_host
@@ -29,6 +30,16 @@ class SlaveSocketListener(Thread):
 
     def run(self):
         self.app.run(host="0.0.0.0", port=SlaveVariableContainer.port, threaded=True)
+
+
+@SlaveSocketListener.app.route("/synchronizeFiles", methods=["POST"])
+def synchronize_files():
+    keyphrase = request.args.get('keyphrase', type=str)
+    if keyphrase == KEYPHRASE:
+        for log_file in request.json["logs"]:
+            if log_file not in os.listdir(SlaveVariableContainer.conf):
+                SlaveVariableContainer.slave.load_log(log_file)
+    return jsonify({})
 
 
 @SlaveSocketListener.app.route("/calculateDfg", methods=["GET"])
