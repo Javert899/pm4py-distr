@@ -112,3 +112,11 @@ def calculate_start_activities():
 
         return jsonify({"start_activities": overall_sa})
     return jsonify({"start_activities": {}})
+
+
+@MasterSocketListener.app.route("/getSlavesList", methods=["GET"])
+def get_slaves_list():
+    keyphrase = request.args.get('keyphrase', type=str)
+    if keyphrase == KEYPHRASE:
+        return jsonify({"slaves": MasterVariableContainer.master.slaves})
+    return jsonify({})
