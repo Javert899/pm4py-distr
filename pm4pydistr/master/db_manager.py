@@ -25,7 +25,7 @@ class DbManager:
         qr = curs.execute("SELECT CONF, ID FROM SLAVES")
 
         for res in qr.fetchall():
-            slaves[str(res[0])] = str(res[1])
+            slaves[str(res[0])] = eval(res[1])
 
         conn.close()
 
@@ -40,7 +40,7 @@ class DbManager:
         qr = curs.execute("SELECT LOG_NAME, ID FROM LOGS")
 
         for res in qr.fetchall():
-            logs[str(res[0])] = str(res[1])
+            logs[str(res[0])] = eval(str(res[1]))
 
         conn.close()
 
@@ -63,3 +63,13 @@ class DbManager:
             print("SLAVE ALREADY FOUND!")
 
         return all_slaves[conf]
+
+    def insert_log_into_db(self, log_name, id):
+        database_path = self.conf + ".db"
+        conn = sqlite3.connect(database_path)
+        curs = conn.cursor()
+
+        curs.execute("INSERT INTO LOGS VALUES (?,?)", (str(log_name), str(id)))
+
+        conn.commit()
+        conn.close()
