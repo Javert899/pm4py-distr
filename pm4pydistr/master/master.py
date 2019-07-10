@@ -102,8 +102,6 @@ class Master:
         for thread in threads:
             thread.join()
 
-            print(Counter(thread.content['dfg']))
-
             overall_dfg = overall_dfg + Counter(thread.content['dfg'])
 
         return overall_dfg
