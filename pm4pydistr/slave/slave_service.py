@@ -69,3 +69,14 @@ def calculate_end_activities():
 
         return jsonify({"end_activities": returned_dict})
     return jsonify({"end_activities": {}})
+
+
+@SlaveSocketListener.app.route("/getStartActivities", methods=["GET"])
+def calculate_start_activities():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    if keyphrase == KEYPHRASE:
+        returned_dict = parquet_handler.get_start_activities(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process])
+
+        return jsonify({"start_activities": returned_dict})
+    return jsonify({"start_activities": {}})

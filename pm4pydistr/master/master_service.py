@@ -101,3 +101,14 @@ def calculate_end_activities():
         return jsonify({"end_activities": overall_ea})
 
     return jsonify({})
+
+
+@MasterSocketListener.app.route("/getStartActivities", methods=["GET"])
+def calculate_start_activities():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    if keyphrase == KEYPHRASE:
+        overall_sa = MasterVariableContainer.master.get_start_activities(process)
+
+        return jsonify({"start_activities": overall_sa})
+    return jsonify({"start_activities": {}})
