@@ -2,6 +2,7 @@ import os
 from pm4py.objects.log.importer.parquet import factory as parquet_importer
 from collections import Counter
 from pm4py.algo.discovery.dfg.adapters.pandas import df_statistics
+from pm4py.algo.filtering.pandas.end_activities import end_activities_filter
 from pm4py.algo.filtering.common.filtering_constants import CASE_CONCEPT_NAME
 from pm4py.objects.log.util.xes import DEFAULT_NAME_KEY
 from pathlib import Path
@@ -24,3 +25,24 @@ def calculate_dfg(path, log_name, managed_logs, parameters=None):
     for el in overall_dfg:
         returned_dict[el[0] + "@@" + el[1]] = overall_dfg[el]
     return returned_dict
+
+
+def get_end_activities(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    folder = os.path.join(path, log_name)
+
+    parquet_list = parquet_importer.get_list_parquet(folder)
+    overall_ea = Counter()
+    for pq in parquet_list:
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            df = parquet_importer.apply(pq, parameters={"columns": [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY]})
+            ea = Counter(end_activities_filter.get_end_activities(df))
+            overall_ea = overall_ea + ea
+
+    for el in overall_ea:
+        overall_ea[el] = int(overall_ea[el])
+
+    return dict(overall_ea)

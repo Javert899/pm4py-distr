@@ -5,6 +5,7 @@ from pm4pydistr.configuration import PARAMETERS_PORT, PARAMETERS_HOST, PARAMETER
 from pm4py.objects.log.importer.parquet import factory as parquet_importer
 from pm4pydistr.master.rqsts.master_assign_request import MasterAssignRequest
 from pm4pydistr.master.rqsts.dfg_calc_request import DfgCalcRequest
+from pm4pydistr.master.rqsts.ea_request import EaRequest
 from pathlib import Path
 from random import randrange
 import os
@@ -109,3 +110,27 @@ class Master:
             overall_dfg = overall_dfg + Counter(thread.content['dfg'])
 
         return overall_dfg
+
+
+    def get_end_activities(self, process):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = EaRequest(slave_host, slave_port, process)
+            m.start()
+
+            threads.append(m)
+
+        overall_ea = Counter()
+
+        for thread in threads:
+            thread.join()
+
+            overall_ea = overall_ea + Counter(thread.content['end_activities'])
+
+        return overall_ea

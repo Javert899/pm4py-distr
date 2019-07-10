@@ -89,3 +89,15 @@ def calculate_dfg():
         return jsonify({"dfg": overall_dfg})
 
     return jsonify({})
+
+
+@MasterSocketListener.app.route("/getEndActivities", methods=["GET"])
+def calculate_end_activities():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    if keyphrase == KEYPHRASE:
+        overall_ea = MasterVariableContainer.master.get_end_activities(process)
+
+        return jsonify({"end_activities": overall_ea})
+
+    return jsonify({})

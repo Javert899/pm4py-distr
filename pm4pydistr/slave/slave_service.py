@@ -58,3 +58,14 @@ def calculate_dfg():
 
         return jsonify({"dfg": returned_dict})
     return jsonify({"dfg": {}})
+
+
+@SlaveSocketListener.app.route("/getEndActivities", methods=["GET"])
+def calculate_end_activities():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    if keyphrase == KEYPHRASE:
+        returned_dict = parquet_handler.get_end_activities(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process])
+
+        return jsonify({"end_activities": returned_dict})
+    return jsonify({"end_activities": {}})
