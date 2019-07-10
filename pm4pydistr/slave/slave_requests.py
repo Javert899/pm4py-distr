@@ -22,3 +22,5 @@ class SlaveRequests:
         response = json.loads(r.text)
         self.id = response['id']
         self.slave.id = response['id']
+
+        self.slave.enable_ping_of_master()

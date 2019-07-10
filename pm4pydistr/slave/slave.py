@@ -5,6 +5,7 @@ from pm4pydistr.slave.slave_service import SlaveSocketListener
 from pm4pydistr.slave.slave_requests import SlaveRequests
 from pathlib import Path
 from pm4py.objects.log.importer.parquet import factory as parquet_importer
+from pm4pydistr.slave.do_ms_ping import DoMasterPing
 
 import os
 import shutil
@@ -18,6 +19,7 @@ class Slave:
         self.master_port = str(parameters[PARAMETERS_MASTER_PORT])
         self.conf = parameters[PARAMETERS_CONF]
         self.id = None
+        self.ping_module = None
 
         if not os.path.exists(self.conf):
             os.mkdir(self.conf)
@@ -46,3 +48,7 @@ class Slave:
                     if log_name in list_paths_corr:
                         #print("log_name",log_name," in ",os.path.join(folder, folder_name),list_paths_corr[log_name])
                         shutil.copyfile(list_paths_corr[log_name], os.path.join(self.conf, folder_name, log_name))
+
+    def enable_ping_of_master(self):
+        self.ping_module = DoMasterPing(self, self.conf, self.id, self.master_host, self.master_port)
+        self.ping_module.start()

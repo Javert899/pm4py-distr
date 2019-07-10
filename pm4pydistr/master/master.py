@@ -10,6 +10,7 @@ from random import randrange
 import os
 import numpy as np
 from collections import Counter
+from pm4pydistr.master.session_checker import SessionChecker
 
 class Master:
     def __init__(self, parameters):
@@ -29,6 +30,9 @@ class Master:
 
         MasterVariableContainer.dbmanager.create_log_db()
         self.load_logs()
+
+        self.session_checker = SessionChecker(self)
+        self.session_checker.start()
 
 
     def load_logs(self):
