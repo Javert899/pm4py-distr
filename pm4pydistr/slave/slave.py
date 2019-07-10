@@ -27,5 +27,8 @@ class Slave:
 
         self.slave_requests.register_to_webservice()
 
-    def load_log(self, log_name):
-        print("told to log "+str(log_name))
+    def create_folder(self, folder_name):
+        print("create folder " + str(folder_name))
+
+    def load_log(self, folder_name, log_name):
+        print("loading log " + str(log_name)+" into "+str(folder_name))

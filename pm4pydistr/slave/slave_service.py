@@ -14,6 +14,7 @@ from pm4py.algo.discovery.dfg.adapters.pandas import df_statistics
 from collections import Counter
 
 import os
+import json
 
 class SlaveSocketListener(Thread):
     app = Flask(__name__)
@@ -36,9 +37,12 @@ class SlaveSocketListener(Thread):
 def synchronize_files():
     keyphrase = request.args.get('keyphrase', type=str)
     if keyphrase == KEYPHRASE:
-        for log_file in request.json["logs"]:
-            if log_file not in os.listdir(SlaveVariableContainer.conf):
-                SlaveVariableContainer.slave.load_log(log_file)
+        json_content = json.loads(request.data)
+        for log_folder in json_content["logs"]:
+            if log_folder not in os.listdir(SlaveVariableContainer.conf):
+                SlaveVariableContainer.slave.create_folder(log_folder)
+            for log_name in json_content["logs"][log_folder]:
+                SlaveVariableContainer.slave.load_log(log_folder, log_name)
     return jsonify({})
 
 

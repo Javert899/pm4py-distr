@@ -68,5 +68,6 @@ def do_log_assingment():
 
     if keyphrase == KEYPHRASE:
         MasterVariableContainer.master.do_assignment()
+        MasterVariableContainer.master.make_slaves_load()
 
     return jsonify({})

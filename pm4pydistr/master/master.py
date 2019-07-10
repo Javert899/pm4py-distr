@@ -3,6 +3,7 @@ from pm4pydistr.master.variable_container import MasterVariableContainer
 
 from pm4pydistr.configuration import PARAMETERS_PORT, PARAMETERS_HOST, PARAMETERS_CONF, BASE_FOLDER_LIST_OPTIONS
 from pm4py.objects.log.importer.parquet import factory as parquet_importer
+from pm4pydistr.master.rqsts.master_assign_request import MasterAssignRequest
 from pathlib import Path
 from random import randrange
 import os
@@ -65,3 +66,16 @@ class Master:
                 distances = sorted([(x, np.linalg.norm(np.array(x) - np.array(self.sublogs_id[folder][log]))) for x in all_slaves], key=lambda x: x[1])
 
                 self.sublogs_correspondence[str(distances[0][0])][folder].append(log)
+
+
+    def make_slaves_load(self):
+        all_slaves = list(self.slaves.keys())
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            dictio = {"logs": self.sublogs_correspondence[slave]}
+
+            m = MasterAssignRequest(slave_host, slave_port, dictio)
+            m.start()
