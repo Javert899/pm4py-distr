@@ -36,7 +36,10 @@ class SlaveSocketListener(Thread):
 def synchronize_files():
     keyphrase = request.args.get('keyphrase', type=str)
     if keyphrase == KEYPHRASE:
-        json_content = json.loads(request.data)
+        try:
+            json_content = json.loads(request.data)
+        except:
+            json_content = json.loads(request.data.decode('utf-8'))
         for log_folder in json_content["logs"]:
             SlaveVariableContainer.managed_logs[log_folder] = None
             SlaveVariableContainer.managed_logs[log_folder] = []
