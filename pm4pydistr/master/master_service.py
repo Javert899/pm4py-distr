@@ -28,10 +28,12 @@ def register_slave():
     keyphrase = request.args.get('keyphrase', type=str)
     ip = request.args.get('ip', type=str)
     port = request.args.get('port', type=str)
+    conf = request.args.get('conf', type=str)
 
     if keyphrase == KEYPHRASE:
         id = [randrange(0, 10), randrange(0, 10), randrange(0, 10), randrange(0, 10), randrange(0, 10),
               randrange(0, 10), randrange(0, 10)]
+        id = MasterVariableContainer.dbmanager.insert_slave_into_db(conf, id)
         MasterVariableContainer.master.slaves[str(id)] = [ip, port, time()]
         return jsonify({"id": str(id)})
 
@@ -42,6 +44,7 @@ def update_slave():
     id = request.args.get('id', type=str)
     ip = request.args.get('ip', type=str)
     port = request.args.get('port', type=str)
+    conf = request.args.get('conf', type=str)
 
     if keyphrase == KEYPHRASE:
         MasterVariableContainer.master.slaves[id] = [ip, port, time()]
@@ -52,6 +55,7 @@ def update_slave():
 def ping_from_slave():
     keyphrase = request.args.get('keyphrase', type=str)
     id = request.args.get('id', type=str)
+    conf = request.args.get('conf', type=str)
 
     if keyphrase == KEYPHRASE:
         MasterVariableContainer.master.slaves[id][2] = time()

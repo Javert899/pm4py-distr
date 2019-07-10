@@ -16,9 +16,9 @@ class SlaveRequests:
         self.id = None
 
     def register_to_webservice(self):
-        r = requests.get("http://"+self.master_host+":"+self.master_port+"/registerSlave?keyphrase="+KEYPHRASE+"&ip="+self.host+"&port="+self.port)
+        r = requests.get(
+            "http://" + self.master_host + ":" + self.master_port + "/registerSlave?keyphrase=" + KEYPHRASE + "&ip=" + self.host + "&port=" + self.port + "&conf=" + self.conf)
 
         response = json.loads(r.text)
         self.id = response['id']
         self.slave.id = response['id']
-

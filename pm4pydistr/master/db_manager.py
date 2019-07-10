@@ -45,3 +45,21 @@ class DbManager:
         conn.close()
 
         return logs
+
+    def insert_slave_into_db(self, conf, id):
+        database_path = self.conf + ".db"
+
+        all_slaves = self.get_slaves_from_db()
+        if conf not in all_slaves:
+            all_slaves[conf] = id
+
+            conn = sqlite3.connect(database_path)
+            curs = conn.cursor()
+
+            curs.execute("INSERT INTO SLAVES VALUES (?,?)", (str(conf), str(id)))
+            conn.commit()
+            conn.close()
+        else:
+            print("SLAVE ALREADY FOUND!")
+
+        return all_slaves[conf]
