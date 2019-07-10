@@ -34,7 +34,7 @@ def register_slave():
         id = [randrange(0, 10), randrange(0, 10), randrange(0, 10), randrange(0, 10), randrange(0, 10),
               randrange(0, 10), randrange(0, 10)]
         id = MasterVariableContainer.dbmanager.insert_slave_into_db(conf, id)
-        MasterVariableContainer.master.slaves[str(id)] = [ip, port, time()]
+        MasterVariableContainer.master.slaves[str(id)] = [conf, ip, port, time()]
         return jsonify({"id": str(id)})
 
 
@@ -47,7 +47,7 @@ def update_slave():
     conf = request.args.get('conf', type=str)
 
     if keyphrase == KEYPHRASE:
-        MasterVariableContainer.master.slaves[id] = [ip, port, time()]
+        MasterVariableContainer.master.slaves[id] = [conf, ip, port, time()]
         return jsonify({"id": id})
 
 
@@ -58,5 +58,15 @@ def ping_from_slave():
     conf = request.args.get('conf', type=str)
 
     if keyphrase == KEYPHRASE:
-        MasterVariableContainer.master.slaves[id][2] = time()
+        MasterVariableContainer.master.slaves[id][3] = time()
         return jsonify({"id": id})
+
+
+@MasterSocketListener.app.route("/doLogAssignment", methods=["GET"])
+def do_log_assingment():
+    keyphrase = request.args.get('keyphrase', type=str)
+
+    if keyphrase == KEYPHRASE:
+        MasterVariableContainer.master.do_assignment()
+
+    return jsonify({})

@@ -6,6 +6,7 @@ from pm4py.objects.log.importer.parquet import factory as parquet_importer
 from pathlib import Path
 from random import randrange
 import os
+import numpy as np
 
 class Master:
     def __init__(self, parameters):
@@ -47,3 +48,20 @@ class Master:
                             MasterVariableContainer.dbmanager.insert_log_into_db(name, id)
                         self.sublogs_id[folder][name] = id
 
+
+    def do_assignment(self):
+        all_slaves = list([eval(x) for x in self.slaves.keys()])
+        for slave in all_slaves:
+            self.sublogs_correspondence[str(slave)] = {}
+
+        for folder in self.sublogs_id:
+            all_logs = list(self.sublogs_id[folder])
+
+            for slave in all_slaves:
+                self.sublogs_correspondence[str(slave)][folder] = []
+
+            for log in all_logs:
+
+                distances = sorted([(x, np.linalg.norm(np.array(x) - np.array(self.sublogs_id[folder][log]))) for x in all_slaves], key=lambda x: x[1])
+
+                self.sublogs_correspondence[str(distances[0][0])][folder].append(log)

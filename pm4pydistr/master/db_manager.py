@@ -60,7 +60,8 @@ class DbManager:
             conn.commit()
             conn.close()
         else:
-            print("SLAVE ALREADY FOUND!")
+            #print("SLAVE ALREADY FOUND!")
+            pass
 
         return all_slaves[conf]
 
