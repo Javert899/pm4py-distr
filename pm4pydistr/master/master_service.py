@@ -120,3 +120,20 @@ def get_slaves_list():
     if keyphrase == KEYPHRASE:
         return jsonify({"slaves": MasterVariableContainer.master.slaves})
     return jsonify({})
+
+
+@MasterSocketListener.app.route("/getSublogsId", methods=["GET"])
+def get_sublogs_id():
+    keyphrase = request.args.get('keyphrase', type=str)
+    if keyphrase == KEYPHRASE:
+        return jsonify({"sublogs_id": MasterVariableContainer.master.sublogs_id})
+    return jsonify({})
+
+
+@MasterSocketListener.app.route("/getSublogsCorrespondence", methods=["GET"])
+def get_sublogs_correspondence():
+    keyphrase = request.args.get('keyphrase', type=str)
+    if keyphrase == KEYPHRASE:
+        return jsonify({"sublogs_correspondence": MasterVariableContainer.master.sublogs_correspondence})
+    return jsonify({})
+
