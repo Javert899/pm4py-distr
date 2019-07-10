@@ -12,8 +12,6 @@ def calculate_dfg(path, log_name, managed_logs, parameters=None):
 
     folder = os.path.join(path, log_name)
 
-    print(managed_logs)
-
     parquet_list = parquet_importer.get_list_parquet(folder)
     overall_dfg = Counter()
     for pq in parquet_list:

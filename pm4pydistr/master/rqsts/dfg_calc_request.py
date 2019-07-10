@@ -16,5 +16,4 @@ class DfgCalcRequest(BasicMasterRequest):
         uri = "http://" + self.target_host + ":" + self.target_port + "/calculateDfg?keyphrase=" + KEYPHRASE + "&process=" + str(
             self.content)
         r = requests.get(uri)
-        print(r.text)
         self.content = json.loads(r.text)

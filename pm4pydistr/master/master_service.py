@@ -7,6 +7,10 @@ from time import time
 from pm4pydistr.master.variable_container import MasterVariableContainer
 from pm4pydistr.master.db_manager import DbManager
 
+import logging
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 class MasterSocketListener(Thread):
     app = Flask(__name__)
@@ -17,6 +21,7 @@ class MasterSocketListener(Thread):
         MasterVariableContainer.master = master
         MasterVariableContainer.conf = conf
         MasterVariableContainer.dbmanager = DbManager(MasterVariableContainer.conf)
+
         Thread.__init__(self)
 
     def run(self):
@@ -79,10 +84,6 @@ def calculate_dfg():
     process = request.args.get('process', type=str)
 
     if keyphrase == KEYPHRASE:
-        if len(MasterVariableContainer.master.sublogs_correspondence) == 0:
-            MasterVariableContainer.master.do_assignment()
-            MasterVariableContainer.master.make_slaves_load()
-
         overall_dfg = MasterVariableContainer.master.calculate_dfg(process)
 
         return jsonify({"dfg": overall_dfg})

@@ -10,6 +10,10 @@ from pm4pydistr.log_handlers import parquet as parquet_handler
 import os
 import json
 
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 class SlaveSocketListener(Thread):
     app = Flask(__name__)
     CORS(app)
@@ -21,6 +25,7 @@ class SlaveSocketListener(Thread):
         SlaveVariableContainer.master_host = master_host
         SlaveVariableContainer.master_port = master_port
         SlaveVariableContainer.conf = conf
+
         Thread.__init__(self)
 
     def run(self):
