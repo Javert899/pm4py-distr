@@ -5,15 +5,18 @@ from flask_cors import CORS
 from random import randrange
 from time import time
 from pm4pydistr.master.variable_container import MasterVariableContainer
+from pm4pydistr.master.db_manager import DbManager
 
 
 class MasterSocketListener(Thread):
     app = Flask(__name__)
     CORS(app)
 
-    def __init__(self, port, master):
+    def __init__(self, master, port, conf):
         MasterVariableContainer.port = port
         MasterVariableContainer.master = master
+        MasterVariableContainer.conf = conf
+        MasterVariableContainer.dbmanager = DbManager(MasterVariableContainer.conf)
         Thread.__init__(self)
 
     def run(self):
