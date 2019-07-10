@@ -33,10 +33,14 @@ def synchronize_files():
     if keyphrase == KEYPHRASE:
         json_content = json.loads(request.data)
         for log_folder in json_content["logs"]:
+            SlaveVariableContainer.managed_logs[log_folder] = None
+            SlaveVariableContainer.managed_logs[log_folder] = []
+
             if log_folder not in os.listdir(SlaveVariableContainer.conf):
                 SlaveVariableContainer.slave.create_folder(log_folder)
             for log_name in json_content["logs"][log_folder]:
                 SlaveVariableContainer.slave.load_log(log_folder, log_name)
+                SlaveVariableContainer.managed_logs[log_folder].append(log_name)
     return jsonify({})
 
 
@@ -45,7 +49,7 @@ def calculate_dfg():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     if keyphrase == KEYPHRASE:
-        returned_dict = parquet_handler.calculate_dfg(SlaveVariableContainer.conf, process)
+        returned_dict = parquet_handler.calculate_dfg(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process])
 
         return jsonify({"dfg": returned_dict})
     return jsonify({"dfg": {}})

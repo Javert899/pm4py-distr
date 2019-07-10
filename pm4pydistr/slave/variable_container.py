@@ -4,3 +4,5 @@ class SlaveVariableContainer:
     master_host = None
     master_port = -1
     conf = None
+
+    managed_logs = {}
