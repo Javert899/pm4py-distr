@@ -71,3 +71,20 @@ def do_log_assingment():
         MasterVariableContainer.master.make_slaves_load()
 
     return jsonify({})
+
+
+@MasterSocketListener.app.route("/calculateDfg", methods=["GET"])
+def calculate_dfg():
+    keyphrase = request.args.get('keyphrase', type=str)
+    process = request.args.get('process', type=str)
+
+    if keyphrase == KEYPHRASE:
+        if len(MasterVariableContainer.master.sublogs_correspondence) == 0:
+            MasterVariableContainer.master.do_assignment()
+            MasterVariableContainer.master.make_slaves_load()
+
+        overall_dfg = MasterVariableContainer.master.calculate_dfg(process)
+
+        return jsonify({"dfg": overall_dfg})
+
+    return jsonify({})

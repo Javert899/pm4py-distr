@@ -4,10 +4,12 @@ from pm4pydistr.master.variable_container import MasterVariableContainer
 from pm4pydistr.configuration import PARAMETERS_PORT, PARAMETERS_HOST, PARAMETERS_CONF, BASE_FOLDER_LIST_OPTIONS
 from pm4py.objects.log.importer.parquet import factory as parquet_importer
 from pm4pydistr.master.rqsts.master_assign_request import MasterAssignRequest
+from pm4pydistr.master.rqsts.dfg_calc_request import DfgCalcRequest
 from pathlib import Path
 from random import randrange
 import os
 import numpy as np
+from collections import Counter
 
 class Master:
     def __init__(self, parameters):
@@ -79,3 +81,29 @@ class Master:
 
             m = MasterAssignRequest(slave_host, slave_port, dictio)
             m.start()
+
+
+    def calculate_dfg(self, process):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = DfgCalcRequest(slave_host, slave_port, process)
+            m.start()
+
+            threads.append(m)
+
+        overall_dfg = Counter()
+
+        for thread in threads:
+            thread.join()
+
+            print(Counter(thread.content['dfg']))
+
+            overall_dfg = overall_dfg + Counter(thread.content['dfg'])
+
+        return overall_dfg
