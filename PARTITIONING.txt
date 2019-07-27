@@ -1,0 +1,13 @@
+HOW TO EXPORT A LOG INTO A PARTITIONED DATASET:
+
+1) Import the log (XES/CSV/Parquet) into PM4Py:
+
+from pm4py.objects.log.importer.xes import factory as xes_importer
+log = xes_importer.apply("C:\\receipt.xes")
+
+2) Export the partitioned dataset with the desidered number of columns:
+
+from pm4py.objects.log.exporter.parquet import factory as parquet_exporter
+parquet_exporter.apply(log, "receipt", parameters={"auto_partitioning": True, "num_partitions": 128})
+
+Where 128 can be replaced with any desidered number of partitions.

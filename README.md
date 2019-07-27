@@ -31,6 +31,8 @@ Remove the "master.db" database and the "master" folder
 
 2) CREATE A "master" FOLDER CONTAINING THE PARTITIONED DATASETS THAT YOU WANT TO USE
 
+See the PARTITIONING.txt file for instructions on how to partition a log file into a partitioned dataset!
+
 3) LAUNCH THE MASTER
 
 Launch the master with the command: python launch.py --type master --conf master --port 5001
