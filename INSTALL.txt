@@ -1,0 +1,7 @@
+PM4Py-Distr working has been verified with Python 3.6 and the latest dependencies contained in the requirements.txt
+file. To install/update the requirements using pip please follow the instructions:
+
+pip install -U -r requirements.txt
+
+-----------------------------------------------
+
