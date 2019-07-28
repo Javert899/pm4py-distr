@@ -1,5 +1,7 @@
 # pm4py-distr
-Support for distributed logs and computations in PM4Py
+Support for distributed logs and computations in PM4Py.
+
+See the currently supported API in api.txt
 
 To execute locally an example (one master running on 5001 and two slaves running on 5002 and 5003)
 just run "python main.py"
