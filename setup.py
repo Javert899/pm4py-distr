@@ -19,18 +19,16 @@ setup(
     author_email=pm4pydistr.__author_email__,
     py_modules=[pm4pydistr.__name__],
     include_package_data=True,
-    packages=['pm4pydistr', 'pm4pydistr.slave', 'pm4pydistr.master', 'pm4pydistr.master.rqsts',
-              'pm4pydistr.log_handlers'],
+    packages=['pm4pydistr', 'pm4pydistr.util', 'pm4pydistr.slave', 'pm4pydistr.master', 'pm4pydistr.master.rqsts',
+              'pm4pydistr.log_handlers', 'pm4pydistr.log_handlers.parquet_filtering',
+              'pm4pydistr.log_handlers.parquet_filtering.versions'],
     url='http://www.pm4py.org',
     license='GPL 3.0',
     install_requires=[
         'pm4py',
-        'networkx>=2.2',
-        'bpmn_python==0.0.18',
-        'intervaltree',
-        'lime',
-        'joblib',
-        'pydotplus'
+        'requests',
+        'Flask',
+        'flask-cors'
     ],
     project_urls={
         'Documentation': 'http://pm4py.pads.rwth-aachen.de/documentation/',
