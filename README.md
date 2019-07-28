@@ -44,3 +44,31 @@ Launch a slave (that are master-aware) with the command:
 
 python launch.py --type slave --conf slave1 --port 5002 --master-host 127.0.0.1 --master-port 5001
 (replace possibly the port used by the slave, and the host/port that points to the master).
+
+## Demo on a custom server
+
+It may work, or it may not work :)
+
+Distributed DFG calculation:
+ 
+http://212.237.8.106:5001/calculateDfg?keyphrase=hello&process=roadtraffic
+ 
+http://212.237.8.106:5001/calculateDfg?keyphrase=hello&process=bpic2018
+ 
+http://212.237.8.106:5001/calculateDfg?keyphrase=hello&process=bpic2019
+ 
+Retrieval of the start activities of the log:
+ 
+http://212.237.8.106:5001/getStartActivities?keyphrase=hello&process=roadtraffic
+ 
+http://212.237.8.106:5001/getStartActivities?keyphrase=hello&process=bpic2018
+ 
+http://212.237.8.106:5001/getStartActivities?keyphrase=hello&process=bpic2019
+ 
+Retrieval of the end activities of the log:
+ 
+http://212.237.8.106:5001/getEndActivities?keyphrase=hello&process=roadtraffic
+ 
+http://212.237.8.106:5001/getEndActivities?keyphrase=hello&process=bpic2018
+ 
+http://212.237.8.106:5001/getEndActivities?keyphrase=hello&process=bpic2019
