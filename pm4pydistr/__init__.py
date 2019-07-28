@@ -1,0 +1,8 @@
+from pm4pydistr import log_handlers, master, slave
+
+__version__ = '0.0.1'
+__doc__ = "Support for distributed logs and computations in PM4Py"
+__author__ = 'PADS'
+__author_email__ = 'pm4py@pads.rwth-aachen.de'
+__maintainer__ = 'PADS'
+__maintainer_email__ = "pm4py@pads.rwth-aachen.de"
