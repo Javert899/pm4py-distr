@@ -1,4 +1,4 @@
-from pm4pydistr import log_handlers, master, slave
+from pm4pydistr import log_handlers, master, slave, util, configuration
 
 __version__ = '0.0.1'
 __doc__ = "Support for distributed logs and computations in PM4Py"
