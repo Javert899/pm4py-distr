@@ -56,3 +56,13 @@ def apply(dataframe, filter, parameters=None):
         return paths_neg_trace.apply(dataframe, filter, parameters=parameters)
 
     return dataframe
+
+
+def apply_filters(dataframe, filters, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    for filter in filters:
+        dataframe = apply(dataframe, filter, parameters=parameters)
+
+    return dataframe
