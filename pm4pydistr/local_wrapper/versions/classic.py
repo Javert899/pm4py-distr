@@ -12,8 +12,17 @@ class ClassicDistrLogObject(DistrLogObj):
 
         return [Path(log).name for log in lp]
 
-    def calculate_dfg(self, parameters=None):
+    def add_filter(self, filter_name, filter_value):
+        self.filters.append([filter_name, filter_value])
+
+    def remove_filter(self, filter_name, filter_value):
+        v = [filter_name, filter_value]
+        del self.filters[self.filters.index(v)]
+
+    def calculate_dfg(self):
         list_logs = self.get_list_logs()
+        parameters = {}
+        parameters["filters"] = self.filters
         dfg = parquet_handler.calculate_dfg(".", self.distr_log_path, list_logs, parameters=parameters)
         return {(x.split("@@")[0], x.split("@@")[1]): dfg[x] for x in dfg}
 
