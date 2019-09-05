@@ -10,7 +10,7 @@ class EaRequest(BasicMasterRequest):
         self.target_host = target_host
         self.target_port = target_port
         self.content = content
-        BasicMasterRequest.__init__(self, target_host, target_port, content)
+        BasicMasterRequest.__init__(self, session, target_host, target_port, content)
 
     def run(self):
         uri = "http://" + self.target_host + ":" + self.target_port + "/getEndActivities?keyphrase=" + KEYPHRASE + "&process=" + str(
