@@ -15,4 +15,4 @@ class FilterRequest(BasicMasterRequest):
     def run(self):
         uri = "http://"+self.target_host+":"+self.target_port+"/setFilters?keyphrase="+KEYPHRASE+"&process="+self.content["process"]
 
-        r = requests.post(uri, data=json.dumps(self.content["data"]))
+        r = requests.post(uri, data=json.dumps({"filters": self.content["data"]}))
