@@ -3,15 +3,16 @@ from pm4pydistr.configuration import KEYPHRASE
 import requests
 import json
 
-class MasterAssignRequest(BasicMasterRequest):
+
+class FilterRequest(BasicMasterRequest):
     def __init__(self, target_host, target_port, content):
         self.target_host = target_host
         self.target_port = target_port
         self.content = content
+        self.result = None
         BasicMasterRequest.__init__(self, target_host, target_port, content)
 
     def run(self):
-        uri = "http://"+self.target_host+":"+self.target_port+"/synchronizeFiles?keyphrase="+KEYPHRASE
+        uri = "http://"+self.target_host+":"+self.target_port+"/setFilters?keyphrase="+KEYPHRASE+"&process="+self.content["process"]
 
-        r = requests.post(uri, data=json.dumps(self.content))
-
+        r = requests.post(uri, data=json.dumps(self.content["data"]))

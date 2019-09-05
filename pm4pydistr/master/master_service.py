@@ -7,7 +7,7 @@ from time import time
 from pm4pydistr.master.variable_container import MasterVariableContainer
 from pm4pydistr.master.db_manager import DbManager
 
-import logging
+import logging, json
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -75,6 +75,16 @@ def do_log_assingment():
         MasterVariableContainer.master.do_assignment()
         MasterVariableContainer.master.make_slaves_load()
 
+    return jsonify({})
+
+
+@MasterSocketListener.app.route("/setFilters", methods=["POST"])
+def set_filters():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    filters = json.loads(request.data)["filters"]
+    if keyphrase == KEYPHRASE:
+        MasterVariableContainer.master.set_filter(process, filters)
     return jsonify({})
 
 

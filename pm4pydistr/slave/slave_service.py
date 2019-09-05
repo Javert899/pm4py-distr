@@ -52,6 +52,15 @@ def synchronize_files():
     return jsonify({})
 
 
+@SlaveSocketListener.app.route("/setFilters", methods=["POST"])
+def set_filters():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    if keyphrase == KEYPHRASE:
+        SlaveVariableContainer.slave.filters[process] = json.loads(request.data)["filters"]
+    return jsonify({})
+
+
 @SlaveSocketListener.app.route("/calculateDfg", methods=["GET"])
 def calculate_dfg():
     process = request.args.get('process', type=str)

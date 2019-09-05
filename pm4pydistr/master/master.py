@@ -7,6 +7,7 @@ from pm4pydistr.master.rqsts.master_assign_request import MasterAssignRequest
 from pm4pydistr.master.rqsts.dfg_calc_request import DfgCalcRequest
 from pm4pydistr.master.rqsts.ea_request import EaRequest
 from pm4pydistr.master.rqsts.sa_request import SaRequest
+from pm4pydistr.master.rqsts.filter_request import FilterRequest
 from pathlib import Path
 from random import randrange
 import os
@@ -88,6 +89,15 @@ class Master:
             m = MasterAssignRequest(slave_host, slave_port, dictio)
             m.start()
 
+    def set_filter(self, process, data):
+        all_slaves = list(self.slaves.keys())
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = FilterRequest(slave_host, slave_port, {"process": process, "data": data})
+            m.start()
 
     def calculate_dfg(self, process):
         all_slaves = list(self.slaves.keys())
