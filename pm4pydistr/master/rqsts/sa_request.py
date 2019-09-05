@@ -14,6 +14,6 @@ class SaRequest(BasicMasterRequest):
 
     def run(self):
         uri = "http://" + self.target_host + ":" + self.target_port + "/getStartActivities?keyphrase=" + KEYPHRASE + "&process=" + str(
-            self.content)
+            self.content) + "&session=" + str(self.session)
         r = requests.get(uri)
         self.content = json.loads(r.text)
