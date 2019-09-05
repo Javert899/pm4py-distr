@@ -5,7 +5,8 @@ import json
 
 
 class SaRequest(BasicMasterRequest):
-    def __init__(self, target_host, target_port, content):
+    def __init__(self, session, target_host, target_port, content):
+        self.session = session
         self.target_host = target_host
         self.target_port = target_port
         self.content = content

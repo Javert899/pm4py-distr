@@ -78,55 +78,10 @@ def do_log_assingment():
     return jsonify({})
 
 
-@MasterSocketListener.app.route("/setFilters", methods=["POST"])
-def set_filters():
-    process = request.args.get('process', type=str)
-    keyphrase = request.args.get('keyphrase', type=str)
-    filters = json.loads(request.data)["filters"]
-    if keyphrase == KEYPHRASE:
-        MasterVariableContainer.master.set_filter(process, filters)
-    return jsonify({})
-
-
-@MasterSocketListener.app.route("/calculateDfg", methods=["GET"])
-def calculate_dfg():
-    keyphrase = request.args.get('keyphrase', type=str)
-    process = request.args.get('process', type=str)
-
-    if keyphrase == KEYPHRASE:
-        overall_dfg = MasterVariableContainer.master.calculate_dfg(process)
-
-        return jsonify({"dfg": overall_dfg})
-
-    return jsonify({})
-
-
-@MasterSocketListener.app.route("/getEndActivities", methods=["GET"])
-def calculate_end_activities():
-    process = request.args.get('process', type=str)
-    keyphrase = request.args.get('keyphrase', type=str)
-    if keyphrase == KEYPHRASE:
-        overall_ea = MasterVariableContainer.master.get_end_activities(process)
-
-        return jsonify({"end_activities": overall_ea})
-
-    return jsonify({})
-
-
-@MasterSocketListener.app.route("/getStartActivities", methods=["GET"])
-def calculate_start_activities():
-    process = request.args.get('process', type=str)
-    keyphrase = request.args.get('keyphrase', type=str)
-    if keyphrase == KEYPHRASE:
-        overall_sa = MasterVariableContainer.master.get_start_activities(process)
-
-        return jsonify({"start_activities": overall_sa})
-    return jsonify({"start_activities": {}})
-
-
 @MasterSocketListener.app.route("/getSlavesList", methods=["GET"])
 def get_slaves_list():
     keyphrase = request.args.get('keyphrase', type=str)
+
     if keyphrase == KEYPHRASE:
         return jsonify({"slaves": MasterVariableContainer.master.slaves})
     return jsonify({})
@@ -146,4 +101,57 @@ def get_sublogs_correspondence():
     if keyphrase == KEYPHRASE:
         return jsonify({"sublogs_correspondence": MasterVariableContainer.master.sublogs_correspondence})
     return jsonify({})
+
+@MasterSocketListener.app.route("/setFilters", methods=["POST"])
+def set_filters():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    filters = json.loads(request.data)["filters"]
+    if keyphrase == KEYPHRASE:
+        MasterVariableContainer.master.set_filter(session, process, filters)
+    return jsonify({})
+
+
+@MasterSocketListener.app.route("/calculateDfg", methods=["GET"])
+def calculate_dfg():
+    keyphrase = request.args.get('keyphrase', type=str)
+    process = request.args.get('process', type=str)
+    session = request.args.get('session', type=str)
+
+    if keyphrase == KEYPHRASE:
+        overall_dfg = MasterVariableContainer.master.calculate_dfg(session, process)
+
+        return jsonify({"dfg": overall_dfg})
+
+    return jsonify({})
+
+
+@MasterSocketListener.app.route("/getEndActivities", methods=["GET"])
+def calculate_end_activities():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    if keyphrase == KEYPHRASE:
+        overall_ea = MasterVariableContainer.master.get_end_activities(session, process)
+
+        return jsonify({"end_activities": overall_ea})
+
+    return jsonify({})
+
+
+@MasterSocketListener.app.route("/getStartActivities", methods=["GET"])
+def calculate_start_activities():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    if keyphrase == KEYPHRASE:
+        overall_sa = MasterVariableContainer.master.get_start_activities(session, process)
+
+        return jsonify({"start_activities": overall_sa})
+    return jsonify({"start_activities": {}})
+
 

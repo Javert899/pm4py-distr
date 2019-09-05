@@ -86,20 +86,20 @@ class Master:
 
             dictio = {"logs": self.sublogs_correspondence[slave]}
 
-            m = MasterAssignRequest(slave_host, slave_port, dictio)
+            m = MasterAssignRequest(None, slave_host, slave_port, dictio)
             m.start()
 
-    def set_filter(self, process, data):
+    def set_filter(self, session, process, data):
         all_slaves = list(self.slaves.keys())
 
         for slave in all_slaves:
             slave_host = self.slaves[slave][1]
             slave_port = str(self.slaves[slave][2])
 
-            m = FilterRequest(slave_host, slave_port, {"process": process, "data": data})
+            m = FilterRequest(session, slave_host, slave_port, {"process": process, "data": data})
             m.start()
 
-    def calculate_dfg(self, process):
+    def calculate_dfg(self, session, process):
         all_slaves = list(self.slaves.keys())
 
         threads = []
@@ -108,7 +108,7 @@ class Master:
             slave_host = self.slaves[slave][1]
             slave_port = str(self.slaves[slave][2])
 
-            m = DfgCalcRequest(slave_host, slave_port, process)
+            m = DfgCalcRequest(session, slave_host, slave_port, process)
             m.start()
 
             threads.append(m)
@@ -123,7 +123,7 @@ class Master:
         return overall_dfg
 
 
-    def get_end_activities(self, process):
+    def get_end_activities(self, session, process):
         all_slaves = list(self.slaves.keys())
 
         threads = []
@@ -132,7 +132,7 @@ class Master:
             slave_host = self.slaves[slave][1]
             slave_port = str(self.slaves[slave][2])
 
-            m = EaRequest(slave_host, slave_port, process)
+            m = EaRequest(session, slave_host, slave_port, process)
             m.start()
 
             threads.append(m)
@@ -147,7 +147,7 @@ class Master:
         return overall_ea
 
 
-    def get_start_activities(self, process):
+    def get_start_activities(self, session, process):
         all_slaves = list(self.slaves.keys())
 
         threads = []
@@ -156,7 +156,7 @@ class Master:
             slave_host = self.slaves[slave][1]
             slave_port = str(self.slaves[slave][2])
 
-            m = SaRequest(slave_host, slave_port, process)
+            m = SaRequest(session, slave_host, slave_port, process)
             m.start()
 
             threads.append(m)
