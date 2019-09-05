@@ -21,6 +21,8 @@ class Slave:
         self.id = None
         self.ping_module = None
 
+        self.filters = {}
+
         if not os.path.exists(self.conf):
             os.mkdir(self.conf)
 

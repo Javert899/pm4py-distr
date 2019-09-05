@@ -57,7 +57,8 @@ def calculate_dfg():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     if keyphrase == KEYPHRASE:
-        returned_dict = parquet_handler.calculate_dfg(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process])
+        filters = SlaveVariableContainer.slave.filters[process] if process in SlaveVariableContainer.slave.filters else []
+        returned_dict = parquet_handler.calculate_dfg(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters={"filters": filters})
 
         return jsonify({"dfg": returned_dict})
     return jsonify({"dfg": {}})
@@ -68,7 +69,8 @@ def calculate_end_activities():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     if keyphrase == KEYPHRASE:
-        returned_dict = parquet_handler.get_end_activities(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process])
+        filters = SlaveVariableContainer.slave.filters[process] if process in SlaveVariableContainer.slave.filters else []
+        returned_dict = parquet_handler.get_end_activities(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters={"filters": filters})
 
         return jsonify({"end_activities": returned_dict})
     return jsonify({"end_activities": {}})
@@ -79,7 +81,8 @@ def calculate_start_activities():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     if keyphrase == KEYPHRASE:
-        returned_dict = parquet_handler.get_start_activities(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process])
+        filters = SlaveVariableContainer.slave.filters[process] if process in SlaveVariableContainer.slave.filters else []
+        returned_dict = parquet_handler.get_start_activities(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters={"filters": filters})
 
         return jsonify({"start_activities": returned_dict})
     return jsonify({"start_activities": {}})

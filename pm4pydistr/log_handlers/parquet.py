@@ -12,6 +12,7 @@ from pathlib import Path
 
 FILTERS = "filters"
 
+
 def calculate_dfg(path, log_name, managed_logs, parameters=None):
     if parameters is None:
         parameters = {}
@@ -27,7 +28,8 @@ def calculate_dfg(path, log_name, managed_logs, parameters=None):
         if pq_basename in managed_logs:
             df = parquet_importer.apply(pq, parameters={"columns": [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY]})
             df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
-            dfg = Counter(df_statistics.get_dfg_graph(df, sort_timestamp_along_case_id=False, sort_caseid_required=False))
+            dfg = Counter(
+                df_statistics.get_dfg_graph(df, sort_timestamp_along_case_id=False, sort_caseid_required=False))
             overall_dfg = overall_dfg + dfg
     returned_dict = {}
     for el in overall_dfg:
