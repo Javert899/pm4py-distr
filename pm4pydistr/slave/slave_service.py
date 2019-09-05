@@ -56,17 +56,28 @@ def synchronize_files():
 def set_filters():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
     if keyphrase == KEYPHRASE:
-        SlaveVariableContainer.slave.filters[process] = json.loads(request.data)["filters"]
+        if not session in SlaveVariableContainer.slave.filters:
+            SlaveVariableContainer.slave.filters[session] = {}
+        SlaveVariableContainer.slave.filters[session][process] = json.loads(request.data)["filters"]
     return jsonify({})
 
+def get_filters_per_session(process, session):
+    if session in SlaveVariableContainer.slave.filters:
+        if process in SlaveVariableContainer.slave.filters[session]:
+            return SlaveVariableContainer.slave.filters[session][process]
+    return []
 
 @SlaveSocketListener.app.route("/calculateDfg", methods=["GET"])
 def calculate_dfg():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
     if keyphrase == KEYPHRASE:
-        filters = SlaveVariableContainer.slave.filters[process] if process in SlaveVariableContainer.slave.filters else []
+        filters = get_filters_per_session(process, session)
         returned_dict = parquet_handler.calculate_dfg(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters={"filters": filters})
 
         return jsonify({"dfg": returned_dict})
@@ -77,8 +88,10 @@ def calculate_dfg():
 def calculate_end_activities():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
     if keyphrase == KEYPHRASE:
-        filters = SlaveVariableContainer.slave.filters[process] if process in SlaveVariableContainer.slave.filters else []
+        filters = get_filters_per_session(process, session)
         returned_dict = parquet_handler.get_end_activities(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters={"filters": filters})
 
         return jsonify({"end_activities": returned_dict})
@@ -89,8 +102,10 @@ def calculate_end_activities():
 def calculate_start_activities():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
     if keyphrase == KEYPHRASE:
-        filters = SlaveVariableContainer.slave.filters[process] if process in SlaveVariableContainer.slave.filters else []
+        filters = get_filters_per_session(process, session)
         returned_dict = parquet_handler.get_start_activities(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters={"filters": filters})
 
         return jsonify({"start_activities": returned_dict})
