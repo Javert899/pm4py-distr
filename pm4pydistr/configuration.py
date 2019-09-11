@@ -1,6 +1,6 @@
 KEYPHRASE = "hello"
-PYTHON_PATH = "python"
-BASE_FOLDER_LIST_OPTIONS = ["master"]
+PYTHON_PATH = "python3"
+BASE_FOLDER_LIST_OPTIONS = ["master", "/opt/pm4pydistr-share"]
 
 THIS_HOST = "127.0.0.1"
 PORT = 5001
