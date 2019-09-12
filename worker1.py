@@ -15,27 +15,11 @@ class ExecutionThread(Thread):
 MASTER_HOST = "137.226.117.71"
 THIS_HOST = "137.226.117.73"
 
-t1 = ExecutionThread(PYTHON_PATH+" launch.py --type slave --host "+THIS_HOST+" --conf slave1 --port 5002 --master-host "+MASTER_HOST+" --master-port 5001")
-t1.start()
-t2 = ExecutionThread(PYTHON_PATH+" launch.py --type slave --host "+THIS_HOST+" --conf slave2 --port 5003 --master-host "+MASTER_HOST+" --master-port 5001")
-t2.start()
-t3 = ExecutionThread(PYTHON_PATH+" launch.py --type slave --host "+THIS_HOST+" --conf slave3 --port 5004 --master-host "+MASTER_HOST+" --master-port 5001")
-t3.start()
-t1 = ExecutionThread(PYTHON_PATH+" launch.py --type slave --host "+THIS_HOST+" --conf slave4 --port 5005 --master-host "+MASTER_HOST+" --master-port 5001")
-t1.start()
-t1 = ExecutionThread(PYTHON_PATH+" launch.py --type slave --host "+THIS_HOST+" --conf slave5 --port 5006 --master-host "+MASTER_HOST+" --master-port 5001")
-t1.start()
-t1 = ExecutionThread(PYTHON_PATH+" launch.py --type slave --host "+THIS_HOST+" --conf slave6 --port 5007 --master-host "+MASTER_HOST+" --master-port 5001")
-t1.start()
-t1 = ExecutionThread(PYTHON_PATH+" launch.py --type slave --host "+THIS_HOST+" --conf slave7 --port 5008 --master-host "+MASTER_HOST+" --master-port 5001")
-t1.start()
-t1 = ExecutionThread(PYTHON_PATH+" launch.py --type slave --host "+THIS_HOST+" --conf slave8 --port 5009 --master-host "+MASTER_HOST+" --master-port 5001")
-t1.start()
-t1 = ExecutionThread(PYTHON_PATH+" launch.py --type slave --host "+THIS_HOST+" --conf slave9 --port 5010 --master-host "+MASTER_HOST+" --master-port 5001")
-t1.start()
-t1 = ExecutionThread(PYTHON_PATH+" launch.py --type slave --host "+THIS_HOST+" --conf slave10 --port 5011 --master-host "+MASTER_HOST+" --master-port 5001")
-t1.start()
-t1 = ExecutionThread(PYTHON_PATH+" launch.py --type slave --host "+THIS_HOST+" --conf slave11 --port 5012 --master-host "+MASTER_HOST+" --master-port 5001")
-t1.start()
-t1 = ExecutionThread(PYTHON_PATH+" launch.py --type slave --host "+THIS_HOST+" --conf slave12 --port 5013 --master-host "+MASTER_HOST+" --master-port 5001")
-t1.start()
+THIS_START = 1000
+THIS_COUNT = 20
+
+for i in range(THIS_COUNT):
+    conf = "slave"+str(THIS_START+i+1)
+    port = str(5000 + i + 2)
+    t = ExecutionThread(PYTHON_PATH+" launch.py --type slave --host "+THIS_HOST+" --conf "+conf+" --port "+port+" --master-host "+MASTER_HOST+" --master-port 5001")
+    t.start()
