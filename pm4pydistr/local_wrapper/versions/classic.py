@@ -20,6 +20,9 @@ class ClassicDistrLogObject(DistrLogObj):
         v = [filter_name, filter_value]
         del self.filters[self.filters.index(v)]
 
+    def reset_filters(self):
+        self.filters = []
+
     def calculate_dfg(self):
         list_logs = self.get_list_logs()
         parameters = {}

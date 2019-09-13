@@ -1,16 +1,12 @@
 class DistrLogObj(object):
-    def __init__(self, hostname, port, log_name, parameters=None):
+    def __init__(self, distr_log_path, parameters=None):
         if parameters is None:
             parameters = {}
-        self.hostname = hostname
-        self.port = port
-        self.log_name = log_name
+        self.distr_log_path = distr_log_path
+        self.init_parameters = parameters
         self.filters = []
 
     def add_filter(self, filter_name, filter_value):
-        raise Exception("not implemented")
-
-    def remove_filter(self, filter_name, filter_value):
         raise Exception("not implemented")
 
     def reset_filters(self):
