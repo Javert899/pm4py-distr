@@ -14,3 +14,9 @@ class DistrLogObj(object):
 
     def calculate_dfg(self, parameters=None):
         raise Exception("not implemented")
+
+    def get_end_activities(self):
+        raise Exception("not implemented")
+
+    def get_start_activities(self):
+        raise Exception("not implemented")
