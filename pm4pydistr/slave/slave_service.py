@@ -61,7 +61,7 @@ def set_filters():
     if keyphrase == KEYPHRASE:
         if not session in SlaveVariableContainer.slave.filters:
             SlaveVariableContainer.slave.filters[session] = {}
-        SlaveVariableContainer.slave.filters[session][process] = json.loads(request.data)["filters"]
+        SlaveVariableContainer.slave.filters[session][process] = eval(json.loads(request.data)["filters"])
     return jsonify({})
 
 def get_filters_per_session(process, session):

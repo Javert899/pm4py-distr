@@ -26,3 +26,6 @@ class DistrLogObj(object):
 
     def get_start_activities(self):
         raise Exception("not implemented")
+
+    def do_log_assignment(self):
+        raise Exception("not implemented")

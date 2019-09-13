@@ -26,8 +26,11 @@ def calculate_dfg(path, log_name, managed_logs, parameters=None):
     for pq in parquet_list:
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
-            df = parquet_importer.apply(pq, parameters={"columns": [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY]})
-            df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+            if not filters:
+                df = parquet_importer.apply(pq, parameters={"columns": [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY]})
+            else:
+                df = parquet_importer.apply(pq)
+                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
             dfg = Counter(
                 df_statistics.get_dfg_graph(df, sort_timestamp_along_case_id=False, sort_caseid_required=False))
             overall_dfg = overall_dfg + dfg
@@ -50,8 +53,11 @@ def get_end_activities(path, log_name, managed_logs, parameters=None):
     for pq in parquet_list:
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
-            df = parquet_importer.apply(pq, parameters={"columns": [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY]})
-            df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+            if not filters:
+                df = parquet_importer.apply(pq, parameters={"columns": [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY]})
+            else:
+                df = parquet_importer.apply(pq)
+                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
             ea = Counter(end_activities_filter.get_end_activities(df))
             overall_ea = overall_ea + ea
 
@@ -74,8 +80,11 @@ def get_start_activities(path, log_name, managed_logs, parameters=None):
     for pq in parquet_list:
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
-            df = parquet_importer.apply(pq, parameters={"columns": [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY]})
-            df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+            if not filters:
+                df = parquet_importer.apply(pq, parameters={"columns": [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY]})
+            else:
+                df = parquet_importer.apply(pq)
+                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
             ea = Counter(start_activities_filter.get_start_activities(df))
             overall_sa = overall_sa + ea
 

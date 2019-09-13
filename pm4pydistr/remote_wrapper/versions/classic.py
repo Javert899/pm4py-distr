@@ -15,18 +15,23 @@ class ClassicDistrLogObject(DistrLogObj):
             self.port) + "/" + service + "?keyphrase=" + self.keyphrase + "&process=" + self.log_name + "&session=" + str(
             self.session)
 
+    def do_log_assignment(self):
+        url = self.get_url("doLogAssignment")
+        r = requests.get(url)
+        ret_text = r.text
+        return ret_text
+
     def add_filter(self, filter_name, filter_value):
         self.filters.append([filter_name, filter_value])
         url = self.get_url("setFilters")
-        print(url)
-        r = requests.post(url, data={"filters": self.filters})
+        r = requests.post(url, json={"filters": json.dumps(self.filters)})
         return r.text
 
     def reset_filters(self):
         self.filters = None
         self.filters = []
         url = self.get_url("setFilters")
-        r = requests.post(url, data={"filters": self.filters})
+        r = requests.post(url, json={"filters": json.dumps(self.filters)})
         return r.text
 
     def calculate_dfg(self, parameters=None):
