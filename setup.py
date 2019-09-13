@@ -21,7 +21,8 @@ setup(
     include_package_data=True,
     packages=['pm4pydistr', 'pm4pydistr.util', 'pm4pydistr.slave', 'pm4pydistr.master', 'pm4pydistr.master.rqsts',
               'pm4pydistr.log_handlers', 'pm4pydistr.log_handlers.parquet_filtering',
-              'pm4pydistr.log_handlers.parquet_filtering.versions'],
+              'pm4pydistr.log_handlers.parquet_filtering.versions', 'pm4pydistr.local_wrapper',
+              'pm4pydistr.local_wrapper.versions', 'pm4pydistr.remote_wrapper', 'pm4pydistr.remote_wrapper.versions'],
     url='http://www.pm4py.org',
     license='GPL 3.0',
     install_requires=[
