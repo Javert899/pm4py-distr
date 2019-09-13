@@ -1,9 +1,15 @@
+import uuid
+
 class DistrLogObj(object):
-    def __init__(self, distr_log_path, parameters=None):
+    def __init__(self, hostname, port, keyphrase, log_name, parameters=None):
         if parameters is None:
             parameters = {}
-        self.distr_log_path = distr_log_path
+        self.hostname = hostname
+        self.port = port
+        self.keyphrase = keyphrase
+        self.log_name = log_name
         self.init_parameters = parameters
+        self.session = str(uuid.uuid4())
         self.filters = []
 
     def add_filter(self, filter_name, filter_value):
