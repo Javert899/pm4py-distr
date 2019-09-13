@@ -16,10 +16,6 @@ class ClassicDistrLogObject(DistrLogObj):
     def add_filter(self, filter_name, filter_value):
         self.filters.append([filter_name, filter_value])
 
-    def remove_filter(self, filter_name, filter_value):
-        v = [filter_name, filter_value]
-        del self.filters[self.filters.index(v)]
-
     def reset_filters(self):
         self.filters = []
 

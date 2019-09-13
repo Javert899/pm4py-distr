@@ -10,9 +10,6 @@ class DistrLogObj(object):
     def add_filter(self, filter_name, filter_value):
         raise Exception("not implemented")
 
-    def remove_filter(self, filter_name, filter_value):
-        raise Exception("not implemented")
-
     def reset_filters(self):
         raise Exception("not implemented")
 
