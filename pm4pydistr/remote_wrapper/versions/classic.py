@@ -16,10 +16,18 @@ class ClassicDistrLogObject(DistrLogObj):
             self.session)
 
     def add_filter(self, filter_name, filter_value):
-        raise Exception("not implemented")
+        self.filters.append([filter_name, filter_value])
+        url = self.get_url("setFilters")
+        print(url)
+        r = requests.post(url, data={"filters": self.filters})
+        return r.text
 
     def reset_filters(self):
-        raise Exception("not implemented")
+        self.filters = None
+        self.filters = []
+        url = self.get_url("setFilters")
+        r = requests.post(url, data={"filters": self.filters})
+        return r.text
 
     def calculate_dfg(self, parameters=None):
         url = self.get_url("calculateDfg")
