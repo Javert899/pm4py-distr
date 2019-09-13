@@ -33,7 +33,15 @@ class ClassicDistrLogObject(DistrLogObj):
         return new_dfg
 
     def get_end_activities(self):
-        raise Exception("not implemented")
+        url = self.get_url("getEndActivities")
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        return ret_json["end_activities"]
 
     def get_start_activities(self):
-        raise Exception("not implemented")
+        url = self.get_url("getStartActivities")
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        return ret_json["start_activities"]
