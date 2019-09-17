@@ -1,3 +1,6 @@
+PARAMETER_USE_TRANSITION = "use_transition"
+DEFAULT_USE_TRANSITION = False
+
 KEYPHRASE = "hello"
 PYTHON_PATH = "python"
 BASE_FOLDER_LIST_OPTIONS = ["master"]

@@ -2,6 +2,7 @@ class LocalDistrLogObj(object):
     def __init__(self, distr_log_path, parameters=None):
         if parameters is None:
             parameters = {}
+        self.init_parameters = parameters
         self.distr_log_path = distr_log_path
         self.filters = []
 
