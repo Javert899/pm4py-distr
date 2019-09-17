@@ -42,6 +42,16 @@ class ClassicDistrLogObject(LocalDistrLogObj):
                                                                 parameters=parameters)
         return start_activities
 
+    def get_log_summary(self):
+        list_logs = self.get_list_logs()
+        parameters = deepcopy(self.init_parameters)
+        parameters["filters"] = self.filters
+
+        dictio = parquet_handler.get_log_summary(".", self.distr_log_path, list_logs,
+                                                                parameters=parameters)
+
+        return dictio
+
 
 def apply(path, parameters=None):
     if parameters is None:

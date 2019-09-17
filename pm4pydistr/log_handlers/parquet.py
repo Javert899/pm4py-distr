@@ -29,6 +29,7 @@ def get_columns_to_import(filters, columns, use_transition=False):
             if type(f[1]) is list:
                 columns.add(f[0])
     if use_transition:
+        columns.add(DEFAULT_NAME_KEY)
         columns.add(DEFAULT_TRANSITION_KEY)
     columns = list(columns)
     return columns
@@ -140,3 +141,30 @@ def get_log_summary(path, log_name, managed_logs, parameters=None):
     if parameters is None:
         parameters = {}
 
+    use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
+    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    filters = parameters[FILTERS] if FILTERS in parameters else []
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
+
+    folder = os.path.join(path, log_name)
+    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME], use_transition=use_transition)
+
+    parquet_list = parquet_importer.get_list_parquet(folder)
+
+    events = 0
+    cases = 0
+    for pq in parquet_list:
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            df = parquet_importer.apply(pq, parameters={"columns": columns})
+
+            if use_transition:
+                df = insert_classifier(df)
+            if filters:
+                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+
+            events = events + len(df)
+            cases = cases + df[CASE_CONCEPT_NAME].nunique()
+
+    return {"events": events, "cases": cases}

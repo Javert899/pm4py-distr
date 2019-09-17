@@ -20,3 +20,6 @@ class LocalDistrLogObj(object):
 
     def get_start_activities(self):
         raise Exception("not implemented")
+
+    def get_log_summary(self):
+        raise Exception("not implemented")
