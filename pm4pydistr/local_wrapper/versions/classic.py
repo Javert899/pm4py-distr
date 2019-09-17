@@ -63,6 +63,16 @@ class ClassicDistrLogObject(LocalDistrLogObj):
 
         return dictio
 
+    def get_attribute_names(self):
+        list_logs = self.get_list_logs()
+        parameters = deepcopy(self.init_parameters)
+        parameters["filters"] = self.filters
+
+        names = parquet_handler.get_attribute_names(".", self.distr_log_path, list_logs, parameters=parameters)
+
+        return names
+
+
 def apply(path, parameters=None):
     if parameters is None:
         parameters = {}

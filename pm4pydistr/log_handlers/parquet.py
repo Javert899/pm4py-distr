@@ -9,6 +9,8 @@ from pm4py.objects.log.util.xes import DEFAULT_NAME_KEY, DEFAULT_TIMESTAMP_KEY, 
 from pm4py.util import constants as pm4py_constants
 from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
 from pm4pydistr.log_handlers.parquet_filtering import factory as parquet_filtering_factory
+import pyarrow.parquet as pqq
+
 
 from pathlib import Path
 
@@ -200,3 +202,23 @@ def get_attribute_values(path, log_name, managed_logs, parameters=None):
             dictio = dictio + Counter(dict(df[attribute_key].value_counts()))
 
     return dictio
+
+
+def get_attribute_names(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    folder = os.path.join(path, log_name)
+
+    parquet_list = parquet_importer.get_list_parquet(folder)
+    names = set()
+
+    for pq in parquet_list:
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            names = names.union(set(pqq.read_metadata(pq).schema.names))
+
+    names = sorted(list(names))
+    names = [x.replace("AAA",":") for x in names]
+
+    return sorted(list(names))

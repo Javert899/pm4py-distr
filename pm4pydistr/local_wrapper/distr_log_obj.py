@@ -26,3 +26,6 @@ class LocalDistrLogObj(object):
 
     def get_attribute_values(self, attribute_key):
         raise Exception("not implemented")
+
+    def get_attribute_names(self):
+        raise Exception("not implemented")
