@@ -159,7 +159,7 @@ def get_log_summary(path, log_name, managed_logs, parameters=None):
         if pq_basename in managed_logs:
             df = parquet_importer.apply(pq, parameters={"columns": columns})
 
-            if use_transition:
+            if use_transition and filters:
                 df = insert_classifier(df)
             if filters:
                 df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
@@ -168,3 +168,35 @@ def get_log_summary(path, log_name, managed_logs, parameters=None):
             cases = cases + df[CASE_CONCEPT_NAME].nunique()
 
     return {"events": events, "cases": cases}
+
+
+def get_attribute_values(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
+    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    filters = parameters[FILTERS] if FILTERS in parameters else []
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
+
+    attribute_key = parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] if pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY in parameters else DEFAULT_NAME_KEY
+
+    folder = os.path.join(path, log_name)
+    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, attribute_key], use_transition=use_transition)
+
+    parquet_list = parquet_importer.get_list_parquet(folder)
+    dictio = Counter({})
+
+    for pq in parquet_list:
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            df = parquet_importer.apply(pq, parameters={"columns": columns})
+
+            if use_transition and filters:
+                df = insert_classifier(df)
+            if filters:
+                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+
+            dictio = dictio + Counter(dict(df[attribute_key].value_counts()))
+
+    return dictio

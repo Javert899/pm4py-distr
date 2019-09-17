@@ -1,6 +1,7 @@
 from pm4pydistr.local_wrapper.distr_log_obj import LocalDistrLogObj
 from pm4pydistr.log_handlers import parquet as parquet_handler
 from pm4py.objects.log.importer.parquet import factory as parquet_factory
+from pm4py.util import constants as pm4py_constants
 from pathlib import Path
 from copy import deepcopy
 
@@ -52,6 +53,15 @@ class ClassicDistrLogObject(LocalDistrLogObj):
 
         return dictio
 
+    def get_attribute_values(self, attribute_key):
+        list_logs = self.get_list_logs()
+        parameters = deepcopy(self.init_parameters)
+        parameters["filters"] = self.filters
+        parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = attribute_key
+
+        dictio = parquet_handler.get_attribute_values(".", self.distr_log_path, list_logs, parameters=parameters)
+
+        return dictio
 
 def apply(path, parameters=None):
     if parameters is None:
