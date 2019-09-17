@@ -48,8 +48,10 @@ def calculate_dfg(path, log_name, managed_logs, parameters=None):
     activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
-    parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
-
+    if pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY in parameters:
+        activity_key, parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY], activity_key
+    else:
+        parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
     folder = os.path.join(path, log_name)
     columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY], use_transition=use_transition)
 
