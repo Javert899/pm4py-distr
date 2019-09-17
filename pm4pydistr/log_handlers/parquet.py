@@ -5,7 +5,7 @@ from pm4py.algo.discovery.dfg.adapters.pandas import df_statistics
 from pm4py.algo.filtering.pandas.end_activities import end_activities_filter
 from pm4py.algo.filtering.pandas.start_activities import start_activities_filter
 from pm4py.algo.filtering.common.filtering_constants import CASE_CONCEPT_NAME
-from pm4py.objects.log.util.xes import DEFAULT_NAME_KEY
+from pm4py.objects.log.util.xes import DEFAULT_NAME_KEY, DEFAULT_TIMESTAMP_KEY
 from pm4pydistr.log_handlers.parquet_filtering import factory as parquet_filtering_factory
 
 from pathlib import Path
@@ -13,11 +13,20 @@ from pathlib import Path
 FILTERS = "filters"
 ALLOWED_FILTERS = {"end_activities", "start_activities", "variants"}
 
-def kind_of_import(filters):
-    fk = set(filter[0] for filter in filters)
-    if fk.issubset(ALLOWED_FILTERS):
-        return True
-    return False
+
+def get_columns_to_import(filters, columns):
+    if filters:
+        columns = set(columns)
+        fkeys = set(f[0] for f in filters)
+        if "start_activities" in fkeys or "end_activities" in fkeys or "variants" in fkeys:
+            columns.add(DEFAULT_NAME_KEY)
+        if "timestamp_events" in fkeys or "timestamp_trace_containing" in fkeys or "timestamp_trace_intersecting" in fkeys or "timestamp_trace_intersecting" in fkeys:
+            columns.add(DEFAULT_TIMESTAMP_KEY)
+        for f in filters:
+            if type(f[1]) is list:
+                columns.add(f[0])
+    columns = list(columns)
+    return columns
 
 def calculate_dfg(path, log_name, managed_logs, parameters=None):
     if parameters is None:
@@ -26,18 +35,14 @@ def calculate_dfg(path, log_name, managed_logs, parameters=None):
     filters = parameters[FILTERS] if FILTERS in parameters else []
 
     folder = os.path.join(path, log_name)
-    imp_with_col_sel = kind_of_import(filters)
+    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY])
 
     parquet_list = parquet_importer.get_list_parquet(folder)
     overall_dfg = Counter()
     for pq in parquet_list:
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
-            if imp_with_col_sel:
-                df = parquet_importer.apply(pq, parameters={"columns": [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY]})
-            else:
-                df = parquet_importer.apply(pq)
-
+            df = parquet_importer.apply(pq, parameters={"columns": columns})
             if filters:
                 df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
             dfg = Counter(
@@ -55,17 +60,14 @@ def get_end_activities(path, log_name, managed_logs, parameters=None):
     filters = parameters[FILTERS] if FILTERS in parameters else []
 
     folder = os.path.join(path, log_name)
-    imp_with_col_sel = kind_of_import(filters)
+    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY])
 
     parquet_list = parquet_importer.get_list_parquet(folder)
     overall_ea = Counter()
     for pq in parquet_list:
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
-            if imp_with_col_sel:
-                df = parquet_importer.apply(pq, parameters={"columns": [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY]})
-            else:
-                df = parquet_importer.apply(pq)
+            df = parquet_importer.apply(pq, parameters={"columns": columns})
 
             if filters:
                 df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
@@ -85,17 +87,14 @@ def get_start_activities(path, log_name, managed_logs, parameters=None):
     filters = parameters[FILTERS] if FILTERS in parameters else []
 
     folder = os.path.join(path, log_name)
-    imp_with_col_sel = kind_of_import(filters)
+    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY])
 
     parquet_list = parquet_importer.get_list_parquet(folder)
     overall_sa = Counter()
     for pq in parquet_list:
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
-            if imp_with_col_sel:
-                df = parquet_importer.apply(pq, parameters={"columns": [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY]})
-            else:
-                df = parquet_importer.apply(pq)
+            df = parquet_importer.apply(pq, parameters={"columns": columns})
 
             if filters:
                 df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
@@ -106,3 +105,9 @@ def get_start_activities(path, log_name, managed_logs, parameters=None):
         overall_sa[el] = int(overall_sa[el])
 
     return dict(overall_sa)
+
+
+def get_log_summary(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
