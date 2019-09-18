@@ -4,6 +4,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from random import randrange
 from time import time
+from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
+from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
 from pm4pydistr.master.variable_container import MasterVariableContainer
 from pm4pydistr.master.db_manager import DbManager
 
@@ -119,9 +121,11 @@ def calculate_dfg():
     keyphrase = request.args.get('keyphrase', type=str)
     process = request.args.get('process', type=str)
     session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
     if keyphrase == KEYPHRASE:
-        overall_dfg = MasterVariableContainer.master.calculate_dfg(session, process)
+        overall_dfg = MasterVariableContainer.master.calculate_dfg(session, process, use_transition, no_samples)
 
         return jsonify({"dfg": overall_dfg})
 
@@ -133,9 +137,11 @@ def calculate_end_activities():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
     if keyphrase == KEYPHRASE:
-        overall_ea = MasterVariableContainer.master.get_end_activities(session, process)
+        overall_ea = MasterVariableContainer.master.get_end_activities(session, process, use_transition, no_samples)
 
         return jsonify({"end_activities": overall_ea})
 
@@ -147,9 +153,11 @@ def calculate_start_activities():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
     if keyphrase == KEYPHRASE:
-        overall_sa = MasterVariableContainer.master.get_start_activities(session, process)
+        overall_sa = MasterVariableContainer.master.get_start_activities(session, process, use_transition, no_samples)
 
         return jsonify({"start_activities": overall_sa})
     return jsonify({"start_activities": {}})

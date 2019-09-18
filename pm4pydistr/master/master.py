@@ -99,7 +99,7 @@ class Master:
             m = FilterRequest(session, slave_host, slave_port, {"process": process, "data": data})
             m.start()
 
-    def calculate_dfg(self, session, process):
+    def calculate_dfg(self, session, process, use_transition, no_samples):
         all_slaves = list(self.slaves.keys())
 
         threads = []
@@ -123,7 +123,7 @@ class Master:
         return overall_dfg
 
 
-    def get_end_activities(self, session, process):
+    def get_end_activities(self, session, process, use_transition, no_samples):
         all_slaves = list(self.slaves.keys())
 
         threads = []
@@ -147,7 +147,7 @@ class Master:
         return overall_ea
 
 
-    def get_start_activities(self, session, process):
+    def get_start_activities(self, session, process, use_transition, no_samples):
         all_slaves = list(self.slaves.keys())
 
         threads = []
