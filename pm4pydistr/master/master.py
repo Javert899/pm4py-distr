@@ -24,19 +24,19 @@ class Master:
         self.conf = parameters[PARAMETERS_CONF]
         self.base_folders = BASE_FOLDER_LIST_OPTIONS
 
-        self.slaves = {}
-        self.service = MasterSocketListener(self, self.port, self.conf)
-        self.service.start()
-
         self.sublogs_id = {}
         self.sublogs_correspondence = {}
+
+        self.service = MasterSocketListener(self, self.port, self.conf)
+        self.service.start()
 
         MasterVariableContainer.dbmanager.create_log_db()
         self.load_logs()
 
+        self.slaves = {}
+
         self.session_checker = SessionChecker(self)
         self.session_checker.start()
-
 
     def load_logs(self):
         all_logs = MasterVariableContainer.dbmanager.get_logs_from_db()
@@ -58,6 +58,8 @@ class Master:
                             MasterVariableContainer.dbmanager.insert_log_into_db(name, id)
                         self.sublogs_id[folder][name] = id
 
+        MasterVariableContainer.first_loading_done = True
+
 
     def do_assignment(self):
         all_slaves = list([eval(x) for x in self.slaves.keys()])
@@ -76,6 +78,7 @@ class Master:
 
                 self.sublogs_correspondence[str(distances[0][0])][folder].append(log)
 
+        MasterVariableContainer.log_assignment_done = True
 
     def make_slaves_load(self):
         all_slaves = list(self.slaves.keys())
@@ -88,6 +91,11 @@ class Master:
 
             m = MasterAssignRequest(None, slave_host, slave_port, False, 100000, dictio)
             m.start()
+
+            MasterVariableContainer.assign_request_threads.append(m)
+
+        MasterVariableContainer.slave_loading_requested = True
+
 
     def set_filter(self, session, process, data, use_transition, no_samples):
         all_slaves = list(self.slaves.keys())

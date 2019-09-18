@@ -69,6 +69,16 @@ def ping_from_slave():
         return jsonify({"id": id})
 
 
+@MasterSocketListener.app.route("/getLoadingStatus", methods=["GET"])
+def get_loading_status():
+    keyphrase = request.args.get('keyphrase', type=str)
+
+    if keyphrase == KEYPHRASE:
+        return jsonify({"keyphrase_correct": True, "first_loading_done": MasterVariableContainer.first_loading_done,
+                        "log_assignment_done": MasterVariableContainer.log_assignment_done, "slave_loading_requested": MasterVariableContainer.slave_loading_requested})
+
+    return jsonify({"keyphrase_correct": False})
+
 @MasterSocketListener.app.route("/doLogAssignment", methods=["GET"])
 def do_log_assingment():
     keyphrase = request.args.get('keyphrase', type=str)
