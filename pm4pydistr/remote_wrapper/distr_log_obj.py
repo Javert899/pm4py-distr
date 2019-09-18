@@ -12,20 +12,20 @@ class DistrLogObj(object):
         self.session = str(uuid.uuid4())
         self.filters = []
 
-    def add_filter(self, filter_name, filter_value):
+    def add_filter(self, filter_name, filter_value, parameters=None):
         raise Exception("not implemented")
 
-    def reset_filters(self):
+    def reset_filters(self, parameters=None):
         raise Exception("not implemented")
 
     def calculate_dfg(self, parameters=None):
         raise Exception("not implemented")
 
-    def get_end_activities(self):
+    def get_end_activities(self, parameters=None):
         raise Exception("not implemented")
 
-    def get_start_activities(self):
+    def get_start_activities(self, parameters=None):
         raise Exception("not implemented")
 
-    def do_log_assignment(self):
+    def do_log_assignment(self, parameters=None):
         raise Exception("not implemented")

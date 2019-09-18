@@ -15,37 +15,57 @@ class ClassicDistrLogObject(LocalDistrLogObj):
 
         return [Path(log).name for log in lp]
 
-    def add_filter(self, filter_name, filter_value):
+    def add_filter(self, filter_name, filter_value, parameters=None):
+        if parameters is None:
+            parameters = {}
         self.filters.append([filter_name, filter_value])
 
-    def reset_filters(self):
+    def reset_filters(self, parameters=None):
+        if parameters is None:
+            parameters = {}
         self.filters = []
 
-    def calculate_dfg(self):
+    def calculate_dfg(self, parameters=None):
+        if parameters is None:
+            parameters = {}
         list_logs = self.get_list_logs()
-        parameters = deepcopy(self.init_parameters)
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
         parameters["filters"] = self.filters
         dfg = parquet_handler.calculate_dfg(".", self.distr_log_path, list_logs, parameters=parameters)
         return {(x.split("@@")[0], x.split("@@")[1]): dfg[x] for x in dfg}
 
-    def get_end_activities(self):
+    def get_end_activities(self, parameters=None):
+        if parameters is None:
+            parameters = {}
         list_logs = self.get_list_logs()
-        parameters = deepcopy(self.init_parameters)
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
         parameters["filters"] = self.filters
         end_activities = parquet_handler.get_end_activities(".", self.distr_log_path, list_logs, parameters=parameters)
         return end_activities
 
-    def get_start_activities(self):
+    def get_start_activities(self, parameters=None):
+        if parameters is None:
+            parameters = {}
         list_logs = self.get_list_logs()
-        parameters = deepcopy(self.init_parameters)
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
         parameters["filters"] = self.filters
         start_activities = parquet_handler.get_start_activities(".", self.distr_log_path, list_logs,
                                                                 parameters=parameters)
         return start_activities
 
-    def get_log_summary(self):
+    def get_log_summary(self, parameters=None):
+        if parameters is None:
+            parameters = {}
         list_logs = self.get_list_logs()
-        parameters = deepcopy(self.init_parameters)
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
         parameters["filters"] = self.filters
 
         dictio = parquet_handler.get_log_summary(".", self.distr_log_path, list_logs,
@@ -53,9 +73,13 @@ class ClassicDistrLogObject(LocalDistrLogObj):
 
         return dictio
 
-    def get_attribute_values(self, attribute_key):
+    def get_attribute_values(self, attribute_key, parameters=None):
+        if parameters is None:
+            parameters = {}
         list_logs = self.get_list_logs()
-        parameters = deepcopy(self.init_parameters)
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
         parameters["filters"] = self.filters
         parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = attribute_key
 
@@ -63,9 +87,13 @@ class ClassicDistrLogObject(LocalDistrLogObj):
 
         return dictio
 
-    def get_attribute_names(self):
+    def get_attribute_names(self, parameters=None):
+        if parameters is None:
+            parameters = {}
         list_logs = self.get_list_logs()
-        parameters = deepcopy(self.init_parameters)
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
         parameters["filters"] = self.filters
 
         names = parquet_handler.get_attribute_names(".", self.distr_log_path, list_logs, parameters=parameters)
