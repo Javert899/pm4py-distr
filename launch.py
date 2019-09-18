@@ -2,8 +2,10 @@ import sys
 from pm4pydistr.master.master import Master
 from pm4pydistr.slave.slave import Slave
 from pm4pydistr.configuration import PARAMETERS_TYPE, PARAMETERS_PORT, PARAMETERS_MASTER_HOST, PARAMETERS_MASTER_PORT, \
-    PARAMETERS_CONF, PARAMETERS_HOST
+    PARAMETERS_CONF, PARAMETERS_HOST, ENVIRON_PREFIX
 from pm4pydistr.configuration import PORT, MASTER_HOST, MASTER_PORT, CONF, THIS_HOST
+import os
+
 
 parameters = {}
 
@@ -29,6 +31,19 @@ while i < len(sys.argv):
         parameters[sys.argv[i]] = sys.argv[i + 1]
 
     i = i + 1
+
+if ENVIRON_PREFIX+PARAMETERS_CONF in os.environ:
+    parameters[PARAMETERS_CONF] = os.environ[ENVIRON_PREFIX+PARAMETERS_CONF]
+if ENVIRON_PREFIX+PARAMETERS_HOST in os.environ:
+    parameters[PARAMETERS_HOST] = os.environ[ENVIRON_PREFIX+PARAMETERS_HOST]
+if ENVIRON_PREFIX+PARAMETERS_PORT in os.environ:
+    parameters[PARAMETERS_PORT] = os.environ[ENVIRON_PREFIX+PARAMETERS_PORT]
+if ENVIRON_PREFIX+PARAMETERS_TYPE in os.environ:
+    parameters[PARAMETERS_TYPE] = os.environ[ENVIRON_PREFIX+PARAMETERS_TYPE]
+if ENVIRON_PREFIX+PARAMETERS_MASTER_HOST in os.environ:
+    parameters[PARAMETERS_MASTER_HOST] = os.environ[ENVIRON_PREFIX+PARAMETERS_MASTER_HOST]
+if ENVIRON_PREFIX+PARAMETERS_MASTER_PORT in os.environ:
+    parameters[PARAMETERS_MASTER_PORT] = os.environ[ENVIRON_PREFIX+PARAMETERS_MASTER_PORT]
 
 if parameters[PARAMETERS_TYPE] == "master":
     m = Master(parameters)
