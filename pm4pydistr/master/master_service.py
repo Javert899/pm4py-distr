@@ -109,10 +109,12 @@ def set_filters():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
     filters = json.loads(request.data)["filters"]
     if keyphrase == KEYPHRASE:
-        MasterVariableContainer.master.set_filter(session, process, filters)
+        MasterVariableContainer.master.set_filter(session, process, filters, use_transition, no_samples)
     return jsonify({})
 
 

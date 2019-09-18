@@ -86,17 +86,17 @@ class Master:
 
             dictio = {"logs": self.sublogs_correspondence[slave]}
 
-            m = MasterAssignRequest(None, slave_host, slave_port, dictio)
+            m = MasterAssignRequest(None, slave_host, slave_port, dictio, False, 100000)
             m.start()
 
-    def set_filter(self, session, process, data):
+    def set_filter(self, session, process, data, use_transition, no_samples):
         all_slaves = list(self.slaves.keys())
 
         for slave in all_slaves:
             slave_host = self.slaves[slave][1]
             slave_port = str(self.slaves[slave][2])
 
-            m = FilterRequest(session, slave_host, slave_port, {"process": process, "data": data})
+            m = FilterRequest(session, slave_host, slave_port, use_transition, no_samples, {"process": process, "data": data})
             m.start()
 
     def calculate_dfg(self, session, process, use_transition, no_samples):
@@ -108,7 +108,7 @@ class Master:
             slave_host = self.slaves[slave][1]
             slave_port = str(self.slaves[slave][2])
 
-            m = DfgCalcRequest(session, slave_host, slave_port, process)
+            m = DfgCalcRequest(session, slave_host, slave_port, process, use_transition, no_samples)
             m.start()
 
             threads.append(m)
@@ -132,7 +132,7 @@ class Master:
             slave_host = self.slaves[slave][1]
             slave_port = str(self.slaves[slave][2])
 
-            m = EaRequest(session, slave_host, slave_port, process)
+            m = EaRequest(session, slave_host, slave_port, process, use_transition, no_samples)
             m.start()
 
             threads.append(m)
@@ -156,7 +156,7 @@ class Master:
             slave_host = self.slaves[slave][1]
             slave_port = str(self.slaves[slave][2])
 
-            m = SaRequest(session, slave_host, slave_port, process)
+            m = SaRequest(session, slave_host, slave_port, process, use_transition, no_samples)
             m.start()
 
             threads.append(m)
