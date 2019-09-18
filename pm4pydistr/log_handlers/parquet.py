@@ -8,6 +8,7 @@ from pm4py.algo.filtering.common.filtering_constants import CASE_CONCEPT_NAME
 from pm4py.objects.log.util.xes import DEFAULT_NAME_KEY, DEFAULT_TIMESTAMP_KEY, DEFAULT_TRANSITION_KEY
 from pm4py.util import constants as pm4py_constants
 from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
+from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
 from pm4pydistr.log_handlers.parquet_filtering import factory as parquet_filtering_factory
 import pyarrow.parquet as pqq
 
@@ -44,6 +45,7 @@ def calculate_dfg(path, log_name, managed_logs, parameters=None):
     if parameters is None:
         parameters = {}
 
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
     activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
     filters = parameters[FILTERS] if FILTERS in parameters else []
@@ -57,9 +59,11 @@ def calculate_dfg(path, log_name, managed_logs, parameters=None):
 
     parquet_list = parquet_importer.get_list_parquet(folder)
     overall_dfg = Counter()
-    for pq in parquet_list:
+    count = 0
+    for index, pq in enumerate(parquet_list):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
+            count = count + 1
             df = parquet_importer.apply(pq, parameters={"columns": columns})
 
             if use_transition:
@@ -69,6 +73,9 @@ def calculate_dfg(path, log_name, managed_logs, parameters=None):
             dfg = Counter(
                 df_statistics.get_dfg_graph(df, activity_key=activity_key, sort_timestamp_along_case_id=False, sort_caseid_required=False))
             overall_dfg = overall_dfg + dfg
+            if count >= no_samples:
+                break
+
     returned_dict = {}
     for el in overall_dfg:
         returned_dict[el[0] + "@@" + el[1]] = overall_dfg[el]
@@ -78,6 +85,7 @@ def get_end_activities(path, log_name, managed_logs, parameters=None):
     if parameters is None:
         parameters = {}
 
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
     activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
     filters = parameters[FILTERS] if FILTERS in parameters else []
@@ -89,9 +97,11 @@ def get_end_activities(path, log_name, managed_logs, parameters=None):
 
     parquet_list = parquet_importer.get_list_parquet(folder)
     overall_ea = Counter()
-    for pq in parquet_list:
+    count = 0
+    for index, pq in enumerate(parquet_list):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
+            count = count + 1
             df = parquet_importer.apply(pq, parameters={"columns": columns})
 
             if use_transition:
@@ -100,6 +110,8 @@ def get_end_activities(path, log_name, managed_logs, parameters=None):
                 df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
             ea = Counter(end_activities_filter.get_end_activities(df, parameters=parameters))
             overall_ea = overall_ea + ea
+            if count >= no_samples:
+                break
 
     for el in overall_ea:
         overall_ea[el] = int(overall_ea[el])
@@ -111,6 +123,7 @@ def get_start_activities(path, log_name, managed_logs, parameters=None):
     if parameters is None:
         parameters = {}
 
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
     activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
     filters = parameters[FILTERS] if FILTERS in parameters else []
@@ -122,9 +135,11 @@ def get_start_activities(path, log_name, managed_logs, parameters=None):
 
     parquet_list = parquet_importer.get_list_parquet(folder)
     overall_sa = Counter()
-    for pq in parquet_list:
+    count = 0
+    for index, pq in enumerate(parquet_list):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
+            count = count + 1
             df = parquet_importer.apply(pq, parameters={"columns": columns})
 
             if use_transition:
@@ -134,6 +149,8 @@ def get_start_activities(path, log_name, managed_logs, parameters=None):
 
             ea = Counter(start_activities_filter.get_start_activities(df, parameters=parameters))
             overall_sa = overall_sa + ea
+            if count >= no_samples:
+                break
 
     for el in overall_sa:
         overall_sa[el] = int(overall_sa[el])
@@ -145,6 +162,7 @@ def get_log_summary(path, log_name, managed_logs, parameters=None):
     if parameters is None:
         parameters = {}
 
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
     activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
     filters = parameters[FILTERS] if FILTERS in parameters else []
@@ -158,9 +176,11 @@ def get_log_summary(path, log_name, managed_logs, parameters=None):
 
     events = 0
     cases = 0
-    for pq in parquet_list:
+    count = 0
+    for index, pq in enumerate(parquet_list):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
+            count = count + 1
             df = parquet_importer.apply(pq, parameters={"columns": columns})
 
             if use_transition and filters:
@@ -170,6 +190,8 @@ def get_log_summary(path, log_name, managed_logs, parameters=None):
 
             events = events + len(df)
             cases = cases + df[CASE_CONCEPT_NAME].nunique()
+            if count >= no_samples:
+                break
 
     return {"events": events, "cases": cases}
 
@@ -178,6 +200,7 @@ def get_attribute_values(path, log_name, managed_logs, parameters=None):
     if parameters is None:
         parameters = {}
 
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
     activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
     filters = parameters[FILTERS] if FILTERS in parameters else []
@@ -191,9 +214,11 @@ def get_attribute_values(path, log_name, managed_logs, parameters=None):
     parquet_list = parquet_importer.get_list_parquet(folder)
     dictio = Counter({})
 
-    for pq in parquet_list:
+    count = 0
+    for index, pq in enumerate(parquet_list):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
+            count = count + 1
             df = parquet_importer.apply(pq, parameters={"columns": columns})
 
             if use_transition and filters:
@@ -202,6 +227,8 @@ def get_attribute_values(path, log_name, managed_logs, parameters=None):
                 df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
 
             dictio = dictio + Counter(dict(df[attribute_key].value_counts()))
+            if count >= no_samples:
+                break
 
     return dictio
 
@@ -210,15 +237,20 @@ def get_attribute_names(path, log_name, managed_logs, parameters=None):
     if parameters is None:
         parameters = {}
 
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     folder = os.path.join(path, log_name)
 
     parquet_list = parquet_importer.get_list_parquet(folder)
     names = set()
 
-    for pq in parquet_list:
+    count = 0
+    for index, pq in enumerate(parquet_list):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
+            count = count + 1
             names = names.union(set(pqq.read_metadata(pq).schema.names))
+            if count >= no_samples:
+                break
 
     names = sorted(list(names))
     names = [x.replace("AAA",":") for x in names]
