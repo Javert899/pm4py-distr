@@ -29,3 +29,12 @@ class DistrLogObj(object):
 
     def do_log_assignment(self, parameters=None):
         raise Exception("not implemented")
+
+    def get_log_summary(self, parameters=None):
+        raise Exception("not implemented")
+
+    def get_attribute_values(self, attribute_key, parameters=None):
+        raise Exception("not implemented")
+
+    def get_attribute_names(self, parameters=None):
+        raise Exception("not implemented")

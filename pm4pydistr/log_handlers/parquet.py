@@ -50,12 +50,14 @@ def calculate_dfg(path, log_name, managed_logs, parameters=None):
     activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
+    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY], use_transition=use_transition)
+
     if pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY in parameters:
+        columns.append(parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY])
         activity_key, parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY], activity_key
     else:
         parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
     folder = os.path.join(path, log_name)
-    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY], use_transition=use_transition)
 
     parquet_list = parquet_importer.get_list_parquet(folder)
     overall_dfg = Counter()
@@ -229,6 +231,10 @@ def get_attribute_values(path, log_name, managed_logs, parameters=None):
             dictio = dictio + Counter(dict(df[attribute_key].value_counts()))
             if count >= no_samples:
                 break
+
+    dictio = dict(dictio)
+    for el in dictio:
+        dictio[el] = int(dictio[el])
 
     return dictio
 

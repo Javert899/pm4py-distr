@@ -5,6 +5,8 @@ from flask_cors import CORS
 from pm4pydistr.slave.variable_container import SlaveVariableContainer
 from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
 from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
+from pm4py.util import constants as pm4py_constants
+from pm4py.objects.log.util import xes
 
 from pm4pydistr.log_handlers import parquet as parquet_handler
 
@@ -76,6 +78,8 @@ def calculate_dfg():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
+    attribute_key = request.args.get('attribute_key', type=str, default=xes.DEFAULT_NAME_KEY)
+
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
@@ -90,6 +94,8 @@ def calculate_dfg():
         parameters["filters"] = filters
         parameters[PARAMETER_USE_TRANSITION] = use_transition
         parameters[PARAMETER_NO_SAMPLES] = no_samples
+        parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = attribute_key
+
         returned_dict = parquet_handler.calculate_dfg(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
 
         return jsonify({"dfg": returned_dict})
@@ -146,3 +152,86 @@ def calculate_start_activities():
 
         return jsonify({"start_activities": returned_dict})
     return jsonify({"start_activities": {}})
+
+
+@SlaveSocketListener.app.route("/getAttributeValues", methods=["GET"])
+def calculate_attribute_values():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+    attribute_key = request.args.get('attribute_key', type=str, default=xes.DEFAULT_NAME_KEY)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
+
+    if keyphrase == KEYPHRASE:
+        filters = get_filters_per_session(process, session)
+        parameters = {}
+        parameters["filters"] = filters
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+        parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = attribute_key
+
+        returned_dict = parquet_handler.get_attribute_values(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
+
+        return jsonify({"values": returned_dict})
+    return jsonify({"values": {}})
+
+
+@SlaveSocketListener.app.route("/getAttributesNames", methods=["GET"])
+def calculate_attribute_names():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
+
+    if keyphrase == KEYPHRASE:
+        filters = get_filters_per_session(process, session)
+        parameters = {}
+        parameters["filters"] = filters
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+
+        returned_list = parquet_handler.get_attribute_names(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
+
+        return jsonify({"names": returned_list})
+    return jsonify({"names": {}})
+
+
+@SlaveSocketListener.app.route("/getLogSummary", methods=["GET"])
+def calculate_log_summary():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
+
+    if keyphrase == KEYPHRASE:
+        filters = get_filters_per_session(process, session)
+        parameters = {}
+        parameters["filters"] = filters
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+
+        summary = parquet_handler.get_log_summary(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
+
+        return jsonify({"summary": summary})
+    return jsonify({"summary": {}})

@@ -5,7 +5,7 @@ import json
 from pm4py.objects.log.util import xes
 
 
-class DfgCalcRequest(BasicMasterRequest):
+class AttrValuesRequest(BasicMasterRequest):
     def __init__(self, session, target_host, target_port, use_transition, no_samples, content):
         self.session = session
         self.target_host = target_host
@@ -18,8 +18,7 @@ class DfgCalcRequest(BasicMasterRequest):
         BasicMasterRequest.__init__(self, session, target_host, target_port, use_transition, no_samples, content)
 
     def run(self):
-        uri = "http://" + self.target_host + ":" + self.target_port + "/calculateDfg?keyphrase=" + KEYPHRASE + "&process=" + str(
-            self.content) + "&session=" + str(self.session) + "&use_transition=" + str(self.use_transition) + "&no_samples="+str(self.no_samples)+"&attribute_key="+str(self.attribute_key)
-
+        uri = "http://" + self.target_host + ":" + self.target_port + "/getAttributeValues?keyphrase=" + KEYPHRASE + "&process=" + str(
+            self.content) + "&session=" + str(self.session) + "&use_transition=" + str(self.use_transition) + "&no_samples="+str(self.no_samples) + "&attribute_key="+str(self.attribute_key)
         r = requests.get(uri)
         self.content = json.loads(r.text)
