@@ -8,6 +8,9 @@ from pm4pydistr.master.rqsts.dfg_calc_request import DfgCalcRequest
 from pm4pydistr.master.rqsts.ea_request import EaRequest
 from pm4pydistr.master.rqsts.sa_request import SaRequest
 from pm4pydistr.master.rqsts.filter_request import FilterRequest
+from pm4pydistr.master.rqsts.attr_names_req import AttributesNamesRequest
+from pm4pydistr.master.rqsts.log_summ_request import LogSummaryRequest
+from pm4pydistr.master.rqsts.attr_values_req import AttrValuesRequest
 from pathlib import Path
 from random import randrange
 import os
@@ -188,3 +191,75 @@ class Master:
             overall_sa = overall_sa + Counter(thread.content['start_activities'])
 
         return overall_sa
+
+
+    def get_attribute_values(self, session, process, use_transition, no_samples, attribute_key):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = AttrValuesRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.attribute_key = attribute_key
+            m.start()
+
+            threads.append(m)
+
+        values = Counter()
+
+        for thread in threads:
+            thread.join()
+
+            values = values + Counter(thread.content['values'])
+
+        return values
+
+    def get_attributes_names(self, session, process, use_transition, no_samples):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = AttributesNamesRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.start()
+
+            threads.append(m)
+
+        names = set()
+
+        for thread in threads:
+            thread.join()
+
+            names = names.union(set(thread.content['names']))
+
+        return sorted(list(names))
+
+    def get_log_summary(self, session, process, use_transition, no_samples):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = LogSummaryRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.start()
+
+            threads.append(m)
+
+        ret = {"events": 0, "cases": 0}
+
+        for thread in threads:
+            thread.join()
+
+            ret["events"] = ret["events"] + thread.content["summary"]['events']
+            ret["cases"] = ret["cases"] + thread.content["summary"]['cases']
+
+        return ret

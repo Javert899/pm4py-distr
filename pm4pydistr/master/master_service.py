@@ -180,3 +180,51 @@ def calculate_start_activities():
     return jsonify({"start_activities": {}})
 
 
+@MasterSocketListener.app.route("/getAttributeValues", methods=["GET"])
+def calculate_attribute_values():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+    attribute_key = request.args.get('attribute_key', type=str, default=xes.DEFAULT_NAME_KEY)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if keyphrase == KEYPHRASE:
+        values = MasterVariableContainer.master.get_attribute_values(session, process, use_transition, no_samples, attribute_key)
+
+        return jsonify({"values": values})
+
+    return jsonify({})
+
+
+@MasterSocketListener.app.route("/getAttributesNames", methods=["GET"])
+def calculate_attributes_names():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if keyphrase == KEYPHRASE:
+        names = MasterVariableContainer.master.get_attributes_names(session, process, use_transition, no_samples)
+
+        return jsonify({"names": names})
+    return jsonify({"names": {}})
+
+
+@MasterSocketListener.app.route("/getLogSummary", methods=["GET"])
+def calculate_log_summary():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if keyphrase == KEYPHRASE:
+        summary = MasterVariableContainer.master.get_log_summary(session, process, use_transition, no_samples)
+
+        return jsonify({"summary": summary})
+    return jsonify({"summary": {}})
