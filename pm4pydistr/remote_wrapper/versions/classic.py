@@ -71,7 +71,7 @@ class ClassicDistrLogObject(DistrLogObj):
 
         if constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY in parameters:
             stru = stru + "&attribute_key=" + str(parameters[constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY])
-        
+
         return stru
 
     def do_log_assignment(self, parameters=None):
@@ -117,3 +117,24 @@ class ClassicDistrLogObject(DistrLogObj):
         ret_text = r.text
         ret_json = json.loads(ret_text)
         return ret_json["start_activities"]
+
+    def get_log_summary(self, parameters=None):
+        url = self.get_url("getLogSummary", parameters=parameters)
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        return ret_json["summary"]
+
+    def get_attribute_values(self, attribute_key, parameters=None):
+        url = self.get_url("getAttributeValues", parameters=parameters)
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        return ret_json["values"]
+
+    def get_attribute_names(self, parameters=None):
+        url = self.get_url("getAttributesNames", parameters=parameters)
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        return ret_json["names"]
