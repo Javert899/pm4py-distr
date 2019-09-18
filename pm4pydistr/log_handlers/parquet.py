@@ -232,6 +232,10 @@ def get_attribute_values(path, log_name, managed_logs, parameters=None):
             if count >= no_samples:
                 break
 
+    dictio = dict(dictio)
+    for el in dictio:
+        dictio[el] = int(dictio[el])
+
     return dictio
 
 
