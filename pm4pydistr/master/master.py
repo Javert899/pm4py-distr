@@ -62,39 +62,49 @@ class Master:
 
 
     def do_assignment(self):
-        all_slaves = list([eval(x) for x in self.slaves.keys()])
-        for slave in all_slaves:
-            self.sublogs_correspondence[str(slave)] = {}
-
-        for folder in self.sublogs_id:
-            all_logs = list(self.sublogs_id[folder])
-
+        if not MasterVariableContainer.log_assignment_done:
+            all_slaves = list([eval(x) for x in self.slaves.keys()])
             for slave in all_slaves:
-                self.sublogs_correspondence[str(slave)][folder] = []
+                self.sublogs_correspondence[str(slave)] = {}
 
-            for log in all_logs:
+            for folder in self.sublogs_id:
+                all_logs = list(self.sublogs_id[folder])
 
-                distances = sorted([(x, np.linalg.norm(np.array(x) - np.array(self.sublogs_id[folder][log])), self.slaves[str(x)]) for x in all_slaves], key=lambda x: (x[1], x[2]))
+                for slave in all_slaves:
+                    self.sublogs_correspondence[str(slave)][folder] = []
 
-                self.sublogs_correspondence[str(distances[0][0])][folder].append(log)
+                for log in all_logs:
 
-        MasterVariableContainer.log_assignment_done = True
+                    distances = sorted([(x, np.linalg.norm(np.array(x) - np.array(self.sublogs_id[folder][log])), self.slaves[str(x)]) for x in all_slaves], key=lambda x: (x[1], x[2]))
+
+                    self.sublogs_correspondence[str(distances[0][0])][folder].append(log)
+
+            MasterVariableContainer.log_assignment_done = True
 
     def make_slaves_load(self):
-        all_slaves = list(self.slaves.keys())
+        if not MasterVariableContainer.slave_loading_requested:
+            all_slaves = list(self.slaves.keys())
 
-        for slave in all_slaves:
-            slave_host = self.slaves[slave][1]
-            slave_port = str(self.slaves[slave][2])
+            i = 0
+            while i < len(MasterVariableContainer.assign_request_threads):
+                t = MasterVariableContainer.assign_request_threads[i]
+                if t.slave_finished == 1:
+                    del MasterVariableContainer.assign_request_threads[i]
+                    continue
+                i = i + 1
 
-            dictio = {"logs": self.sublogs_correspondence[slave]}
+            for slave in all_slaves:
+                slave_host = self.slaves[slave][1]
+                slave_port = str(self.slaves[slave][2])
 
-            m = MasterAssignRequest(None, slave_host, slave_port, False, 100000, dictio)
-            m.start()
+                dictio = {"logs": self.sublogs_correspondence[slave]}
 
-            MasterVariableContainer.assign_request_threads.append(m)
+                m = MasterAssignRequest(None, slave_host, slave_port, False, 100000, dictio)
+                m.start()
 
-        MasterVariableContainer.slave_loading_requested = True
+                MasterVariableContainer.assign_request_threads.append(m)
+
+            MasterVariableContainer.slave_loading_requested = True
 
 
     def set_filter(self, session, process, data, use_transition, no_samples):

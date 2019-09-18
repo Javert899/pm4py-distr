@@ -6,11 +6,55 @@ from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANS
 from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
 import requests
 import json
+import time
 
 
 class ClassicDistrLogObject(DistrLogObj):
     def __init__(self, hostname, port, keyphrase, log_name, parameters=None):
         DistrLogObj.__init__(self, hostname, port, keyphrase, log_name, parameters=parameters)
+        self.check_connession()
+
+    def check_connession(self):
+        url = self.get_url("getLoadingStatus")
+        max_retry_conn = 13
+        sleep_time = 0.1
+        connected = False
+        for i in range(max_retry_conn):
+            try:
+                r = requests.get(url)
+                content = json.loads(r.text)
+                if content["keyphrase_correct"]:
+                    if content["first_loading_done"]:
+                        if not content["log_assignment_done"]:
+                            url2 = self.get_url("doLogAssignment")
+                            print(time.time(), "doing initial log assignment into slaves")
+                            r2 = requests.get(url2)
+                            print(time.time(), "done initial log assignment into slaves (they are working now :) )")
+                        connected = True
+                    else:
+                        print(time.time(), "services still loading")
+                else:
+                    print(time.time(), "password uncorrect!")
+                    break
+            except:
+                print(time.time(), "connection with host failed (%d out of %d)" % (i+1, max_retry_conn))
+                if i+1 == max_retry_conn:
+                    break
+                sleep_time = sleep_time * 1.5
+                time.sleep(sleep_time)
+
+        if not connected:
+            raise Exception("impossible to set up a connection with the specified host!! launching exception")
+
+        while True:
+            r = requests.get(url)
+            content = json.loads(r.text)
+            if content["slave_loading_requested"] and content["finished_slaves"] > 0 and content["finished_slaves"] == content["slaves_count"]:
+                break
+            else:
+                print(time.time(), "slaves still coming up, waiting a little more! finished log assignation for %d slaves out of %d" % (content["finished_slaves"], content["slaves_count"]))
+            sleep_time = sleep_time * 1.5
+            time.sleep(sleep_time)
 
     def get_url(self, service, parameters=None):
         if parameters is None:
