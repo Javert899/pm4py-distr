@@ -1,12 +1,10 @@
 from pm4pydistr.remote_wrapper.distr_log_obj import DistrLogObj
-from pm4pydistr.log_handlers import parquet as parquet_handler
-from pm4py.objects.log.importer.parquet import factory as parquet_factory
-from pathlib import Path
 from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
 from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
 import requests
 import json
 import time
+from pm4py.util import constants
 
 
 class ClassicDistrLogObject(DistrLogObj):
@@ -67,9 +65,14 @@ class ClassicDistrLogObject(DistrLogObj):
         use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
         no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
 
-        return "http://" + self.hostname + ":" + str(
+        stru = "http://" + self.hostname + ":" + str(
             self.port) + "/" + service + "?keyphrase=" + self.keyphrase + "&process=" + self.log_name + "&session=" + str(
             self.session) + "&use_transition="+str(use_transition) + "&no_samples=" + str(no_samples)
+
+        if constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY in parameters:
+            stru = stru + "&attribute_key=" + str(parameters[constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY])
+        
+        return stru
 
     def do_log_assignment(self, parameters=None):
         url = self.get_url("doLogAssignment", parameters=parameters)

@@ -117,7 +117,7 @@ class Master:
             m = FilterRequest(session, slave_host, slave_port, use_transition, no_samples, {"process": process, "data": data})
             m.start()
 
-    def calculate_dfg(self, session, process, use_transition, no_samples):
+    def calculate_dfg(self, session, process, use_transition, no_samples, attribute_key):
         all_slaves = list(self.slaves.keys())
 
         threads = []
@@ -127,6 +127,7 @@ class Master:
             slave_port = str(self.slaves[slave][2])
 
             m = DfgCalcRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.attribute_key = attribute_key
             m.start()
 
             threads.append(m)
