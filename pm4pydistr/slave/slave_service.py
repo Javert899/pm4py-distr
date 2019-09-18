@@ -3,7 +3,8 @@ from pm4pydistr.configuration import KEYPHRASE
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pm4pydistr.slave.variable_container import SlaveVariableContainer
-
+from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
+from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
 
 from pm4pydistr.log_handlers import parquet as parquet_handler
 
@@ -75,10 +76,21 @@ def calculate_dfg():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
 
     if keyphrase == KEYPHRASE:
         filters = get_filters_per_session(process, session)
-        returned_dict = parquet_handler.calculate_dfg(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters={"filters": filters})
+        parameters = {}
+        parameters["filters"] = filters
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+        returned_dict = parquet_handler.calculate_dfg(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
 
         return jsonify({"dfg": returned_dict})
     return jsonify({"dfg": {}})
@@ -89,10 +101,22 @@ def calculate_end_activities():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
 
     if keyphrase == KEYPHRASE:
         filters = get_filters_per_session(process, session)
-        returned_dict = parquet_handler.get_end_activities(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters={"filters": filters})
+        parameters = {}
+        parameters["filters"] = filters
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+
+        returned_dict = parquet_handler.get_end_activities(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
 
         return jsonify({"end_activities": returned_dict})
     return jsonify({"end_activities": {}})
@@ -103,10 +127,22 @@ def calculate_start_activities():
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
 
     if keyphrase == KEYPHRASE:
         filters = get_filters_per_session(process, session)
-        returned_dict = parquet_handler.get_start_activities(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters={"filters": filters})
+        parameters = {}
+        parameters["filters"] = filters
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+
+        returned_dict = parquet_handler.get_start_activities(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
 
         return jsonify({"start_activities": returned_dict})
     return jsonify({"start_activities": {}})

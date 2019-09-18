@@ -1,3 +1,8 @@
+PARAMETER_USE_TRANSITION = "use_transition"
+DEFAULT_USE_TRANSITION = False
+PARAMETER_NO_SAMPLES = "no_samples"
+DEFAULT_MAX_NO_SAMPLES = 10000000
+
 KEYPHRASE = "hello"
 PYTHON_PATH = "python3"
 BASE_FOLDER_LIST_OPTIONS = ["master", "/opt/pm4pydistr-share"]

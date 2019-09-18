@@ -1,23 +1,31 @@
-class DistrLogObj(object):
-    def __init__(self, hostname, port, log_name, parameters=None):
+class LocalDistrLogObj(object):
+    def __init__(self, distr_log_path, parameters=None):
         if parameters is None:
             parameters = {}
-        self.hostname = hostname
-        self.port = port
-        self.log_name = log_name
+        self.init_parameters = parameters
+        self.distr_log_path = distr_log_path
         self.filters = []
 
-    def add_filter(self, filter_name, filter_value):
+    def add_filter(self, filter_name, filter_value, parameters=None):
         raise Exception("not implemented")
 
-    def reset_filters(self):
+    def reset_filters(self, parameters=None):
         raise Exception("not implemented")
 
     def calculate_dfg(self, parameters=None):
         raise Exception("not implemented")
 
-    def get_end_activities(self):
+    def get_end_activities(self, parameters=None):
         raise Exception("not implemented")
 
-    def get_start_activities(self):
+    def get_start_activities(self, parameters=None):
+        raise Exception("not implemented")
+
+    def get_log_summary(self, parameters=None):
+        raise Exception("not implemented")
+
+    def get_attribute_values(self, attribute_key, parameters=None):
+        raise Exception("not implemented")
+
+    def get_attribute_names(self, parameters=None):
         raise Exception("not implemented")
