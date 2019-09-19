@@ -102,6 +102,64 @@ def calculate_dfg():
     return jsonify({"dfg": {}})
 
 
+@SlaveSocketListener.app.route("/calculatePerformanceDfg", methods=["GET"])
+def calculate_performance_dfg():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+    attribute_key = request.args.get('attribute_key', type=str, default=xes.DEFAULT_NAME_KEY)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
+
+    if keyphrase == KEYPHRASE:
+        filters = get_filters_per_session(process, session)
+        parameters = {}
+        parameters["filters"] = filters
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+        parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = attribute_key
+
+        returned_dict = parquet_handler.calculate_performance_dfg(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
+
+        return jsonify({"dfg": returned_dict})
+    return jsonify({"dfg": {}})
+
+
+@SlaveSocketListener.app.route("/calculateCompositeObj", methods=["GET"])
+def calculate_composite_obj():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+    attribute_key = request.args.get('attribute_key', type=str, default=xes.DEFAULT_NAME_KEY)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
+
+    if keyphrase == KEYPHRASE:
+        filters = get_filters_per_session(process, session)
+        parameters = {}
+        parameters["filters"] = filters
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+        parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = attribute_key
+
+        returned_dict = parquet_handler.calculate_process_schema_composite_object(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
+
+        return jsonify({"obj": returned_dict})
+    return jsonify({"obj": {}})
+
+
 @SlaveSocketListener.app.route("/getEndActivities", methods=["GET"])
 def calculate_end_activities():
     process = request.args.get('process', type=str)
