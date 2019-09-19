@@ -137,6 +137,11 @@ def calculate_composite_obj():
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
     attribute_key = request.args.get('attribute_key', type=str, default=xes.DEFAULT_NAME_KEY)
+    performance_required = request.args.get('performance_required', type=str)
+    if performance_required == "True":
+        performance_required = True
+    else:
+        performance_required = False
 
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
@@ -153,6 +158,7 @@ def calculate_composite_obj():
         parameters[PARAMETER_USE_TRANSITION] = use_transition
         parameters[PARAMETER_NO_SAMPLES] = no_samples
         parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = attribute_key
+        parameters["performance_required"] = performance_required
 
         returned_dict = parquet_handler.calculate_process_schema_composite_object(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
 
