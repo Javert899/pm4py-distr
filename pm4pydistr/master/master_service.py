@@ -304,3 +304,21 @@ def get_cases():
 
         return jsonify(cases)
     return jsonify({"cases_list": [], "events": 0, "cases": 0})
+
+
+@MasterSocketListener.app.route("/getEvents", methods=["GET"])
+def get_events():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+    case_id = request.args.get('case_id', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if keyphrase == KEYPHRASE:
+        events = MasterVariableContainer.master.get_events(session, process, use_transition, no_samples, case_id)
+
+        return jsonify({"events": events})
+
+    return jsonify({})

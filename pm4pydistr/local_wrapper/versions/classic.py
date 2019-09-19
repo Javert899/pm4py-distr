@@ -158,6 +158,19 @@ class ClassicDistrLogObject(LocalDistrLogObj):
 
         return cases
 
+    def get_events(self, case_id, parameters=None):
+        if parameters is None:
+            parameters = {}
+        list_logs = self.get_list_logs()
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
+        parameters["filters"] = self.filters
+        parameters["case_id"] = case_id
+
+        events = parquet_handler.get_events(".", self.distr_log_path, list_logs, parameters=parameters)
+
+        return events
 
 
 def apply(path, parameters=None):

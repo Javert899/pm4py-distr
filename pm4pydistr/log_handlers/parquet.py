@@ -523,3 +523,49 @@ def get_cases(path, log_name, managed_logs, parameters=None):
                 break
 
     return {"cases_list": cases_list, "events": events, "cases": cases}
+
+
+def get_events(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
+    use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
+    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    filters = parameters[FILTERS] if FILTERS in parameters else []
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
+
+    case_id = parameters["case_id"]
+
+    folder = os.path.join(path, log_name)
+
+    parquet_list = parquet_importer.get_list_parquet(folder)
+
+    ret = []
+
+    count = 0
+    for index, pq in enumerate(parquet_list):
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            count = count + 1
+
+        df = parquet_importer.apply(pq)
+        if use_transition and filters:
+            df = insert_classifier(df)
+
+        if filters:
+            df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+
+        try:
+            events = case_statistics.get_events(df, case_id)
+            if len(events) > 0:
+                ret = events
+                break
+        except:
+            pass
+
+        if count >= no_samples:
+            break
+
+    return ret
