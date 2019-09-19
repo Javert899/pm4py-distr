@@ -11,6 +11,8 @@ from pm4pydistr.master.rqsts.filter_request import FilterRequest
 from pm4pydistr.master.rqsts.attr_names_req import AttributesNamesRequest
 from pm4pydistr.master.rqsts.log_summ_request import LogSummaryRequest
 from pm4pydistr.master.rqsts.attr_values_req import AttrValuesRequest
+from pm4pydistr.master.rqsts.perf_dfg_calc_request import PerfDfgCalcRequest
+from pm4pydistr.master.rqsts.comp_obj_calc_request import CompObjCalcRequest
 from pathlib import Path
 from random import randrange
 import os
@@ -144,6 +146,76 @@ class Master:
 
         return overall_dfg
 
+    def calculate_performance_dfg(self, session, process, use_transition, no_samples, attribute_key):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = PerfDfgCalcRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.attribute_key = attribute_key
+            m.start()
+
+            threads.append(m)
+
+        overall_dfg = Counter()
+
+        for thread in threads:
+            thread.join()
+
+            overall_dfg = overall_dfg + Counter(thread.content['dfg'])
+
+        return overall_dfg
+
+    def calculate_composite_obj(self, session, process, use_transition, no_samples, attribute_key, performance_required=False):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = CompObjCalcRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.attribute_key = attribute_key
+            m.performance_required = performance_required
+            m.start()
+
+            threads.append(m)
+
+        overall_obj = {}
+        overall_obj["events"] = 0
+        overall_obj["cases"] = 0
+        overall_obj["activities"] = Counter()
+        overall_obj["start_activities"] = Counter()
+        overall_obj["end_activities"] = Counter()
+        overall_obj["frequency_dfg"] = Counter()
+        if performance_required:
+            overall_obj["performance_dfg"] = Counter()
+
+        for thread in threads:
+            thread.join()
+
+            overall_obj["events"] = overall_obj["events"] + thread.content['obj']["events"]
+            overall_obj["cases"] = overall_obj["cases"] + thread.content['obj']["cases"]
+            overall_obj["activities"] = overall_obj["activities"] + Counter(thread.content['obj']["activities"])
+            overall_obj["start_activities"] = overall_obj["start_activities"] + Counter(thread.content['obj']["start_activities"])
+            overall_obj["end_activities"] = overall_obj["end_activities"] + Counter(thread.content['obj']["end_activities"])
+            overall_obj["frequency_dfg"] = overall_obj["frequency_dfg"] + Counter(thread.content['obj']["frequency_dfg"])
+            if performance_required:
+                overall_obj["performance_dfg"] = overall_obj["performance_dfg"] + Counter(thread.content['obj']["performance_dfg"])
+
+        overall_obj["activities"] = dict(overall_obj["activities"])
+        overall_obj["start_activities"] = dict(overall_obj["start_activities"])
+        overall_obj["end_activities"] = dict(overall_obj["end_activities"])
+        overall_obj["frequency_dfg"] = dict(overall_obj["frequency_dfg"])
+        if performance_required:
+            overall_obj["performance_dfg"] = dict(overall_obj["performance_dfg"])
+
+        return overall_obj
 
     def get_end_activities(self, session, process, use_transition, no_samples):
         all_slaves = list(self.slaves.keys())

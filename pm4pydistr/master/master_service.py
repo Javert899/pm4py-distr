@@ -149,6 +149,47 @@ def calculate_dfg():
     return jsonify({})
 
 
+@MasterSocketListener.app.route("/calculatePerformanceDfg", methods=["GET"])
+def calculate_performance_dfg():
+    keyphrase = request.args.get('keyphrase', type=str)
+    process = request.args.get('process', type=str)
+    session = request.args.get('session', type=str)
+    attribute_key = request.args.get('attribute_key', type=str, default=xes.DEFAULT_NAME_KEY)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if keyphrase == KEYPHRASE:
+        overall_dfg = MasterVariableContainer.master.calculate_performance_dfg(session, process, use_transition, no_samples, attribute_key)
+
+        return jsonify({"dfg": overall_dfg})
+
+    return jsonify({})
+
+
+@MasterSocketListener.app.route("/calculateCompositeObj", methods=["GET"])
+def calculate_composite_obj():
+    keyphrase = request.args.get('keyphrase', type=str)
+    process = request.args.get('process', type=str)
+    session = request.args.get('session', type=str)
+    attribute_key = request.args.get('attribute_key', type=str, default=xes.DEFAULT_NAME_KEY)
+    performance_required = request.args.get('performance_required', type=str, default="False")
+    if performance_required == "True":
+        performance_required = True
+    else:
+        performance_required = False
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if keyphrase == KEYPHRASE:
+        overall_obj = MasterVariableContainer.master.calculate_composite_obj(session, process, use_transition, no_samples, attribute_key, performance_required=performance_required)
+
+        return jsonify({"obj": overall_obj})
+
+    return jsonify({})
+
+
 @MasterSocketListener.app.route("/getEndActivities", methods=["GET"])
 def calculate_end_activities():
     process = request.args.get('process', type=str)

@@ -72,6 +72,9 @@ class ClassicDistrLogObject(DistrLogObj):
         if constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY in parameters:
             stru = stru + "&attribute_key=" + str(parameters[constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY])
 
+        if "performance_required" in parameters:
+            stru = stru + "&performance_required=" + str(parameters["performance_required"])
+
         return stru
 
     def do_log_assignment(self, parameters=None):
@@ -103,6 +106,34 @@ class ClassicDistrLogObject(DistrLogObj):
         for el in dfg:
             new_dfg[(el.split("@@")[0], el.split("@@")[1])] = dfg[el]
         return new_dfg
+
+    def calculate_performance_dfg(self, parameters=None):
+        url = self.get_url("calculatePerformanceDfg", parameters=parameters)
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        dfg = ret_json["dfg"]
+        new_dfg = {}
+        for el in dfg:
+            new_dfg[(el.split("@@")[0], el.split("@@")[1])] = dfg[el]
+        return new_dfg
+
+    def calculate_composite_object(self, parameters=None):
+        url = self.get_url("calculateCompositeObj", parameters=parameters)
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        obj = ret_json["obj"]
+        new_frequency = {}
+        for el in obj["frequency_dfg"]:
+            new_frequency[(el.split("@@")[0], el.split("@@")[1])] = obj["frequency_dfg"][el]
+        obj["frequency_dfg"] = new_frequency
+        if "performance_dfg" in obj:
+            new_performance = {}
+            for el in obj["performance_dfg"]:
+                new_performance[(el.split("@@")[0], el.split("@@")[1])] = obj["performance_dfg"][el]
+            obj["performance_dfg"] = new_performance
+        return obj
 
     def get_end_activities(self, parameters=None):
         url = self.get_url("getEndActivities", parameters=parameters)

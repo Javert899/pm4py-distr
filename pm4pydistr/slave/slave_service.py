@@ -137,7 +137,7 @@ def calculate_composite_obj():
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
     attribute_key = request.args.get('attribute_key', type=str, default=xes.DEFAULT_NAME_KEY)
-    performance_required = request.args.get('performance_required', type=str)
+    performance_required = request.args.get('performance_required', type=str, default="False")
     if performance_required == "True":
         performance_required = True
     else:
