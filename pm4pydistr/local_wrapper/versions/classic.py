@@ -36,6 +36,17 @@ class ClassicDistrLogObject(LocalDistrLogObj):
         dfg = parquet_handler.calculate_dfg(".", self.distr_log_path, list_logs, parameters=parameters)
         return {(x.split("@@")[0], x.split("@@")[1]): dfg[x] for x in dfg}
 
+    def calculate_performance_dfg(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        list_logs = self.get_list_logs()
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
+        parameters["filters"] = self.filters
+        dfg = parquet_handler.calculate_performance_dfg(".", self.distr_log_path, list_logs, parameters=parameters)
+        return {(x.split("@@")[0], x.split("@@")[1]): dfg[x] for x in dfg}
+
     def get_end_activities(self, parameters=None):
         if parameters is None:
             parameters = {}

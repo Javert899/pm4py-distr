@@ -15,6 +15,9 @@ class LocalDistrLogObj(object):
     def calculate_dfg(self, parameters=None):
         raise Exception("not implemented")
 
+    def calculate_performance_dfg(self, parameters=None):
+        raise Exception("not implemented")
+
     def get_end_activities(self, parameters=None):
         raise Exception("not implemented")
 
