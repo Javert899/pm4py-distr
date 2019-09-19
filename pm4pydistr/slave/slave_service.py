@@ -359,3 +359,31 @@ def get_cases():
         return jsonify(returned_dict)
     return jsonify({"cases_list": [], "events": 0, "cases": 0})
 
+
+
+@SlaveSocketListener.app.route("/getEvents", methods=["GET"])
+def get_events():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+    case_id = request.args.get('case_id', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
+
+    if keyphrase == KEYPHRASE:
+        filters = get_filters_per_session(process, session)
+        parameters = {}
+        parameters["filters"] = filters
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+        parameters["case_id"] = case_id
+
+        events = parquet_handler.get_events(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
+
+        return jsonify({"events": events})
+    return jsonify({"events": {}})

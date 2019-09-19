@@ -187,3 +187,11 @@ class ClassicDistrLogObject(DistrLogObj):
         ret_text = r.text
         ret_json = json.loads(ret_text)
         return ret_json
+
+    def get_events(self, case_id, parameters=None):
+        url = self.get_url("getEvents", parameters=parameters)
+        url = url + "&case_id="+str(case_id)
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        return ret_json["events"]

@@ -50,3 +50,6 @@ class DistrLogObj(object):
 
     def get_cases(self, parameters=None):
         raise Exception("not implemented")
+
+    def get_events(self, case_id, parameters=None):
+        raise Exception("not implemented")

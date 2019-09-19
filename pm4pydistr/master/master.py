@@ -15,6 +15,7 @@ from pm4pydistr.master.rqsts.perf_dfg_calc_request import PerfDfgCalcRequest
 from pm4pydistr.master.rqsts.comp_obj_calc_request import CompObjCalcRequest
 from pm4pydistr.master.rqsts.variants import VariantsRequest
 from pm4pydistr.master.rqsts.cases_list import CasesListRequest
+from pm4pydistr.master.rqsts.events import EventsRequest
 from pathlib import Path
 from random import randrange
 import os
@@ -412,3 +413,29 @@ class Master:
             cases = cases + thread.content["cases"]
 
         return {"cases_list": cases_list, "events": events, "cases": cases}
+
+    def get_events(self, session, process, use_transition, no_samples, case_id):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = EventsRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.case_id = case_id
+            m.start()
+
+            threads.append(m)
+
+        events = []
+
+        for thread in threads:
+            thread.join()
+
+            ev = thread.content["events"]
+            if ev:
+                events = ev
+
+        return events
