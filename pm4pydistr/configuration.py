@@ -1,4 +1,7 @@
-ENVIRON_PREFIX = "pm4pydistr_"
+import os
+
+ENVIRON_PREFIX = "pm4pydistr"
+PARAMETERS_AUTO_HOST = "--auto-host"
 
 PARAMETER_USE_TRANSITION = "use_transition"
 DEFAULT_USE_TRANSITION = False
@@ -8,7 +11,10 @@ PARAMETER_NUM_RET_ITEMS = "num_ret_items"
 DEFAULT_MAX_NO_RET_ITEMS = 500
 
 KEYPHRASE = "hello"
-PYTHON_PATH = "python3"
+if str(os.name) == "posix":
+    PYTHON_PATH = "python3"
+else:
+    PYTHON_PATH = "python"
 BASE_FOLDER_LIST_OPTIONS = ["master", "/opt/pm4pydistr-share"]
 
 THIS_HOST = "127.0.0.1"

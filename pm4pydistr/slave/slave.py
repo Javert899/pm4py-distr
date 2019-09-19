@@ -1,11 +1,12 @@
 from pm4pydistr.configuration import PARAMETERS_PORT, PARAMETERS_HOST, PARAMETERS_MASTER_HOST, PARAMETERS_MASTER_PORT, \
-    PARAMETERS_CONF, BASE_FOLDER_LIST_OPTIONS
+    PARAMETERS_CONF, BASE_FOLDER_LIST_OPTIONS, PARAMETERS_AUTO_HOST
 
 from pm4pydistr.slave.slave_service import SlaveSocketListener
 from pm4pydistr.slave.slave_requests import SlaveRequests
 from pathlib import Path
 from pm4py.objects.log.importer.parquet import factory as parquet_importer
 from pm4pydistr.slave.do_ms_ping import DoMasterPing
+import uuid
 
 import os
 import shutil
@@ -18,6 +19,8 @@ class Slave:
         self.master_host = parameters[PARAMETERS_MASTER_HOST]
         self.master_port = str(parameters[PARAMETERS_MASTER_PORT])
         self.conf = parameters[PARAMETERS_CONF]
+        if PARAMETERS_AUTO_HOST in parameters and parameters[PARAMETERS_AUTO_HOST] == "1":
+            self.conf = str(uuid.uuid4())
         self.id = None
         self.ping_module = None
 
