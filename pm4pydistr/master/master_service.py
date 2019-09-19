@@ -287,3 +287,20 @@ def get_variants():
 
         return jsonify(variants)
     return jsonify({"variants": [], "events": 0, "cases": 0})
+
+
+@MasterSocketListener.app.route("/getCases", methods=["GET"])
+def get_cases():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
+
+    if keyphrase == KEYPHRASE:
+        cases = MasterVariableContainer.master.get_cases(session, process, use_transition, no_samples, max_ret_items=max_no_ret_items)
+
+        return jsonify(cases)
+    return jsonify({"cases_list": [], "events": 0, "cases": 0})

@@ -47,3 +47,6 @@ class DistrLogObj(object):
 
     def get_variants(self, parameters=None):
         raise Exception("not implemented")
+
+    def get_cases(self, parameters=None):
+        raise Exception("not implemented")

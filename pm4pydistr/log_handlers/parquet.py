@@ -489,7 +489,9 @@ def get_cases(path, log_name, managed_logs, parameters=None):
 
     parquet_list = parquet_importer.get_list_parquet(folder)
 
-    dictio_variants = {}
+    cases_list = []
+    events = 0
+    cases = 0
 
     count = 0
     for index, pq in enumerate(parquet_list):
@@ -506,8 +508,18 @@ def get_cases(path, log_name, managed_logs, parameters=None):
             if filters:
                 df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
 
-            stats = case_statistics.get_cases_description(df)
-            print(stats)
-            input()
+            events = events + len(df)
+            cases = cases + df[CASE_CONCEPT_NAME].nunique()
 
-    return None
+            stats = case_statistics.get_cases_description(df)
+            c_list = []
+            for x, y in stats.items():
+                c_list.append({"case_id": x, "caseDuration": y["caseDuration"], "startTime": y["startTime"], "endTime": y["endTime"]})
+
+            cases_list = sorted(cases_list + c_list, key=lambda x: x["caseDuration"], reverse=True)
+            cases_list = cases_list[:min(len(cases_list), no_ret_elements)]
+
+            if count >= no_samples:
+                break
+
+    return {"cases_list": cases_list, "events": events, "cases": cases}

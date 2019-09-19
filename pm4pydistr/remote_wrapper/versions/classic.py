@@ -1,6 +1,7 @@
 from pm4pydistr.remote_wrapper.distr_log_obj import DistrLogObj
 from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
 from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
+from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS
 import requests
 import json
 import time
@@ -74,6 +75,9 @@ class ClassicDistrLogObject(DistrLogObj):
 
         if "performance_required" in parameters:
             stru = stru + "&performance_required=" + str(parameters["performance_required"])
+
+        if PARAMETER_NUM_RET_ITEMS in parameters:
+            stru = stru + "&"+PARAMETER_NUM_RET_ITEMS+"="+str(parameters[PARAMETER_NUM_RET_ITEMS])
 
         return stru
 
@@ -170,9 +174,15 @@ class ClassicDistrLogObject(DistrLogObj):
         ret_json = json.loads(ret_text)
         return ret_json["names"]
 
-
     def get_variants(self, parameters=None):
         url = self.get_url("getVariants", parameters=parameters)
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        return ret_json
+
+    def get_cases(self, parameters=None):
+        url = self.get_url("getCases", parameters=parameters)
         r = requests.get(url)
         ret_text = r.text
         ret_json = json.loads(ret_text)
