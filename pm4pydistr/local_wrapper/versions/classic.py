@@ -47,6 +47,26 @@ class ClassicDistrLogObject(LocalDistrLogObj):
         dfg = parquet_handler.calculate_performance_dfg(".", self.distr_log_path, list_logs, parameters=parameters)
         return {(x.split("@@")[0], x.split("@@")[1]): dfg[x] for x in dfg}
 
+    def calculate_composite_object(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        list_logs = self.get_list_logs()
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
+        parameters["filters"] = self.filters
+        obj = parquet_handler.calculate_process_schema_composite_object(".", self.distr_log_path, list_logs, parameters=parameters)
+        new_frequency = {}
+        for el in obj["frequency_dfg"]:
+            new_frequency[(el.split("@@")[0], el.split("@@")[1])] = obj["frequency_dfg"][el]
+        obj["frequency_dfg"] = new_frequency
+        if "performance_dfg" in obj:
+            new_performance = {}
+            for el in obj["performance_dfg"]:
+                new_performance[(el.split("@@")[0], el.split("@@")[1])] = obj["performance_dfg"][el]
+            obj["performance_dfg"] = new_performance
+        return obj
+
     def get_end_activities(self, parameters=None):
         if parameters is None:
             parameters = {}
