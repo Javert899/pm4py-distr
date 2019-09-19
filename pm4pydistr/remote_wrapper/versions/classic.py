@@ -169,3 +169,11 @@ class ClassicDistrLogObject(DistrLogObj):
         ret_text = r.text
         ret_json = json.loads(ret_text)
         return ret_json["names"]
+
+
+    def get_variants(self, parameters=None):
+        url = self.get_url("getVariants", parameters=parameters)
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        return ret_json["variants"]
