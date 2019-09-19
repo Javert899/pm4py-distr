@@ -35,3 +35,6 @@ class LocalDistrLogObj(object):
 
     def get_attribute_names(self, parameters=None):
         raise Exception("not implemented")
+
+    def get_variants(self, parameters=None):
+        raise Exception("not implemented")

@@ -132,6 +132,20 @@ class ClassicDistrLogObject(LocalDistrLogObj):
         return names
 
 
+    def get_variants(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        list_logs = self.get_list_logs()
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
+        parameters["filters"] = self.filters
+
+        variants = parquet_handler.get_variants(".", self.distr_log_path, list_logs, parameters=parameters)
+
+        return variants
+
+
 def apply(path, parameters=None):
     if parameters is None:
         parameters = {}
