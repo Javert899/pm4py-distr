@@ -325,7 +325,7 @@ def get_variants():
         parameters[PARAMETER_NO_SAMPLES] = no_samples
         parameters[PARAMETER_NUM_RET_ITEMS] = max_no_ret_items
 
-        returned_list = parquet_handler.get_variants(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
+        returned_dict = parquet_handler.get_variants(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
 
-        return jsonify({"variants": returned_list})
-    return jsonify({"variants": {}})
+        return jsonify(returned_dict)
+    return jsonify({"variants": [], "events": 0, "cases": 0})

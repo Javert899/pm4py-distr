@@ -285,5 +285,5 @@ def get_variants():
     if keyphrase == KEYPHRASE:
         variants = MasterVariableContainer.master.get_variants(session, process, use_transition, no_samples, max_ret_items=max_no_ret_items)
 
-        return jsonify({"variants": variants})
-    return jsonify({"variants": {}})
+        return jsonify(variants)
+    return jsonify({"variants": [], "events": 0, "cases": 0})

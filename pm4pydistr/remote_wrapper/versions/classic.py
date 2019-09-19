@@ -176,4 +176,4 @@ class ClassicDistrLogObject(DistrLogObj):
         r = requests.get(url)
         ret_text = r.text
         ret_json = json.loads(ret_text)
-        return ret_json["variants"]
+        return ret_json

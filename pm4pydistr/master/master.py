@@ -355,11 +355,15 @@ class Master:
             threads.append(m)
 
         dictio_variants = {}
+        events = 0
+        cases = 0
 
         for thread in threads:
             thread.join()
 
             d_variants = {x["variant"]: x for x in thread.content["variants"]}
+            events = events + thread.content["events"]
+            cases = cases + thread.content["cases"]
 
             for variant in d_variants:
                 if not variant in dictio_variants:
@@ -374,4 +378,4 @@ class Master:
 
         list_variants = sorted(list(dictio_variants.values()), key=lambda x: x["count"], reverse=True)
 
-        return list_variants
+        return {"variants": list_variants, "events": events, "cases": cases}
