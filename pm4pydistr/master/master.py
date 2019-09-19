@@ -13,12 +13,16 @@ from pm4pydistr.master.rqsts.log_summ_request import LogSummaryRequest
 from pm4pydistr.master.rqsts.attr_values_req import AttrValuesRequest
 from pm4pydistr.master.rqsts.perf_dfg_calc_request import PerfDfgCalcRequest
 from pm4pydistr.master.rqsts.comp_obj_calc_request import CompObjCalcRequest
+from pm4pydistr.master.rqsts.variants import VariantsRequest
+from pm4pydistr.master.rqsts.cases_list import CasesListRequest
 from pathlib import Path
 from random import randrange
 import os
 import numpy as np
 from collections import Counter
 from pm4pydistr.master.session_checker import SessionChecker
+from pm4pydistr.configuration import DEFAULT_MAX_NO_RET_ITEMS
+
 
 class Master:
     def __init__(self, parameters):
@@ -335,3 +339,76 @@ class Master:
             ret["cases"] = ret["cases"] + thread.content["summary"]['cases']
 
         return ret
+
+    def get_variants(self, session, process, use_transition, no_samples, max_ret_items=DEFAULT_MAX_NO_RET_ITEMS):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = VariantsRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.max_ret_items = max_ret_items
+            m.start()
+
+            threads.append(m)
+
+        dictio_variants = {}
+        events = 0
+        cases = 0
+
+        for thread in threads:
+            thread.join()
+
+            d_variants = {x["variant"]: x for x in thread.content["variants"]}
+            events = events + thread.content["events"]
+            cases = cases + thread.content["cases"]
+
+            for variant in d_variants:
+                if not variant in dictio_variants:
+                    dictio_variants[variant] = d_variants[variant]
+                else:
+                    dictio_variants[variant]["caseDuration"] = (dictio_variants[variant]["caseDuration"] * dictio_variants[variant]["count"] + d_variants[variant]["caseDuration"] * d_variants[variant]["count"])/(dictio_variants[variant]["count"] + d_variants[variant]["count"])
+                    dictio_variants[variant]["count"] = dictio_variants[variant]["count"] + d_variants[variant]["count"]
+
+            list_variants = sorted(list(dictio_variants.values()), key=lambda x: x["count"], reverse=True)
+            list_variants = list_variants[:min(len(list_variants), max_ret_items)]
+            dictio_variants = {x["variant"]: x for x in list_variants}
+
+        list_variants = sorted(list(dictio_variants.values()), key=lambda x: x["count"], reverse=True)
+
+        return {"variants": list_variants, "events": events, "cases": cases}
+
+    def get_cases(self, session, process, use_transition, no_samples, max_ret_items=DEFAULT_MAX_NO_RET_ITEMS):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = CasesListRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.max_ret_items = max_ret_items
+            m.start()
+
+            threads.append(m)
+
+        cases_list = []
+        events = 0
+        cases = 0
+
+        for thread in threads:
+            thread.join()
+
+            c_list = thread.content["cases_list"]
+
+            cases_list = sorted(cases_list + c_list, key=lambda x: x["caseDuration"], reverse=True)
+            cases_list = cases_list[:min(len(cases_list), max_ret_items)]
+
+            events = events + thread.content["events"]
+            cases = cases + thread.content["cases"]
+
+        return {"cases_list": cases_list, "events": events, "cases": cases}

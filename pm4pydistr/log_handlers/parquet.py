@@ -9,9 +9,10 @@ from pm4py.objects.log.util.xes import DEFAULT_NAME_KEY, DEFAULT_TIMESTAMP_KEY, 
 from pm4py.util import constants as pm4py_constants
 from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
 from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
+from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_MAX_NO_RET_ITEMS
 from pm4pydistr.log_handlers.parquet_filtering import factory as parquet_filtering_factory
 import pyarrow.parquet as pqq
-
+from pm4py.statistics.traces.pandas import case_statistics
 
 from pathlib import Path
 
@@ -410,3 +411,115 @@ def get_attribute_names(path, log_name, managed_logs, parameters=None):
     names = [x.replace("AAA",":") for x in names]
 
     return sorted(list(names))
+
+
+def get_variants(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
+    use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
+    no_ret_elements = parameters[PARAMETER_NUM_RET_ITEMS] if PARAMETER_NUM_RET_ITEMS in parameters else DEFAULT_MAX_NO_RET_ITEMS
+    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    filters = parameters[FILTERS] if FILTERS in parameters else []
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
+
+    folder = os.path.join(path, log_name)
+    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY, DEFAULT_TIMESTAMP_KEY], use_transition=use_transition)
+
+    parquet_list = parquet_importer.get_list_parquet(folder)
+
+    dictio_variants = {}
+    events = 0
+    cases = 0
+
+    count = 0
+    for index, pq in enumerate(parquet_list):
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            count = count + 1
+            df = parquet_importer.apply(pq, parameters={"columns": columns})
+
+            if use_transition and filters:
+                df = insert_classifier(df)
+            else:
+                df["@@classifier"] = df[DEFAULT_NAME_KEY]
+
+            if filters:
+                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+
+            events = events + len(df)
+            cases = cases + df[CASE_CONCEPT_NAME].nunique()
+
+            #dictio = dictio + Counter(dict(df[attribute_key].value_counts()))
+            stats = case_statistics.get_variant_statistics_with_case_duration(df)
+            d_variants = {x["variant"]: x for x in stats}
+
+            for variant in d_variants:
+                if not variant in dictio_variants:
+                    dictio_variants[variant] = d_variants[variant]
+                else:
+                    dictio_variants[variant]["caseDuration"] = (dictio_variants[variant]["caseDuration"] * dictio_variants[variant]["count"] + d_variants[variant]["caseDuration"] * d_variants[variant]["count"])/(dictio_variants[variant]["count"] + d_variants[variant]["count"])
+                    dictio_variants[variant]["count"] = dictio_variants[variant]["count"] + d_variants[variant]["count"]
+
+            list_variants = sorted(list(dictio_variants.values()), key=lambda x: x["count"], reverse=True)
+            list_variants = list_variants[:min(len(list_variants), no_ret_elements)]
+            dictio_variants = {x["variant"]: x for x in list_variants}
+
+            if count >= no_samples:
+                break
+
+    list_variants = sorted(list(dictio_variants.values()), key=lambda x: x["count"], reverse=True)
+
+    return {"variants": list_variants, "events": events, "cases": cases}
+
+def get_cases(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
+    use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
+    no_ret_elements = parameters[PARAMETER_NUM_RET_ITEMS] if PARAMETER_NUM_RET_ITEMS in parameters else DEFAULT_MAX_NO_RET_ITEMS
+    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    filters = parameters[FILTERS] if FILTERS in parameters else []
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
+
+    folder = os.path.join(path, log_name)
+    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY, DEFAULT_TIMESTAMP_KEY], use_transition=use_transition)
+
+    parquet_list = parquet_importer.get_list_parquet(folder)
+
+    cases_list = []
+    events = 0
+    cases = 0
+
+    count = 0
+    for index, pq in enumerate(parquet_list):
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            count = count + 1
+            df = parquet_importer.apply(pq, parameters={"columns": columns})
+
+            if use_transition and filters:
+                df = insert_classifier(df)
+            else:
+                df["@@classifier"] = df[DEFAULT_NAME_KEY]
+
+            if filters:
+                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+
+            events = events + len(df)
+            cases = cases + df[CASE_CONCEPT_NAME].nunique()
+
+            stats = case_statistics.get_cases_description(df)
+            c_list = []
+            for x, y in stats.items():
+                c_list.append({"case_id": x, "caseDuration": y["caseDuration"], "startTime": y["startTime"], "endTime": y["endTime"]})
+
+            cases_list = sorted(cases_list + c_list, key=lambda x: x["caseDuration"], reverse=True)
+            cases_list = cases_list[:min(len(cases_list), no_ret_elements)]
+
+            if count >= no_samples:
+                break
+
+    return {"cases_list": cases_list, "events": events, "cases": cases}
