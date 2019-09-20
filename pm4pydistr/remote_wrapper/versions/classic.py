@@ -195,3 +195,10 @@ class ClassicDistrLogObject(DistrLogObj):
         ret_text = r.text
         ret_json = json.loads(ret_text)
         return ret_json["events"]
+
+    def get_logs_list(self):
+        url = self.get_url("getSublogsId")
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        return sorted(list(ret_json["sublogs_id"].keys()))
