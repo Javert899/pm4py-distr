@@ -10,7 +10,7 @@ COPY . /
 
 #ENV pm4pydistr--port=5002
 #ENV pm4pydistr--master-port=5001
-#ENV pm4pydistr--base-folders=/master
+ENV pm4pydistr--base-folders=/master
 ENV pm4pydistr--type=slave
 ENV pm4pydistr--auto-host=1
 
