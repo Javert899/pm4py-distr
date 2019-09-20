@@ -1,8 +1,9 @@
 import sys
 from pm4pydistr.master.master import Master
 from pm4pydistr.slave.slave import Slave
+from pm4pydistr import configuration
 from pm4pydistr.configuration import PARAMETERS_TYPE, PARAMETERS_PORT, PARAMETERS_MASTER_HOST, PARAMETERS_MASTER_PORT, \
-    PARAMETERS_CONF, PARAMETERS_HOST, ENVIRON_PREFIX, PARAMETERS_AUTO_HOST
+    PARAMETERS_CONF, PARAMETERS_HOST, ENVIRON_PREFIX, PARAMETERS_AUTO_HOST, PARAMETERS_KEYPHRASE, PARAMETERS_BASE_FOLDERS
 from pm4pydistr.configuration import PORT, MASTER_HOST, MASTER_PORT, CONF, THIS_HOST
 import os
 
@@ -29,7 +30,12 @@ while i < len(sys.argv):
         parameters[sys.argv[i]] = sys.argv[i + 1]
     elif sys.argv[i] == PARAMETERS_CONF:
         parameters[sys.argv[i]] = sys.argv[i + 1]
-
+    elif sys.argv[i] == PARAMETERS_AUTO_HOST:
+        parameters[sys.argv[i]] = sys.argv[i + 1]
+    elif sys.argv[i] == PARAMETERS_KEYPHRASE:
+        configuration.KEYPHRASE = sys.argv[i + 1]
+    elif sys.argv[i] == PARAMETERS_BASE_FOLDERS:
+        configuration.BASE_FOLDER_LIST_OPTIONS = sys.argv[i + 1].split("@@")
     i = i + 1
 
 if ENVIRON_PREFIX+PARAMETERS_CONF in os.environ:
@@ -47,6 +53,10 @@ if ENVIRON_PREFIX+PARAMETERS_MASTER_PORT in os.environ:
 
 if ENVIRON_PREFIX+PARAMETERS_AUTO_HOST in os.environ:
     parameters[PARAMETERS_AUTO_HOST] = os.environ[ENVIRON_PREFIX+PARAMETERS_AUTO_HOST]
+if ENVIRON_PREFIX+PARAMETERS_KEYPHRASE in os.environ:
+    configuration.KEYPHRASE = os.environ[ENVIRON_PREFIX+PARAMETERS_KEYPHRASE]
+if ENVIRON_PREFIX+PARAMETERS_BASE_FOLDERS in os.environ:
+    configuration.PARAMETERS_BASE_FOLDERS = os.environ[ENVIRON_PREFIX+PARAMETERS_BASE_FOLDERS].split("@@")
 
 if parameters[PARAMETERS_TYPE] == "master":
     m = Master(parameters)
