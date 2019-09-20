@@ -1,6 +1,6 @@
 from threading import Thread
 import time
-from pm4pydistr.configuration import SLEEPING_TIME, KEYPHRASE
+from pm4pydistr import configuration
 import requests
 
 
@@ -15,7 +15,7 @@ class DoMasterPing(Thread):
 
     def run(self):
         while True:
-            uri = "http://"+self.master_host+":"+self.master_port+"/pingFromSlave?id="+str(self.id)+"&conf="+str(self.conf)+"&keyphrase="+KEYPHRASE
+            uri = "http://"+self.master_host+":"+self.master_port+"/pingFromSlave?id="+str(self.id)+"&conf="+str(self.conf)+"&keyphrase="+configuration.KEYPHRASE
             r = requests.get(uri)
             #print("done ping request")
-            time.sleep(SLEEPING_TIME)
+            time.sleep(configuration.SLEEPING_TIME)
