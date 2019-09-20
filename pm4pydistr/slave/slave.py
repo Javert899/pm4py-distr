@@ -21,8 +21,12 @@ class Slave:
         self.master_port = str(parameters[PARAMETERS_MASTER_PORT])
         self.conf = parameters[PARAMETERS_CONF]
         if PARAMETERS_AUTO_HOST in parameters and parameters[PARAMETERS_AUTO_HOST] == "1":
+            #import netifaces as ni
             self.conf = str(uuid.uuid4())
             self.host = str(socket.gethostname())
+            #ni.ifaddresses('eth0')
+            #ip = ni.ifaddresses('eth0')[ni.AF_INET][0]['addr']
+            #self.master_host = str(ip)
         self.id = None
         self.ping_module = None
 
