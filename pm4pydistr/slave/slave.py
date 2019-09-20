@@ -7,6 +7,7 @@ from pathlib import Path
 from pm4py.objects.log.importer.parquet import factory as parquet_importer
 from pm4pydistr.slave.do_ms_ping import DoMasterPing
 import uuid
+import socket
 
 import os
 import shutil
@@ -21,6 +22,7 @@ class Slave:
         self.conf = parameters[PARAMETERS_CONF]
         if PARAMETERS_AUTO_HOST in parameters and parameters[PARAMETERS_AUTO_HOST] == "1":
             self.conf = str(uuid.uuid4())
+            self.host = str(socket.gethostname())
         self.id = None
         self.ping_module = None
 
