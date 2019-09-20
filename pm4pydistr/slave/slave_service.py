@@ -1,5 +1,5 @@
 from threading import Thread
-from pm4pydistr.configuration import KEYPHRASE
+from pm4pydistr import configuration
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pm4pydistr.slave.variable_container import SlaveVariableContainer
@@ -39,7 +39,7 @@ class SlaveSocketListener(Thread):
 @SlaveSocketListener.app.route("/synchronizeFiles", methods=["POST"])
 def synchronize_files():
     keyphrase = request.args.get('keyphrase', type=str)
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         try:
             json_content = json.loads(request.data)
         except:
@@ -62,7 +62,7 @@ def set_filters():
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         if not session in SlaveVariableContainer.slave.filters:
             SlaveVariableContainer.slave.filters[session] = {}
         SlaveVariableContainer.slave.filters[session][process] = eval(json.loads(request.data)["filters"])
@@ -89,7 +89,7 @@ def calculate_dfg():
     else:
         use_transition = False
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         filters = get_filters_per_session(process, session)
         parameters = {}
         parameters["filters"] = filters
@@ -118,7 +118,7 @@ def calculate_performance_dfg():
     else:
         use_transition = False
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         filters = get_filters_per_session(process, session)
         parameters = {}
         parameters["filters"] = filters
@@ -152,7 +152,7 @@ def calculate_composite_obj():
     else:
         use_transition = False
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         filters = get_filters_per_session(process, session)
         parameters = {}
         parameters["filters"] = filters
@@ -180,7 +180,7 @@ def calculate_end_activities():
     else:
         use_transition = False
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         filters = get_filters_per_session(process, session)
         parameters = {}
         parameters["filters"] = filters
@@ -206,7 +206,7 @@ def calculate_start_activities():
     else:
         use_transition = False
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         filters = get_filters_per_session(process, session)
         parameters = {}
         parameters["filters"] = filters
@@ -234,7 +234,7 @@ def calculate_attribute_values():
     else:
         use_transition = False
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         filters = get_filters_per_session(process, session)
         parameters = {}
         parameters["filters"] = filters
@@ -262,7 +262,7 @@ def calculate_attribute_names():
     else:
         use_transition = False
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         filters = get_filters_per_session(process, session)
         parameters = {}
         parameters["filters"] = filters
@@ -289,7 +289,7 @@ def calculate_log_summary():
     else:
         use_transition = False
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         filters = get_filters_per_session(process, session)
         parameters = {}
         parameters["filters"] = filters
@@ -317,7 +317,7 @@ def get_variants():
     else:
         use_transition = False
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         filters = get_filters_per_session(process, session)
         parameters = {}
         parameters["filters"] = filters
@@ -346,7 +346,7 @@ def get_cases():
     else:
         use_transition = False
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         filters = get_filters_per_session(process, session)
         parameters = {}
         parameters["filters"] = filters
@@ -375,7 +375,7 @@ def get_events():
     else:
         use_transition = False
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         filters = get_filters_per_session(process, session)
         parameters = {}
         parameters["filters"] = filters

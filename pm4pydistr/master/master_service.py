@@ -1,5 +1,5 @@
 from threading import Thread
-from pm4pydistr.configuration import KEYPHRASE
+from pm4pydistr import configuration
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from random import randrange
@@ -39,7 +39,7 @@ def register_slave():
     port = request.args.get('port', type=str)
     conf = request.args.get('conf', type=str)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         id = [randrange(0, 10), randrange(0, 10), randrange(0, 10), randrange(0, 10), randrange(0, 10),
               randrange(0, 10), randrange(0, 10)]
         id = MasterVariableContainer.dbmanager.insert_slave_into_db(conf, id)
@@ -55,7 +55,7 @@ def update_slave():
     port = request.args.get('port', type=str)
     conf = request.args.get('conf', type=str)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         MasterVariableContainer.master.slaves[id] = [conf, ip, port, time()]
         return jsonify({"id": id})
 
@@ -66,7 +66,7 @@ def ping_from_slave():
     id = request.args.get('id', type=str)
     conf = request.args.get('conf', type=str)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         MasterVariableContainer.master.slaves[id][3] = time()
         return jsonify({"id": id})
 
@@ -75,7 +75,7 @@ def ping_from_slave():
 def get_loading_status():
     keyphrase = request.args.get('keyphrase', type=str)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         finished_slaves = sum(t.slave_finished for t in MasterVariableContainer.assign_request_threads)
         return jsonify({"keyphrase_correct": True, "first_loading_done": MasterVariableContainer.first_loading_done,
                         "log_assignment_done": MasterVariableContainer.log_assignment_done, "slave_loading_requested": MasterVariableContainer.slave_loading_requested,
@@ -87,7 +87,7 @@ def get_loading_status():
 def do_log_assignment():
     keyphrase = request.args.get('keyphrase', type=str)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         MasterVariableContainer.master.do_assignment()
         MasterVariableContainer.master.make_slaves_load()
 
@@ -98,7 +98,7 @@ def do_log_assignment():
 def get_slaves_list():
     keyphrase = request.args.get('keyphrase', type=str)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         return jsonify({"slaves": MasterVariableContainer.master.slaves})
     return jsonify({})
 
@@ -106,7 +106,7 @@ def get_slaves_list():
 @MasterSocketListener.app.route("/getSublogsId", methods=["GET"])
 def get_sublogs_id():
     keyphrase = request.args.get('keyphrase', type=str)
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         return jsonify({"sublogs_id": MasterVariableContainer.master.sublogs_id})
     return jsonify({})
 
@@ -114,7 +114,7 @@ def get_sublogs_id():
 @MasterSocketListener.app.route("/getSublogsCorrespondence", methods=["GET"])
 def get_sublogs_correspondence():
     keyphrase = request.args.get('keyphrase', type=str)
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         return jsonify({"sublogs_correspondence": MasterVariableContainer.master.sublogs_correspondence})
     return jsonify({})
 
@@ -127,7 +127,7 @@ def set_filters():
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
     filters = json.loads(request.data)["filters"]
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         MasterVariableContainer.master.set_filter(session, process, filters, use_transition, no_samples)
     return jsonify({})
 
@@ -142,7 +142,7 @@ def calculate_dfg():
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         overall_dfg = MasterVariableContainer.master.calculate_dfg(session, process, use_transition, no_samples, attribute_key)
 
         return jsonify({"dfg": overall_dfg})
@@ -160,7 +160,7 @@ def calculate_performance_dfg():
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         overall_dfg = MasterVariableContainer.master.calculate_performance_dfg(session, process, use_transition, no_samples, attribute_key)
 
         return jsonify({"dfg": overall_dfg})
@@ -183,7 +183,7 @@ def calculate_composite_obj():
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         overall_obj = MasterVariableContainer.master.calculate_composite_obj(session, process, use_transition, no_samples, attribute_key, performance_required=performance_required)
 
         return jsonify({"obj": overall_obj})
@@ -199,7 +199,7 @@ def calculate_end_activities():
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         overall_ea = MasterVariableContainer.master.get_end_activities(session, process, use_transition, no_samples)
 
         return jsonify({"end_activities": overall_ea})
@@ -215,7 +215,7 @@ def calculate_start_activities():
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         overall_sa = MasterVariableContainer.master.get_start_activities(session, process, use_transition, no_samples)
 
         return jsonify({"start_activities": overall_sa})
@@ -232,7 +232,7 @@ def calculate_attribute_values():
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         values = MasterVariableContainer.master.get_attribute_values(session, process, use_transition, no_samples, attribute_key)
 
         return jsonify({"values": values})
@@ -249,7 +249,7 @@ def calculate_attributes_names():
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         names = MasterVariableContainer.master.get_attributes_names(session, process, use_transition, no_samples)
 
         return jsonify({"names": names})
@@ -265,7 +265,7 @@ def calculate_log_summary():
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         summary = MasterVariableContainer.master.get_log_summary(session, process, use_transition, no_samples)
 
         return jsonify({"summary": summary})
@@ -282,7 +282,7 @@ def get_variants():
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
     max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         variants = MasterVariableContainer.master.get_variants(session, process, use_transition, no_samples, max_ret_items=max_no_ret_items)
 
         return jsonify(variants)
@@ -299,7 +299,7 @@ def get_cases():
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
     max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         cases = MasterVariableContainer.master.get_cases(session, process, use_transition, no_samples, max_ret_items=max_no_ret_items)
 
         return jsonify(cases)
@@ -316,7 +316,7 @@ def get_events():
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
-    if keyphrase == KEYPHRASE:
+    if keyphrase == configuration.KEYPHRASE:
         events = MasterVariableContainer.master.get_events(session, process, use_transition, no_samples, case_id)
 
         return jsonify({"events": events})

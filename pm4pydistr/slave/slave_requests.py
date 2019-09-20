@@ -1,7 +1,7 @@
 import requests
 import json
 
-from pm4pydistr.configuration import KEYPHRASE
+from pm4pydistr import configuration
 
 
 class SlaveRequests:
@@ -17,7 +17,7 @@ class SlaveRequests:
 
     def register_to_webservice(self):
         r = requests.get(
-            "http://" + self.master_host + ":" + self.master_port + "/registerSlave?keyphrase=" + KEYPHRASE + "&ip=" + self.host + "&port=" + self.port + "&conf=" + self.conf)
+            "http://" + self.master_host + ":" + self.master_port + "/registerSlave?keyphrase=" + configuration.KEYPHRASE + "&ip=" + self.host + "&port=" + self.port + "&conf=" + self.conf)
 
         response = json.loads(r.text)
         self.id = response['id']
