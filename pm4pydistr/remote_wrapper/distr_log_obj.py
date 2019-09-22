@@ -18,6 +18,9 @@ class DistrLogObj(object):
     def reset_filters(self, parameters=None):
         raise Exception("not implemented")
 
+    def set_filters(self, parameters=None):
+        raise Exception("not implemented")
+
     def calculate_dfg(self, parameters=None):
         raise Exception("not implemented")
 

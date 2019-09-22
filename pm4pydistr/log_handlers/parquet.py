@@ -31,7 +31,7 @@ def get_columns_to_import(filters, columns, use_transition=False):
             columns.add(DEFAULT_TIMESTAMP_KEY)
         for f in filters:
             if type(f[1]) is list:
-                columns.add(f[0])
+                columns.add(f[1][0])
     if use_transition:
         columns.add(DEFAULT_NAME_KEY)
         columns.add(DEFAULT_TRANSITION_KEY)
@@ -514,7 +514,7 @@ def get_cases(path, log_name, managed_logs, parameters=None):
             stats = case_statistics.get_cases_description(df)
             c_list = []
             for x, y in stats.items():
-                c_list.append({"case_id": x, "caseDuration": y["caseDuration"], "startTime": y["startTime"], "endTime": y["endTime"]})
+                c_list.append({"caseId": x, "caseDuration": y["caseDuration"], "startTime": y["startTime"], "endTime": y["endTime"]})
 
             cases_list = sorted(cases_list + c_list, key=lambda x: x["caseDuration"], reverse=True)
             cases_list = cases_list[:min(len(cases_list), no_ret_elements)]

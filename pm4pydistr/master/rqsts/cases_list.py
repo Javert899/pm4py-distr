@@ -13,13 +13,10 @@ class CasesListRequest(BasicMasterRequest):
         self.use_transition = use_transition
         self.no_samples = no_samples
         self.max_ret_items = DEFAULT_MAX_NO_RET_ITEMS
-        self.requested_variant = None
         BasicMasterRequest.__init__(self, session, target_host, target_port, use_transition, no_samples, content)
 
     def run(self):
         uri = "http://" + self.target_host + ":" + self.target_port + "/getCases?keyphrase=" + KEYPHRASE + "&process=" + str(
             self.content) + "&session=" + str(self.session) + "&use_transition=" + str(self.use_transition) + "&no_samples="+str(self.no_samples) + "&" + PARAMETER_NUM_RET_ITEMS + "="+str(self.max_ret_items)
-        if self.requested_variant is not None:
-            pass
         r = requests.get(uri)
         self.content = json.loads(r.text)
