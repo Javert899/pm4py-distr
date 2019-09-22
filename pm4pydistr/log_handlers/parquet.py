@@ -31,7 +31,7 @@ def get_columns_to_import(filters, columns, use_transition=False):
             columns.add(DEFAULT_TIMESTAMP_KEY)
         for f in filters:
             if type(f[1]) is list:
-                columns.add(f[0])
+                columns.add(f[1][0])
     if use_transition:
         columns.add(DEFAULT_NAME_KEY)
         columns.add(DEFAULT_TRANSITION_KEY)
