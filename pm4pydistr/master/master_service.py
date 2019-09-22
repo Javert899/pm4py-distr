@@ -126,7 +126,10 @@ def set_filters():
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
-    filters = json.loads(request.data)["filters"]
+    try:
+        filters = json.loads(request.data)["filters"]
+    except:
+        filters = json.loads(request.data.decode('utf-8'))["filters"]
     if keyphrase == configuration.KEYPHRASE:
         MasterVariableContainer.master.set_filter(session, process, filters, use_transition, no_samples)
     return jsonify({})
