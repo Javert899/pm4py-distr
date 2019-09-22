@@ -100,6 +100,12 @@ class ClassicDistrLogObject(DistrLogObj):
         r = requests.post(url, json={"filters": json.dumps(self.filters)})
         return r.text
 
+    def set_filters(self, filters, parameters=None):
+        self.filters = filters
+        url = self.get_url("setFilters", parameters=parameters)
+        r = requests.post(url, json={"filters": json.dumps(self.filters)})
+        return r.text
+
     def calculate_dfg(self, parameters=None):
         url = self.get_url("calculateDfg", parameters=parameters)
         r = requests.get(url)
