@@ -16,6 +16,10 @@ from pm4pydistr.master.rqsts.comp_obj_calc_request import CompObjCalcRequest
 from pm4pydistr.master.rqsts.variants import VariantsRequest
 from pm4pydistr.master.rqsts.cases_list import CasesListRequest
 from pm4pydistr.master.rqsts.events import EventsRequest
+from pm4pydistr.master.rqsts.events_dotted_request import EventsDottedRequest
+from pm4pydistr.master.rqsts.events_per_time_request import EventsPerTimeRequest
+from pm4pydistr.master.rqsts.case_duration_request import CaseDurationRequest
+from pm4pydistr.master.rqsts.numeric_attribute_request import NumericAttributeRequest
 from pathlib import Path
 from random import randrange
 import os
@@ -439,3 +443,62 @@ class Master:
                 events = ev
 
         return events
+
+
+    def get_events_per_dotted(self, session, process, use_transition, no_samples, attribute1, attribute2, attribute3, max_ret_items=10000):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+        for thread in threads:
+            thread.join()
+
+        return None, None, None, None
+
+
+    def get_events_per_time(self, session, process, use_transition, no_samples, max_ret_items=100000):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+        for thread in threads:
+            thread.join()
+
+        return None
+
+
+    def get_case_duration(self, session, process, use_transition, no_samples, max_ret_items=100000):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+        for thread in threads:
+            thread.join()
+
+        return None
+
+    def get_numeric_attribute_values(self, session, process, use_transition, no_samples, max_ret_items=100000):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+        for thread in threads:
+            thread.join()
+
+        return None
