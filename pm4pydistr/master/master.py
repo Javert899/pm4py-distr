@@ -27,6 +27,7 @@ import numpy as np
 from collections import Counter
 from pm4pydistr.master.session_checker import SessionChecker
 from pm4pydistr.configuration import DEFAULT_MAX_NO_RET_ITEMS
+from pm4py.util import points_subset
 
 
 class Master:
@@ -454,51 +455,106 @@ class Master:
             slave_host = self.slaves[slave][1]
             slave_port = str(self.slaves[slave][2])
 
+            m = EventsDottedRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.max_ret_items = max_ret_items
+            m.attribute1 = attribute1
+            m.attribute2 = attribute2
+            m.attribute3 = attribute3
+
+            m.start()
+
+            threads.append(m)
+
+            break
+
         for thread in threads:
             thread.join()
 
-        return None, None, None, None
+            return thread.content
 
 
     def get_events_per_time(self, session, process, use_transition, no_samples, max_ret_items=100000):
         all_slaves = list(self.slaves.keys())
 
         threads = []
+        points = []
 
         for slave in all_slaves:
             slave_host = self.slaves[slave][1]
             slave_port = str(self.slaves[slave][2])
 
+            m = EventsPerTimeRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.max_ret_items = max_ret_items
+
+            m.start()
+
+            threads.append(m)
+
         for thread in threads:
             thread.join()
 
-        return None
+            points = points + thread.content["points"]
+
+        points = sorted(points)
+        if len(points) > max_ret_items:
+            points = points_subset.pick_chosen_points_list(max_ret_items, points)
+
+        return points
 
 
     def get_case_duration(self, session, process, use_transition, no_samples, max_ret_items=100000):
         all_slaves = list(self.slaves.keys())
 
         threads = []
+        points = []
 
         for slave in all_slaves:
             slave_host = self.slaves[slave][1]
             slave_port = str(self.slaves[slave][2])
 
+            m = CaseDurationRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.max_ret_items = max_ret_items
+
+            m.start()
+
+            threads.append(m)
+
         for thread in threads:
             thread.join()
 
-        return None
+            points = points + thread.content["points"]
 
-    def get_numeric_attribute_values(self, session, process, use_transition, no_samples, max_ret_items=100000):
+        points = sorted(points)
+        if len(points) > max_ret_items:
+            points = points_subset.pick_chosen_points_list(max_ret_items, points)
+
+        return points
+
+    def get_numeric_attribute_values(self, session, process, use_transition, no_samples, attribute_key, max_ret_items=100000):
         all_slaves = list(self.slaves.keys())
 
         threads = []
+        points = []
 
         for slave in all_slaves:
             slave_host = self.slaves[slave][1]
             slave_port = str(self.slaves[slave][2])
 
+            m = NumericAttributeRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.max_ret_items = max_ret_items
+            m.attribute_key = attribute_key
+
+            m.start()
+
+            threads.append(m)
+
         for thread in threads:
             thread.join()
 
-        return None
+            points = points + thread.content["points"]
+
+        points = sorted(points)
+        if len(points) > max_ret_items:
+            points = points_subset.pick_chosen_points_list(max_ret_items, points)
+
+        return points

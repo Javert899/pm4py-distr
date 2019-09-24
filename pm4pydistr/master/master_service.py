@@ -342,7 +342,7 @@ def get_events_per_dotted():
     attribute3 = request.args.get("attribute3", type=str, default=None)
 
     if keyphrase == configuration.KEYPHRASE:
-        ret = MasterVariableContainer.master.get_events_per_dotted(session, process, use_transition, no_samples, attribute1, attribute2, attribute3)
+        ret = MasterVariableContainer.master.get_events_per_dotted(session, process, use_transition, no_samples, attribute1, attribute2, attribute3, max_ret_items=max_no_ret_items)
 
         return jsonify({"traces": ret[0], "types": ret[1], "attributes": ret[2], "third_unique_values": ret[3]})
 
@@ -360,7 +360,7 @@ def get_events_per_time():
     max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
 
     if keyphrase == configuration.KEYPHRASE:
-        points = MasterVariableContainer.master.get_events_per_time(session, process, use_transition, no_samples)
+        points = MasterVariableContainer.master.get_events_per_time(session, process, use_transition, no_samples, max_ret_items=max_no_ret_items)
 
         return jsonify({"points": points})
 
@@ -378,7 +378,7 @@ def get_case_duration():
     max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
 
     if keyphrase == configuration.KEYPHRASE:
-        points = MasterVariableContainer.master.get_case_duration(session, process, use_transition, no_samples)
+        points = MasterVariableContainer.master.get_case_duration(session, process, use_transition, no_samples, max_ret_items=max_no_ret_items)
 
         return jsonify({"points": points})
 
@@ -398,7 +398,7 @@ def get_numeric_attribute_values():
     attribute_key = request.args.get("attribute_key", type=str)
 
     if keyphrase == configuration.KEYPHRASE:
-        points = MasterVariableContainer.master.get_case_duration(session, process, use_transition, no_samples, attribute_key)
+        points = MasterVariableContainer.master.get_numeric_attribute_values(session, process, use_transition, no_samples, attribute_key, max_ret_items=max_no_ret_items)
 
         return jsonify({"points": points})
 
