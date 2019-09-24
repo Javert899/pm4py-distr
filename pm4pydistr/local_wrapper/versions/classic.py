@@ -4,6 +4,7 @@ from pm4py.objects.log.importer.parquet import factory as parquet_factory
 from pm4py.util import constants as pm4py_constants
 from pathlib import Path
 from pm4py.algo.filtering.common.attributes import attributes_common
+from pm4py.statistics.traces.common import case_duration as case_duration_commons
 from copy import deepcopy
 from datetime import datetime
 
@@ -201,8 +202,22 @@ class ClassicDistrLogObject(LocalDistrLogObj):
 
         x, y = attributes_common.get_kde_date_attribute(ret)
 
-        return {"x": x, "y": y}
+        return x, y
 
+    def get_case_duration(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        list_logs = self.get_list_logs()
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
+        parameters["filters"] = self.filters
+
+        ret = parquet_handler.get_case_duration(".", self.distr_log_path, list_logs, parameters=parameters)
+
+        x, y = case_duration_commons.get_kde_caseduration(ret)
+
+        return x, y
 
 
 def apply(path, parameters=None):
