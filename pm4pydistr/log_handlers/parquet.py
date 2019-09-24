@@ -30,6 +30,7 @@ def get_columns_to_import(filters, columns, use_transition=False):
         fkeys = set(f[0] for f in filters)
         if "start_activities" in fkeys or "end_activities" in fkeys or "variants" in fkeys:
             columns.add(DEFAULT_NAME_KEY)
+            columns.add(CASE_CONCEPT_NAME)
         if "timestamp_events" in fkeys or "timestamp_trace_containing" in fkeys or "timestamp_trace_intersecting" in fkeys or "timestamp_trace_intersecting" in fkeys:
             columns.add(DEFAULT_TIMESTAMP_KEY)
         for f in filters:
