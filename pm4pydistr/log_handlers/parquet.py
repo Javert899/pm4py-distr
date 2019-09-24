@@ -31,8 +31,9 @@ def get_columns_to_import(filters, columns, use_transition=False):
         if "start_activities" in fkeys or "end_activities" in fkeys or "variants" in fkeys:
             columns.add(DEFAULT_NAME_KEY)
             columns.add(CASE_CONCEPT_NAME)
-        if "timestamp_events" in fkeys or "timestamp_trace_containing" in fkeys or "timestamp_trace_intersecting" in fkeys or "timestamp_trace_intersecting" in fkeys:
+        if "timestamp_events" in fkeys or "timestamp_trace_containing" in fkeys or "timestamp_trace_intersecting" in fkeys or "timestamp_trace_intersecting" in fkeys or "case_performance_filter" in fkeys:
             columns.add(DEFAULT_TIMESTAMP_KEY)
+            columns.add(CASE_CONCEPT_NAME)
         for f in filters:
             if type(f[1]) is list:
                 columns.add(f[1][0])
@@ -176,6 +177,8 @@ def calculate_process_schema_composite_object(path, log_name, managed_logs, para
             count = count + 1
             df = parquet_importer.apply(pq, parameters={"columns": columns})
 
+            if DEFAULT_TIMESTAMP_KEY in columns:
+                df[DEFAULT_TIMESTAMP_KEY] = pd.to_datetime(df[DEFAULT_TIMESTAMP_KEY], utc=True)
             if use_transition:
                 df = insert_classifier(df)
             if filters:
