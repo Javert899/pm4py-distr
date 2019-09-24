@@ -175,7 +175,7 @@ class ClassicDistrLogObject(LocalDistrLogObj):
 
         return events
 
-    def get_events_per_dotted(self, parameters=None):
+    def get_events_per_dotted(self, attribute1, attribute2, attribute3, parameters=None):
         if parameters is None:
             parameters = {}
         list_logs = self.get_list_logs()
@@ -183,6 +183,9 @@ class ClassicDistrLogObject(LocalDistrLogObj):
             if key not in parameters:
                 parameters[key] = self.init_parameters[key]
         parameters["filters"] = self.filters
+        parameters["attribute1"] = attribute1
+        parameters["attribute2"] = attribute2
+        parameters["attribute3"] = attribute3
 
         ret = parquet_handler.get_events_per_dotted(".", self.distr_log_path, list_logs, parameters=parameters)
 
@@ -219,6 +222,21 @@ class ClassicDistrLogObject(LocalDistrLogObj):
 
         return x, y
 
+    def get_numeric_attribute(self, attribute_key, parameters=None):
+        if parameters is None:
+            parameters = {}
+        list_logs = self.get_list_logs()
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
+        parameters["filters"] = self.filters
+        parameters["attribute_key"] = attribute_key
+
+        ret = parquet_handler.get_case_duration(".", self.distr_log_path, list_logs, parameters=parameters)
+
+        x, y = attributes_common.get_kde_numeric_attribute(ret)
+
+        return x, y
 
 def apply(path, parameters=None):
     if parameters is None:
