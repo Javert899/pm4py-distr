@@ -1,4 +1,6 @@
 from pm4pydistr.remote_wrapper.distr_log_obj import DistrLogObj
+from pm4py.algo.filtering.common.attributes import attributes_common
+from pm4py.statistics.traces.common import case_duration as case_duration_commons
 from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
 from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
 from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS
@@ -6,7 +8,7 @@ import requests
 import json
 import time
 from pm4py.util import constants
-
+from datetime import datetime
 
 class ClassicDistrLogObject(DistrLogObj):
     def __init__(self, hostname, port, keyphrase, log_name, parameters=None):
@@ -70,14 +72,17 @@ class ClassicDistrLogObject(DistrLogObj):
             self.port) + "/" + service + "?keyphrase=" + self.keyphrase + "&process=" + self.log_name + "&session=" + str(
             self.session) + "&use_transition="+str(use_transition) + "&no_samples=" + str(no_samples)
 
-        if constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY in parameters:
-            stru = stru + "&attribute_key=" + str(parameters[constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY])
-
-        if "performance_required" in parameters:
-            stru = stru + "&performance_required=" + str(parameters["performance_required"])
-
-        if PARAMETER_NUM_RET_ITEMS in parameters:
-            stru = stru + "&"+PARAMETER_NUM_RET_ITEMS+"="+str(parameters[PARAMETER_NUM_RET_ITEMS])
+        for parameter in parameters:
+            if parameter == constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY:
+                stru = stru + "&attribute_key=" + str(parameters[constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY])
+            elif parameter == "attribute_key":
+                stru = stru + "&attribute_key=" + str(parameters["attribute_key"])
+            elif parameter == "performance_required":
+                stru = stru + "&performance_required=" + str(parameters["performance_required"])
+            elif PARAMETER_NUM_RET_ITEMS in parameters:
+                stru = stru + "&" + PARAMETER_NUM_RET_ITEMS + "=" + str(parameters[PARAMETER_NUM_RET_ITEMS])
+            elif parameter.startswith("attribute"):
+                stru = stru + "&" + str(parameter) + "=" + str(parameters[parameter])
 
         return stru
 
@@ -208,3 +213,53 @@ class ClassicDistrLogObject(DistrLogObj):
         ret_text = r.text
         ret_json = json.loads(ret_text)
         return sorted(list(ret_json["sublogs_id"].keys()))
+
+    def get_events_per_dotted(self, attribute1, attribute2, attribute3, parameters=None):
+        if parameters is None:
+            parameters = {}
+        url = self.get_url("getEventsPerDotted", parameters={"attribute1": attribute1, "attribute2": attribute2, "attribute3": attribute3})
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+
+        return ret_json
+
+    def get_events_per_time(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        url = self.get_url("getEventsPerTime")
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        ret = ret_json["points"]
+        ret = [datetime.fromtimestamp(x) for x in ret]
+        x, y = attributes_common.get_kde_date_attribute(ret)
+
+        return x, y
+
+    def get_case_duration(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        url = self.get_url("getCaseDuration")
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        ret = ret_json["points"]
+
+        x, y = case_duration_commons.get_kde_caseduration(ret)
+
+        return x, y
+
+
+    def get_numeric_attribute(self, attribute_key, parameters=None):
+        if parameters is None:
+            parameters = {}
+        url = self.get_url("getNumericAttributeValues", parameters={"attribute_key": attribute_key})
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        ret = ret_json["points"]
+
+        x, y = attributes_common.get_kde_numeric_attribute(ret)
+
+        return x, y
