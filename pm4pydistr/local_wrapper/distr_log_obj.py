@@ -47,3 +47,6 @@ class LocalDistrLogObj(object):
 
     def get_events_per_dotted(self, parameters=None):
         raise Exception("not implemented")
+
+    def get_events_per_time(self, parameters=None):
+        raise Exception("not implemented")
