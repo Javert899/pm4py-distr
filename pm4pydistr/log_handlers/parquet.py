@@ -13,6 +13,9 @@ from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_MAX_NO_RET
 from pm4pydistr.log_handlers.parquet_filtering import factory as parquet_filtering_factory
 import pyarrow.parquet as pqq
 from pm4py.statistics.traces.pandas import case_statistics
+import pandas as pd
+from pm4py.util import points_subset
+from pm4py.algo.filtering.pandas.attributes import attributes_filter
 
 from pathlib import Path
 
@@ -569,3 +572,238 @@ def get_events(path, log_name, managed_logs, parameters=None):
             break
 
     return ret
+
+
+def get_events_per_dotted(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
+    use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
+    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    filters = parameters[FILTERS] if FILTERS in parameters else []
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
+
+    max_no_cases = parameters["max_no_cases"] if "max_no_cases" in parameters else 10000
+
+    attributes = ["@@event_index", parameters["attribute1"], parameters["attribute2"]]
+    if parameters["attribute3"] is not None:
+        attributes.append(parameters["attribute3"])
+    attributes1 = list(set([CASE_CONCEPT_NAME] + [x for x in list(set(attributes)) if not x.startswith("@@")]))
+
+    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_TIMESTAMP_KEY] + attributes1, use_transition=use_transition)
+
+    folder = os.path.join(path, log_name)
+
+    parquet_list = parquet_importer.get_list_parquet(folder)
+
+    df_list = []
+    no_cases = 0
+    count = 0
+    for index, pq in enumerate(parquet_list):
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            count = count + 1
+
+            df = parquet_importer.apply(pq, parameters={"columns": columns})
+
+            if use_transition and filters:
+                df = insert_classifier(df)
+
+            if filters:
+                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+
+            df = df[attributes1].dropna()
+
+            no_cases = no_cases + df[CASE_CONCEPT_NAME].nunique()
+
+            df_list.append(df)
+
+            if no_cases >= max_no_cases:
+                break
+
+            if count >= no_samples:
+                break
+
+    df = pd.concat(df_list)
+    df["@@event_index"] = df.index
+    df = df.sort_values([DEFAULT_TIMESTAMP_KEY, "@@event_index"])
+    df["@@case_index"] = df.groupby(CASE_CONCEPT_NAME).ngroup()
+
+    stream = df.to_dict('r')
+    stream = sorted(stream, key=lambda x: (x[attributes[2]], x[attributes[1]], x[attributes[0]]))
+    third_unique_values = []
+    if len(attributes) > 3:
+        third_unique_values = sorted(list(set(s[attributes[3]] for s in stream)))
+    types = {}
+    if stream:
+        for attr in attributes:
+            val = stream[0][attr]
+            types[attr] = str(type(val))
+            if type(val) is pd._libs.tslibs.timestamps.Timestamp:
+                for ev in stream:
+                    ev[attr] = ev[attr].timestamp()
+    traces = []
+    if third_unique_values:
+        for index, v in enumerate(third_unique_values):
+            traces.append({})
+            for index2, attr in enumerate(attributes):
+                if index2 < len(attributes) - 1:
+                    traces[-1][attr] = [s[attr] for s in stream if s[attributes[3]] == v]
+    else:
+        third_unique_values.append("UNIQUE")
+        traces.append({})
+        for index2, attr in enumerate(attributes):
+            traces[-1][attr] = [s[attr] for s in stream]
+
+    return traces, types, attributes, third_unique_values
+
+
+def get_events_per_time(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
+    use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
+    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    filters = parameters[FILTERS] if FILTERS in parameters else []
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
+
+    max_no_of_points_to_sample = parameters[
+        "max_no_of_points_to_sample"] if "max_no_of_points_to_sample" in parameters else 100000
+
+    folder = os.path.join(path, log_name)
+    columns = get_columns_to_import(filters, [DEFAULT_TIMESTAMP_KEY], use_transition=use_transition)
+
+    parquet_list = parquet_importer.get_list_parquet(folder)
+
+    overall_list = []
+    count = 0
+    for index, pq in enumerate(parquet_list):
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            count = count + 1
+
+        df = parquet_importer.apply(pq, parameters={"columns": columns}).dropna()
+        if use_transition and filters:
+            df = insert_classifier(df)
+
+        if filters:
+            df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+
+        if len(df) > max_no_of_points_to_sample:
+            df = df.sample(n=max_no_of_points_to_sample)
+
+        date_values = [x.timestamp() for x in list(df[DEFAULT_TIMESTAMP_KEY])]
+        overall_list = overall_list + date_values
+
+        if count >= no_samples:
+            break
+
+    overall_list = sorted(overall_list)
+    if len(overall_list) > max_no_of_points_to_sample:
+        overall_list = points_subset.pick_chosen_points_list(max_no_of_points_to_sample, overall_list)
+
+    return overall_list
+
+
+def get_case_duration(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
+    use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
+    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    filters = parameters[FILTERS] if FILTERS in parameters else []
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
+
+    max_no_of_points_to_sample = parameters[
+        "max_no_of_points_to_sample"] if "max_no_of_points_to_sample" in parameters else 100000
+
+    folder = os.path.join(path, log_name)
+    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_TIMESTAMP_KEY], use_transition=use_transition)
+
+    parquet_list = parquet_importer.get_list_parquet(folder)
+
+    overall_list = []
+    count = 0
+    for index, pq in enumerate(parquet_list):
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            count = count + 1
+
+        df = parquet_importer.apply(pq, parameters={"columns": columns}).dropna()
+        if use_transition and filters:
+            df = insert_classifier(df)
+
+        if filters:
+            df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+
+        cases = case_statistics.get_cases_description(df, parameters=parameters)
+        duration_values = [x["caseDuration"] for x in cases.values()]
+
+        overall_list = overall_list + duration_values
+
+        if count >= no_samples:
+            break
+
+    overall_list = sorted(overall_list)
+    if len(overall_list) > max_no_of_points_to_sample:
+        overall_list = points_subset.pick_chosen_points_list(max_no_of_points_to_sample, overall_list)
+
+    return overall_list
+
+
+def get_numeric_attribute_values(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
+    use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
+    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    filters = parameters[FILTERS] if FILTERS in parameters else []
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
+
+    max_no_of_points_to_sample = parameters[
+        "max_no_of_points_to_sample"] if "max_no_of_points_to_sample" in parameters else 100000
+
+    attribute_key = parameters["attribute_key"]
+
+    folder = os.path.join(path, log_name)
+    columns = get_columns_to_import(filters, [attribute_key], use_transition=use_transition)
+
+    parquet_list = parquet_importer.get_list_parquet(folder)
+
+    overall_list = []
+    count = 0
+    for index, pq in enumerate(parquet_list):
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            count = count + 1
+
+        df = parquet_importer.apply(pq, parameters={"columns": columns}).dropna()
+        if use_transition and filters:
+            df = insert_classifier(df)
+
+        if filters:
+            df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+
+        if len(df) > max_no_of_points_to_sample:
+            df = df.sample(n=max_no_of_points_to_sample)
+
+        values = list(df[attribute_key])
+
+        overall_list = overall_list + values
+
+        if count >= no_samples:
+            break
+
+    overall_list = sorted(overall_list)
+    if len(overall_list) > max_no_of_points_to_sample:
+        overall_list = points_subset.pick_chosen_points_list(max_no_of_points_to_sample, overall_list)
+
+    return overall_list

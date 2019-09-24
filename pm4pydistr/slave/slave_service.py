@@ -65,7 +65,10 @@ def set_filters():
     if keyphrase == configuration.KEYPHRASE:
         if not session in SlaveVariableContainer.slave.filters:
             SlaveVariableContainer.slave.filters[session] = {}
-        SlaveVariableContainer.slave.filters[session][process] = eval(json.loads(request.data)["filters"])
+        try:
+            SlaveVariableContainer.slave.filters[session][process] = eval(json.loads(request.data)["filters"])
+        except:
+            SlaveVariableContainer.slave.filters[session][process] = eval(json.loads(request.data.decode('utf-8'))["filters"])
     return jsonify({})
 
 def get_filters_per_session(process, session):
@@ -387,3 +390,133 @@ def get_events():
 
         return jsonify({"events": events})
     return jsonify({"events": {}})
+
+
+@SlaveSocketListener.app.route("/getEventsPerDotted", methods=["GET"])
+def get_events_per_dotted():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+    attribute1 = request.args.get("attribute1", type=str)
+    attribute2 = request.args.get("attribute2", type=str)
+    attribute3 = request.args.get("attribute3", type=str, default=None)
+    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=10000)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
+
+    if keyphrase == configuration.KEYPHRASE:
+        filters = get_filters_per_session(process, session)
+        parameters = {}
+        parameters["filters"] = filters
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+        parameters["attribute1"] = attribute1
+        parameters["attribute2"] = attribute2
+        parameters["attribute3"] = attribute3
+        parameters["max_no_cases"] = max_no_ret_items
+
+        returned_dict = parquet_handler.get_events_per_dotted(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
+
+        return jsonify(returned_dict)
+    return jsonify({})
+
+
+@SlaveSocketListener.app.route("/getEventsPerTime", methods=["GET"])
+def get_events_per_time():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=100000)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
+
+    if keyphrase == configuration.KEYPHRASE:
+        filters = get_filters_per_session(process, session)
+        parameters = {}
+        parameters["filters"] = filters
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+        parameters[PARAMETER_NUM_RET_ITEMS] = max_no_ret_items
+        parameters["max_no_of_points_to_sample"] = max_no_ret_items
+
+        returned_list = parquet_handler.get_events_per_time(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
+
+        return jsonify({"points": returned_list})
+
+    return jsonify({})
+
+
+@SlaveSocketListener.app.route("/getCaseDuration", methods=["GET"])
+def get_case_duration():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=100000)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
+
+    if keyphrase == configuration.KEYPHRASE:
+        filters = get_filters_per_session(process, session)
+        parameters = {}
+        parameters["filters"] = filters
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+        parameters[PARAMETER_NUM_RET_ITEMS] = max_no_ret_items
+        parameters["max_no_of_points_to_sample"] = max_no_ret_items
+
+        returned_list = parquet_handler.get_case_duration(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
+
+        return jsonify({"points": returned_list})
+
+    return jsonify({})
+
+
+@SlaveSocketListener.app.route("/getNumericAttributeValues", methods=["GET"])
+def get_numeric_attribute_values():
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=100000)
+    attribute_key = request.args.get("attribute_key", type=str)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
+
+    if keyphrase == configuration.KEYPHRASE:
+        filters = get_filters_per_session(process, session)
+        parameters = {}
+        parameters["filters"] = filters
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+        parameters[PARAMETER_NUM_RET_ITEMS] = max_no_ret_items
+        parameters["max_no_of_points_to_sample"] = max_no_ret_items
+        parameters["attribute_key"] = attribute_key
+
+        returned_list = parquet_handler.get_numeric_attribute_values(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
+
+        return jsonify({"points": returned_list})
+
+    return jsonify({})

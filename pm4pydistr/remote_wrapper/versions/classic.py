@@ -208,3 +208,15 @@ class ClassicDistrLogObject(DistrLogObj):
         ret_text = r.text
         ret_json = json.loads(ret_text)
         return sorted(list(ret_json["sublogs_id"].keys()))
+
+    def get_events_per_dotted(self, attribute1, attribute2, attribute3, parameters=None):
+        raise Exception("not implemented")
+
+    def get_events_per_time(self, parameters=None):
+        raise Exception("not implemented")
+
+    def get_case_duration(self, parameters=None):
+        raise Exception("not implemented")
+
+    def get_numeric_attribute(self, attribute_key, parameters=None):
+        raise Exception("not implemented")
