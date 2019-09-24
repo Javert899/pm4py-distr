@@ -774,7 +774,7 @@ def get_numeric_attribute_values(path, log_name, managed_logs, parameters=None):
     attribute_key = parameters["attribute_key"]
 
     folder = os.path.join(path, log_name)
-    columns = get_columns_to_import(filters, [attribute], use_transition=use_transition)
+    columns = get_columns_to_import(filters, [attribute_key], use_transition=use_transition)
 
     parquet_list = parquet_importer.get_list_parquet(folder)
 
