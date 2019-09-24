@@ -172,6 +172,18 @@ class ClassicDistrLogObject(LocalDistrLogObj):
 
         return events
 
+    def get_events_per_dotted(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        list_logs = self.get_list_logs()
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
+        parameters["filters"] = self.filters
+
+        ret = parquet_handler.get_events_per_dotted(".", self.distr_log_path, list_logs, parameters=parameters)
+
+        return ret
 
 def apply(path, parameters=None):
     if parameters is None:
