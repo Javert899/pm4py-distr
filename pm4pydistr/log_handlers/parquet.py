@@ -80,6 +80,26 @@ def get_filtered_parquet(path, columns, filters, use_transition=False, force_cla
 
     return df
 
+def do_caching(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
+    folder = os.path.join(path, log_name)
+    parquet_list = parquet_importer.get_list_parquet(folder)
+    count = 0
+
+    for index, pq in enumerate(parquet_list):
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            count = count + 1
+
+            df = load_parquet_from_path(pq, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY, DEFAULT_TIMESTAMP_KEY], [], use_transition=False, force_classifier_insertion=True, force_timestamp_conversion=True)
+            PARQUET_CACHE[pq] = df
+
+            if count >= no_samples:
+                break
+
 def calculate_dfg(path, log_name, managed_logs, parameters=None):
     if parameters is None:
         parameters = {}
