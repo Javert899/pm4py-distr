@@ -172,6 +172,9 @@ class ClassicDistrLogObject(DistrLogObj):
         return ret_json["summary"]
 
     def get_attribute_values(self, attribute_key, parameters=None):
+        if parameters is None:
+            parameters = {}
+        parameters["attribute_key"] = attribute_key
         url = self.get_url("getAttributeValues", parameters=parameters)
         r = requests.get(url)
         ret_text = r.text

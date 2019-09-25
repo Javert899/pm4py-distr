@@ -15,13 +15,11 @@ import pyarrow.parquet as pqq
 from pm4py.statistics.traces.pandas import case_statistics
 import pandas as pd
 from pm4py.util import points_subset
-from pm4py.algo.filtering.pandas.attributes import attributes_filter
 
 from pathlib import Path
 
+PARQUET_CACHE = {}
 FILTERS = "filters"
-ALLOWED_FILTERS = {"end_activities", "start_activities", "variants"}
-
 
 def get_columns_to_import(filters, columns, use_transition=False):
     columns = set(columns)
@@ -37,6 +35,9 @@ def get_columns_to_import(filters, columns, use_transition=False):
         for f in filters:
             if type(f[1]) is list:
                 columns.add(f[1][0])
+            if "cas" in f[0] or "trac" in f[0] or "var" in f[0]:
+                columns.add(CASE_CONCEPT_NAME)
+                columns.add(DEFAULT_NAME_KEY)
     if use_transition:
         columns.add(DEFAULT_NAME_KEY)
         columns.add(DEFAULT_TRANSITION_KEY)
@@ -45,6 +46,38 @@ def get_columns_to_import(filters, columns, use_transition=False):
 
 def insert_classifier(df):
     df["@@classifier"] = df[DEFAULT_NAME_KEY] + "+" + df[DEFAULT_TRANSITION_KEY]
+    return df
+
+def load_parquet_from_path(path, columns, filters, use_transition=False, force_classifier_insertion=False, force_timestamp_conversion=False, parameters=None):
+    if parameters is None:
+        parameters = {}
+    if columns is None:
+        columns = {}
+        df = parquet_importer.apply(path)
+    else:
+        df = parquet_importer.apply(path, parameters={"columns": columns})
+
+    if DEFAULT_TIMESTAMP_KEY in columns and (filters or force_timestamp_conversion):
+        df[DEFAULT_TIMESTAMP_KEY] = pd.to_datetime(df[DEFAULT_TIMESTAMP_KEY], utc=True)
+
+    if use_transition:
+        df = insert_classifier(df)
+    elif force_classifier_insertion:
+        df["@@classifier"] = df[DEFAULT_NAME_KEY]
+
+    return df
+
+def get_filtered_parquet(path, columns, filters, use_transition=False, force_classifier_insertion=False, parameters=None):
+    if parameters is None:
+        parameters = {}
+    if path in PARQUET_CACHE and not use_transition and set(columns).issubset(set([CASE_CONCEPT_NAME, DEFAULT_TIMESTAMP_KEY, DEFAULT_NAME_KEY])):
+        df = PARQUET_CACHE[path]
+    else:
+        df = load_parquet_from_path(path, columns, filters, use_transition=use_transition, force_classifier_insertion=force_classifier_insertion, parameters=parameters)
+
+    if filters:
+        df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+
     return df
 
 def calculate_dfg(path, log_name, managed_logs, parameters=None):
@@ -72,12 +105,7 @@ def calculate_dfg(path, log_name, managed_logs, parameters=None):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
             count = count + 1
-            df = parquet_importer.apply(pq, parameters={"columns": columns})
-
-            if use_transition:
-                df = insert_classifier(df)
-            if filters:
-                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+            df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters)
             dfg = Counter(
                 df_statistics.get_dfg_graph(df, activity_key=activity_key, sort_timestamp_along_case_id=False, sort_caseid_required=False))
             overall_dfg = overall_dfg + dfg
@@ -115,12 +143,8 @@ def calculate_performance_dfg(path, log_name, managed_logs, parameters=None):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
             count = count + 1
-            df = parquet_importer.apply(pq, parameters={"columns": columns})
+            df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters)
 
-            if use_transition:
-                df = insert_classifier(df)
-            if filters:
-                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
             f_dfg, p_dfg = df_statistics.get_dfg_graph(df, activity_key=activity_key, sort_timestamp_along_case_id=False, sort_caseid_required=False, measure="both")
             f_dfg = Counter(f_dfg)
 
@@ -175,14 +199,8 @@ def calculate_process_schema_composite_object(path, log_name, managed_logs, para
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
             count = count + 1
-            df = parquet_importer.apply(pq, parameters={"columns": columns})
+            df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters)
 
-            if DEFAULT_TIMESTAMP_KEY in columns:
-                df[DEFAULT_TIMESTAMP_KEY] = pd.to_datetime(df[DEFAULT_TIMESTAMP_KEY], utc=True)
-            if use_transition:
-                df = insert_classifier(df)
-            if filters:
-                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
             if performance_required:
                 f_dfg, p_dfg = df_statistics.get_dfg_graph(df, activity_key=activity_key, sort_timestamp_along_case_id=False, sort_caseid_required=False, measure="both")
             else:
@@ -259,12 +277,8 @@ def get_end_activities(path, log_name, managed_logs, parameters=None):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
             count = count + 1
-            df = parquet_importer.apply(pq, parameters={"columns": columns})
+            df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters)
 
-            if use_transition:
-                df = insert_classifier(df)
-            if filters:
-                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
             ea = Counter(end_activities_filter.get_end_activities(df, parameters=parameters))
             overall_ea = overall_ea + ea
 
@@ -298,12 +312,7 @@ def get_start_activities(path, log_name, managed_logs, parameters=None):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
             count = count + 1
-            df = parquet_importer.apply(pq, parameters={"columns": columns})
-
-            if use_transition:
-                df = insert_classifier(df)
-            if filters:
-                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+            df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters)
 
             ea = Counter(start_activities_filter.get_start_activities(df, parameters=parameters))
             overall_sa = overall_sa + ea
@@ -339,12 +348,7 @@ def get_log_summary(path, log_name, managed_logs, parameters=None):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
             count = count + 1
-            df = parquet_importer.apply(pq, parameters={"columns": columns})
-
-            if use_transition and filters:
-                df = insert_classifier(df)
-            if filters:
-                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+            df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters)
 
             events = events + len(df)
             cases = cases + df[CASE_CONCEPT_NAME].nunique()
@@ -377,12 +381,7 @@ def get_attribute_values(path, log_name, managed_logs, parameters=None):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
             count = count + 1
-            df = parquet_importer.apply(pq, parameters={"columns": columns})
-
-            if use_transition and filters:
-                df = insert_classifier(df)
-            if filters:
-                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+            df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters)
 
             dictio = dictio + Counter(dict(df[attribute_key].value_counts()))
             if count >= no_samples:
@@ -445,15 +444,7 @@ def get_variants(path, log_name, managed_logs, parameters=None):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
             count = count + 1
-            df = parquet_importer.apply(pq, parameters={"columns": columns})
-
-            if use_transition and filters:
-                df = insert_classifier(df)
-            else:
-                df["@@classifier"] = df[DEFAULT_NAME_KEY]
-
-            if filters:
-                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+            df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters, force_classifier_insertion=True)
 
             events = events + len(df)
             cases = cases + df[CASE_CONCEPT_NAME].nunique()
@@ -505,15 +496,8 @@ def get_cases(path, log_name, managed_logs, parameters=None):
         pq_basename = Path(pq).name
         if pq_basename in managed_logs:
             count = count + 1
-            df = parquet_importer.apply(pq, parameters={"columns": columns})
+            df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters, force_classifier_insertion=True)
 
-            if use_transition and filters:
-                df = insert_classifier(df)
-            else:
-                df["@@classifier"] = df[DEFAULT_NAME_KEY]
-
-            if filters:
-                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
 
             events = events + len(df)
             cases = cases + df[CASE_CONCEPT_NAME].nunique()
@@ -557,12 +541,7 @@ def get_events(path, log_name, managed_logs, parameters=None):
         if pq_basename in managed_logs:
             count = count + 1
 
-        df = parquet_importer.apply(pq)
-        if use_transition and filters:
-            df = insert_classifier(df)
-
-        if filters:
-            df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+        df = get_filtered_parquet(pq, None, filters, use_transition=use_transition, parameters=parameters)
 
         try:
             events = case_statistics.get_events(df, case_id)
@@ -610,13 +589,7 @@ def get_events_per_dotted(path, log_name, managed_logs, parameters=None):
         if pq_basename in managed_logs:
             count = count + 1
 
-            df = parquet_importer.apply(pq, parameters={"columns": columns})
-
-            if use_transition and filters:
-                df = insert_classifier(df)
-
-            if filters:
-                df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+            df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters)
 
             df = df[attributes1].dropna()
 
@@ -692,12 +665,7 @@ def get_events_per_time(path, log_name, managed_logs, parameters=None):
         if pq_basename in managed_logs:
             count = count + 1
 
-        df = parquet_importer.apply(pq, parameters={"columns": columns}).dropna()
-        if use_transition and filters:
-            df = insert_classifier(df)
-
-        if filters:
-            df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+        df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters)
 
         if len(df) > max_no_of_points_to_sample:
             df = df.sample(n=max_no_of_points_to_sample)
@@ -741,12 +709,7 @@ def get_case_duration(path, log_name, managed_logs, parameters=None):
         if pq_basename in managed_logs:
             count = count + 1
 
-        df = parquet_importer.apply(pq, parameters={"columns": columns}).dropna()
-        if use_transition and filters:
-            df = insert_classifier(df)
-
-        if filters:
-            df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+        df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters)
 
         cases = case_statistics.get_cases_description(df, parameters=parameters)
         duration_values = [x["caseDuration"] for x in cases.values()]
@@ -791,12 +754,8 @@ def get_numeric_attribute_values(path, log_name, managed_logs, parameters=None):
         if pq_basename in managed_logs:
             count = count + 1
 
-        df = parquet_importer.apply(pq, parameters={"columns": columns}).dropna()
-        if use_transition and filters:
-            df = insert_classifier(df)
-
-        if filters:
-            df = parquet_filtering_factory.apply_filters(df, filters, parameters=parameters)
+        df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters)
+        df = df.dropna()
 
         if len(df) > max_no_of_points_to_sample:
             df = df.sample(n=max_no_of_points_to_sample)
