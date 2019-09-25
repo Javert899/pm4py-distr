@@ -20,6 +20,7 @@ from pm4pydistr.master.rqsts.events_dotted_request import EventsDottedRequest
 from pm4pydistr.master.rqsts.events_per_time_request import EventsPerTimeRequest
 from pm4pydistr.master.rqsts.case_duration_request import CaseDurationRequest
 from pm4pydistr.master.rqsts.numeric_attribute_request import NumericAttributeRequest
+from pm4pydistr.master.rqsts.caching_request import CachingRequest
 from pathlib import Path
 from random import randrange
 import os
@@ -558,3 +559,24 @@ class Master:
             points = points_subset.pick_chosen_points_list(max_ret_items, points)
 
         return points
+
+
+    def do_caching(self, session, process, use_transition, no_samples):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = CachingRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+
+            m.start()
+
+            threads.append(m)
+
+        for thread in threads:
+            thread.join()
+
+        return None

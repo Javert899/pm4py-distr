@@ -363,6 +363,21 @@ def get_cases():
     return jsonify({"cases_list": [], "events": 0, "cases": 0})
 
 
+@SlaveSocketListener.app.route("/doCaching", methods=["GET"])
+def do_caching():
+    keyphrase = request.args.get('keyphrase', type=str)
+    process = request.args.get('process', type=str)
+
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if keyphrase == configuration.KEYPHRASE:
+        parameters = {}
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+
+        parquet_handler.do_caching(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
+
+    return jsonify({})
+
 
 @SlaveSocketListener.app.route("/getEvents", methods=["GET"])
 def get_events():
