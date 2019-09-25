@@ -135,6 +135,20 @@ def set_filters():
     return jsonify({})
 
 
+@MasterSocketListener.app.route("/doCaching", methods=["GET"])
+def do_caching():
+    keyphrase = request.args.get('keyphrase', type=str)
+    process = request.args.get('process', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if keyphrase == configuration.KEYPHRASE:
+        res = MasterVariableContainer.master.do_caching(session, process, use_transition, no_samples)
+
+    return jsonify({})
+
 @MasterSocketListener.app.route("/calculateDfg", methods=["GET"])
 def calculate_dfg():
     keyphrase = request.args.get('keyphrase', type=str)
