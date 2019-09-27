@@ -637,7 +637,7 @@ def get_events_per_dotted(path, log_name, managed_logs, parameters=None):
     df["@@event_index"] = df.index
     df = df.sort_values([DEFAULT_TIMESTAMP_KEY, "@@event_index"])
     df = df.reset_index(drop=True)
-    df["@@case_index"] = df.groupby(CASE_CONCEPT_NAME).ngroup()
+    df["@@case_index"] = df.groupby(CASE_CONCEPT_NAME, sort=False).ngroup()
     df = df.sort_values(["@@case_index", DEFAULT_TIMESTAMP_KEY, "@@event_index"])
 
     stream = df.to_dict('r')
