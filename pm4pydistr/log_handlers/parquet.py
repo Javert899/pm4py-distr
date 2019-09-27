@@ -22,6 +22,10 @@ PARQUET_CACHE = {}
 FILTERS = "filters"
 
 def get_columns_to_import(filters, columns, use_transition=False):
+    if filters is None:
+        filters = []
+    if columns is None:
+        columns = []
     columns = set(columns)
 
     if filters:
@@ -51,8 +55,10 @@ def insert_classifier(df):
 def load_parquet_from_path(path, columns, filters, use_transition=False, force_classifier_insertion=False, force_timestamp_conversion=False, parameters=None):
     if parameters is None:
         parameters = {}
+    if filters is None:
+        filters = []
     if columns is None:
-        columns = {}
+        columns = []
         df = parquet_importer.apply(path)
     else:
         df = parquet_importer.apply(path, parameters={"columns": columns})
@@ -70,6 +76,10 @@ def load_parquet_from_path(path, columns, filters, use_transition=False, force_c
 def get_filtered_parquet(path, columns, filters, use_transition=False, force_classifier_insertion=False, parameters=None):
     if parameters is None:
         parameters = {}
+    if filters is None:
+        filters = []
+    if columns is None:
+        columns = []
     if path in PARQUET_CACHE and not use_transition and set(columns).issubset(set([CASE_CONCEPT_NAME, DEFAULT_TIMESTAMP_KEY, DEFAULT_NAME_KEY])):
         df = PARQUET_CACHE[path]
     else:
@@ -627,7 +637,7 @@ def get_events_per_dotted(path, log_name, managed_logs, parameters=None):
     df["@@event_index"] = df.index
     df = df.sort_values([DEFAULT_TIMESTAMP_KEY, "@@event_index"])
     df = df.reset_index(drop=True)
-    df["@@case_index"] = df.groupby(CASE_CONCEPT_NAME).ngroup()
+    df["@@case_index"] = df.groupby(CASE_CONCEPT_NAME, sort=False).ngroup()
     df = df.sort_values(["@@case_index", DEFAULT_TIMESTAMP_KEY, "@@event_index"])
 
     stream = df.to_dict('r')
