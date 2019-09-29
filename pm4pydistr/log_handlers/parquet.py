@@ -576,7 +576,8 @@ def get_events(path, log_name, managed_logs, parameters=None):
         try:
             events = case_statistics.get_events(df, case_id)
             if len(events) > 0:
-                ret = events
+                df = parquet_importer.apply(pq)
+                ret = case_statistics.get_events(df, case_id)
                 break
         except:
             pass
