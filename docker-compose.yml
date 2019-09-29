@@ -28,6 +28,8 @@ services:
         - "6002:5002"
       volumes:
         - ./master:/master
+      depends_on:
+        - 'pm4pydistr_master'
 
     pm4pydistr_slave2:
       container_name: pm4pydistr_slave2
@@ -43,3 +45,5 @@ services:
         - "6003:5003"
       volumes:
         - ./master:/master
+      depends_on:
+        - 'pm4pydistr_master'
