@@ -71,3 +71,6 @@ class DistrLogObj(object):
 
     def get_numeric_attribute(self, attribute_key, parameters=None):
         raise Exception("not implemented")
+
+    def do_caching(self, parameters=None):
+        raise Exception("not implemented")

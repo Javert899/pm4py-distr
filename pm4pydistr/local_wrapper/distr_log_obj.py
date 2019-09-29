@@ -6,6 +6,9 @@ class LocalDistrLogObj(object):
         self.distr_log_path = distr_log_path
         self.filters = []
 
+    def do_caching(self, parameters=None):
+        raise Exception("not implemented")
+
     def add_filter(self, filter_name, filter_value, parameters=None):
         raise Exception("not implemented")
 
