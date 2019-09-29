@@ -92,6 +92,11 @@ class ClassicDistrLogObject(DistrLogObj):
         ret_text = r.text
         return ret_text
 
+    def do_caching(self, parameters=None):
+        url = self.get_url("doCaching", parameters=parameters)
+        r = requests.get(url)
+        return None
+
     def add_filter(self, filter_name, filter_value, parameters=None):
         self.filters.append([filter_name, filter_value])
         url = self.get_url("setFilters", parameters=parameters)
@@ -172,6 +177,9 @@ class ClassicDistrLogObject(DistrLogObj):
         return ret_json["summary"]
 
     def get_attribute_values(self, attribute_key, parameters=None):
+        if parameters is None:
+            parameters = {}
+        parameters["attribute_key"] = attribute_key
         url = self.get_url("getAttributeValues", parameters=parameters)
         r = requests.get(url)
         ret_text = r.text

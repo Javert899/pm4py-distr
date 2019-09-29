@@ -13,6 +13,15 @@ class ClassicDistrLogObject(LocalDistrLogObj):
     def __init__(self, distr_log_path, parameters=None):
         LocalDistrLogObj.__init__(self, distr_log_path, parameters=parameters)
 
+    def do_caching(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        list_logs = self.get_list_logs()
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
+        parquet_handler.do_caching(".", self.distr_log_path, list_logs, parameters=parameters)
+
     def get_list_logs(self):
         lp = parquet_factory.get_list_parquet(self.distr_log_path)
 
