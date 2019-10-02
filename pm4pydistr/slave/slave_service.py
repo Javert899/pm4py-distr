@@ -434,7 +434,7 @@ def get_events_per_dotted():
         parameters["attribute1"] = attribute1
         parameters["attribute2"] = attribute2
         parameters["attribute3"] = attribute3
-        parameters["max_no_cases"] = max_no_ret_items
+        parameters["max_no_events"] = max_no_ret_items
 
         returned_dict = parquet_handler.get_events_per_dotted(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
 
