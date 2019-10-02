@@ -38,6 +38,28 @@ def check_master_initialized():
         sleep(0.55)
 
 
+def except_if_not_slave_loading_requested():
+    if not MasterVariableContainer.slave_loading_requested:
+        raise Exception("slave loading not requested")
+
+
+def get_slaves_count():
+    slaves_count = len(MasterVariableContainer.master.slaves)
+    finished_slaves = sum(t.slave_finished for t in MasterVariableContainer.assign_request_threads)
+
+    return slaves_count, finished_slaves
+
+
+def wait_till_slave_load_requested():
+    while True:
+        slaves_count, finished_slaves = get_slaves_count()
+
+        if not finished_slaves >= slaves_count:
+            sleep(0.55)
+        else:
+            break
+
+
 @MasterSocketListener.app.route("/registerSlave", methods=["GET"])
 def register_slave():
     check_master_initialized()
@@ -90,10 +112,10 @@ def get_loading_status():
     keyphrase = request.args.get('keyphrase', type=str)
 
     if keyphrase == configuration.KEYPHRASE:
-        finished_slaves = sum(t.slave_finished for t in MasterVariableContainer.assign_request_threads)
+        slaves_count, finished_slaves = get_slaves_count()
         return jsonify({"keyphrase_correct": True, "first_loading_done": MasterVariableContainer.first_loading_done,
                         "log_assignment_done": MasterVariableContainer.log_assignment_done, "slave_loading_requested": MasterVariableContainer.slave_loading_requested,
-                        "slaves_count": len(MasterVariableContainer.master.slaves), "finished_slaves": finished_slaves})
+                        "slaves_count": slaves_count, "finished_slaves": finished_slaves})
 
     return jsonify({"keyphrase_correct": False})
 
@@ -143,6 +165,8 @@ def get_sublogs_correspondence():
 @MasterSocketListener.app.route("/setFilters", methods=["POST"])
 def set_filters():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
@@ -162,6 +186,8 @@ def set_filters():
 @MasterSocketListener.app.route("/doCaching", methods=["GET"])
 def do_caching():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     keyphrase = request.args.get('keyphrase', type=str)
     process = request.args.get('process', type=str)
@@ -178,6 +204,8 @@ def do_caching():
 @MasterSocketListener.app.route("/calculateDfg", methods=["GET"])
 def calculate_dfg():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     keyphrase = request.args.get('keyphrase', type=str)
     process = request.args.get('process', type=str)
@@ -198,6 +226,8 @@ def calculate_dfg():
 @MasterSocketListener.app.route("/calculatePerformanceDfg", methods=["GET"])
 def calculate_performance_dfg():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     keyphrase = request.args.get('keyphrase', type=str)
     process = request.args.get('process', type=str)
@@ -218,6 +248,8 @@ def calculate_performance_dfg():
 @MasterSocketListener.app.route("/calculateCompositeObj", methods=["GET"])
 def calculate_composite_obj():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     keyphrase = request.args.get('keyphrase', type=str)
     process = request.args.get('process', type=str)
@@ -243,6 +275,8 @@ def calculate_composite_obj():
 @MasterSocketListener.app.route("/getEndActivities", methods=["GET"])
 def calculate_end_activities():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
@@ -261,6 +295,8 @@ def calculate_end_activities():
 @MasterSocketListener.app.route("/getStartActivities", methods=["GET"])
 def calculate_start_activities():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
@@ -278,6 +314,8 @@ def calculate_start_activities():
 @MasterSocketListener.app.route("/getAttributeValues", methods=["GET"])
 def calculate_attribute_values():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
@@ -298,6 +336,8 @@ def calculate_attribute_values():
 @MasterSocketListener.app.route("/getAttributesNames", methods=["GET"])
 def calculate_attributes_names():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
@@ -316,6 +356,8 @@ def calculate_attributes_names():
 @MasterSocketListener.app.route("/getLogSummary", methods=["GET"])
 def calculate_log_summary():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
@@ -334,6 +376,8 @@ def calculate_log_summary():
 @MasterSocketListener.app.route("/getVariants", methods=["GET"])
 def get_variants():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
@@ -353,6 +397,8 @@ def get_variants():
 @MasterSocketListener.app.route("/getCases", methods=["GET"])
 def get_cases():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
@@ -372,6 +418,8 @@ def get_cases():
 @MasterSocketListener.app.route("/getEvents", methods=["GET"])
 def get_events():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
@@ -392,6 +440,8 @@ def get_events():
 @MasterSocketListener.app.route("/getEventsPerDotted", methods=["GET"])
 def get_events_per_dotted():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
@@ -416,6 +466,8 @@ def get_events_per_dotted():
 @MasterSocketListener.app.route("/getEventsPerTime", methods=["GET"])
 def get_events_per_time():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
@@ -436,6 +488,8 @@ def get_events_per_time():
 @MasterSocketListener.app.route("/getCaseDuration", methods=["GET"])
 def get_case_duration():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
@@ -456,6 +510,8 @@ def get_case_duration():
 @MasterSocketListener.app.route("/getNumericAttributeValues", methods=["GET"])
 def get_numeric_attribute_values():
     check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
 
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
