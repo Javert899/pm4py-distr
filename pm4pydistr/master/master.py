@@ -29,7 +29,7 @@ from collections import Counter
 from pm4pydistr.master.session_checker import SessionChecker
 from pm4pydistr.configuration import DEFAULT_MAX_NO_RET_ITEMS
 from pm4py.util import points_subset
-
+import time
 
 class Master:
     def __init__(self, parameters):
@@ -53,6 +53,11 @@ class Master:
 
         self.session_checker = SessionChecker(self)
         self.session_checker.start()
+
+        # wait that the master really comes up
+        time.sleep(0.5)
+
+        MasterVariableContainer.master_initialization_done = True
 
     def load_logs(self):
         all_logs = MasterVariableContainer.dbmanager.get_logs_from_db()

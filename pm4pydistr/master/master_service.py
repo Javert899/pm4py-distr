@@ -3,7 +3,7 @@ from pm4pydistr import configuration
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from random import randrange
-from time import time
+from time import time, sleep
 from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
 from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
 from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_MAX_NO_RET_ITEMS
@@ -32,8 +32,16 @@ class MasterSocketListener(Thread):
         self.app.run(host="0.0.0.0", port=MasterVariableContainer.port, threaded=True)
 
 
+def check_master_initialized():
+    while not MasterVariableContainer.master_initialization_done:
+        # sleep a while till the master is fine
+        sleep(0.55)
+
+
 @MasterSocketListener.app.route("/registerSlave", methods=["GET"])
 def register_slave():
+    check_master_initialized()
+
     keyphrase = request.args.get('keyphrase', type=str)
     ip = request.args.get('ip', type=str)
     port = request.args.get('port', type=str)
@@ -49,6 +57,8 @@ def register_slave():
 
 @MasterSocketListener.app.route("/updateSlave", methods=["GET"])
 def update_slave():
+    check_master_initialized()
+
     keyphrase = request.args.get('keyphrase', type=str)
     id = request.args.get('id', type=str)
     ip = request.args.get('ip', type=str)
@@ -62,6 +72,8 @@ def update_slave():
 
 @MasterSocketListener.app.route("/pingFromSlave", methods=["GET"])
 def ping_from_slave():
+    check_master_initialized()
+
     keyphrase = request.args.get('keyphrase', type=str)
     id = request.args.get('id', type=str)
     conf = request.args.get('conf', type=str)
@@ -73,6 +85,8 @@ def ping_from_slave():
 
 @MasterSocketListener.app.route("/getLoadingStatus", methods=["GET"])
 def get_loading_status():
+    check_master_initialized()
+
     keyphrase = request.args.get('keyphrase', type=str)
 
     if keyphrase == configuration.KEYPHRASE:
@@ -85,6 +99,8 @@ def get_loading_status():
 
 @MasterSocketListener.app.route("/doLogAssignment", methods=["GET"])
 def do_log_assignment():
+    check_master_initialized()
+
     keyphrase = request.args.get('keyphrase', type=str)
 
     if keyphrase == configuration.KEYPHRASE:
@@ -96,6 +112,8 @@ def do_log_assignment():
 
 @MasterSocketListener.app.route("/getSlavesList", methods=["GET"])
 def get_slaves_list():
+    check_master_initialized()
+
     keyphrase = request.args.get('keyphrase', type=str)
 
     if keyphrase == configuration.KEYPHRASE:
@@ -105,6 +123,8 @@ def get_slaves_list():
 
 @MasterSocketListener.app.route("/getSublogsId", methods=["GET"])
 def get_sublogs_id():
+    check_master_initialized()
+
     keyphrase = request.args.get('keyphrase', type=str)
     if keyphrase == configuration.KEYPHRASE:
         return jsonify({"sublogs_id": MasterVariableContainer.master.sublogs_id})
@@ -113,6 +133,8 @@ def get_sublogs_id():
 
 @MasterSocketListener.app.route("/getSublogsCorrespondence", methods=["GET"])
 def get_sublogs_correspondence():
+    check_master_initialized()
+
     keyphrase = request.args.get('keyphrase', type=str)
     if keyphrase == configuration.KEYPHRASE:
         return jsonify({"sublogs_correspondence": MasterVariableContainer.master.sublogs_correspondence})
@@ -120,6 +142,8 @@ def get_sublogs_correspondence():
 
 @MasterSocketListener.app.route("/setFilters", methods=["POST"])
 def set_filters():
+    check_master_initialized()
+
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
@@ -137,6 +161,8 @@ def set_filters():
 
 @MasterSocketListener.app.route("/doCaching", methods=["GET"])
 def do_caching():
+    check_master_initialized()
+
     keyphrase = request.args.get('keyphrase', type=str)
     process = request.args.get('process', type=str)
     session = request.args.get('session', type=str)
@@ -151,6 +177,8 @@ def do_caching():
 
 @MasterSocketListener.app.route("/calculateDfg", methods=["GET"])
 def calculate_dfg():
+    check_master_initialized()
+
     keyphrase = request.args.get('keyphrase', type=str)
     process = request.args.get('process', type=str)
     session = request.args.get('session', type=str)
@@ -169,6 +197,8 @@ def calculate_dfg():
 
 @MasterSocketListener.app.route("/calculatePerformanceDfg", methods=["GET"])
 def calculate_performance_dfg():
+    check_master_initialized()
+
     keyphrase = request.args.get('keyphrase', type=str)
     process = request.args.get('process', type=str)
     session = request.args.get('session', type=str)
@@ -187,6 +217,8 @@ def calculate_performance_dfg():
 
 @MasterSocketListener.app.route("/calculateCompositeObj", methods=["GET"])
 def calculate_composite_obj():
+    check_master_initialized()
+
     keyphrase = request.args.get('keyphrase', type=str)
     process = request.args.get('process', type=str)
     session = request.args.get('session', type=str)
@@ -210,6 +242,8 @@ def calculate_composite_obj():
 
 @MasterSocketListener.app.route("/getEndActivities", methods=["GET"])
 def calculate_end_activities():
+    check_master_initialized()
+
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
@@ -226,6 +260,8 @@ def calculate_end_activities():
 
 @MasterSocketListener.app.route("/getStartActivities", methods=["GET"])
 def calculate_start_activities():
+    check_master_initialized()
+
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
@@ -241,6 +277,8 @@ def calculate_start_activities():
 
 @MasterSocketListener.app.route("/getAttributeValues", methods=["GET"])
 def calculate_attribute_values():
+    check_master_initialized()
+
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
@@ -259,6 +297,8 @@ def calculate_attribute_values():
 
 @MasterSocketListener.app.route("/getAttributesNames", methods=["GET"])
 def calculate_attributes_names():
+    check_master_initialized()
+
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
@@ -275,6 +315,8 @@ def calculate_attributes_names():
 
 @MasterSocketListener.app.route("/getLogSummary", methods=["GET"])
 def calculate_log_summary():
+    check_master_initialized()
+
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
@@ -291,6 +333,8 @@ def calculate_log_summary():
 
 @MasterSocketListener.app.route("/getVariants", methods=["GET"])
 def get_variants():
+    check_master_initialized()
+
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
@@ -308,6 +352,8 @@ def get_variants():
 
 @MasterSocketListener.app.route("/getCases", methods=["GET"])
 def get_cases():
+    check_master_initialized()
+
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
@@ -325,6 +371,8 @@ def get_cases():
 
 @MasterSocketListener.app.route("/getEvents", methods=["GET"])
 def get_events():
+    check_master_initialized()
+
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
@@ -343,6 +391,8 @@ def get_events():
 
 @MasterSocketListener.app.route("/getEventsPerDotted", methods=["GET"])
 def get_events_per_dotted():
+    check_master_initialized()
+
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
@@ -365,6 +415,8 @@ def get_events_per_dotted():
 
 @MasterSocketListener.app.route("/getEventsPerTime", methods=["GET"])
 def get_events_per_time():
+    check_master_initialized()
+
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
@@ -383,6 +435,8 @@ def get_events_per_time():
 
 @MasterSocketListener.app.route("/getCaseDuration", methods=["GET"])
 def get_case_duration():
+    check_master_initialized()
+
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
@@ -401,6 +455,8 @@ def get_case_duration():
 
 @MasterSocketListener.app.route("/getNumericAttributeValues", methods=["GET"])
 def get_numeric_attribute_values():
+    check_master_initialized()
+
     process = request.args.get('process', type=str)
     keyphrase = request.args.get('keyphrase', type=str)
     session = request.args.get('session', type=str)
