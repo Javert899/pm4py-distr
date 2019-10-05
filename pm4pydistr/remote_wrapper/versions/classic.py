@@ -50,7 +50,7 @@ class ClassicDistrLogObject(DistrLogObj):
         while True:
             r = requests.get(url)
             content = json.loads(r.text)
-            if content["slave_loading_requested"] and content["finished_slaves"] > 0 and content["finished_slaves"] == content["slaves_count"]:
+            if content["slave_loading_requested"] and content["finished_slaves"] > 0 and content["finished_slaves"] >= content["slaves_count"]:
                 break
             else:
                 print(time.time(), "slaves still coming up, waiting a little more! finished log assignation for %d slaves out of %d" % (content["finished_slaves"], content["slaves_count"]))
