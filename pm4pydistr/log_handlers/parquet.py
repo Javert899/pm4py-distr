@@ -599,7 +599,7 @@ def get_events_per_dotted(path, log_name, managed_logs, parameters=None):
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
 
-    max_no_cases = parameters["max_no_cases"] if "max_no_cases" in parameters else 10000
+    max_no_events = parameters["max_no_events"] if "max_no_events" in parameters else 10000
 
     attributes = ["@@event_index", parameters["attribute1"], parameters["attribute2"]]
     if parameters["attribute3"] is not None:
@@ -613,7 +613,7 @@ def get_events_per_dotted(path, log_name, managed_logs, parameters=None):
     parquet_list = parquet_importer.get_list_parquet(folder)
 
     df_list = []
-    no_cases = 0
+    no_events = 0
     count = 0
     for index, pq in enumerate(parquet_list):
         pq_basename = Path(pq).name
@@ -624,11 +624,11 @@ def get_events_per_dotted(path, log_name, managed_logs, parameters=None):
 
             df = df[attributes1].dropna()
 
-            no_cases = no_cases + df[CASE_CONCEPT_NAME].nunique()
+            no_events = no_events + len(df)
 
             df_list.append(df)
 
-            if no_cases >= max_no_cases:
+            if no_events >= max_no_events:
                 break
 
             if count >= no_samples:

@@ -12,6 +12,8 @@ import socket
 import os
 import shutil
 
+import time
+
 class Slave:
     def __init__(self, parameters):
         self.parameters = parameters
@@ -35,10 +37,16 @@ class Slave:
         if not os.path.exists(self.conf):
             os.mkdir(self.conf)
 
+        # sleep a while before taking the slaves up :)
+        time.sleep(2)
+
         self.slave_requests = SlaveRequests(self, self.host, self.port, self.master_host, self.master_port, self.conf)
 
         self.service = SlaveSocketListener(self, self.host, self.port, self.master_host, self.master_port, self.conf)
         self.service.start()
+
+        # sleep a while before taking the slaves up :)
+        time.sleep(2)
 
         self.slave_requests.register_to_webservice()
 
