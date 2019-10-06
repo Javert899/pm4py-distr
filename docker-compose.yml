@@ -47,3 +47,14 @@ services:
         - ./master:/master
       depends_on:
         - 'pm4pydistr_master'
+
+    pm4pyws:
+      container_name: pm4pyws
+      image: javert899/pm4pyws:pm4pyDistrIntegration
+      restart: always
+      ports:
+        - "6000:80"
+      depends_on:
+        - 'pm4pydistr_master'
+        - 'pm4pydistr_slave1'
+        - 'pm4pydistr_slave2'
