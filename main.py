@@ -12,5 +12,5 @@ class ExecutionThread(Thread):
     def run(self):
         os.system(self.command)
 
-t1 = ExecutionThread(PYTHON_PATH+" launch.py --type master --conf master --port 5001")
+t1 = ExecutionThread(PYTHON_PATH+" launch.py type master conf master port 5001")
 t1.start()

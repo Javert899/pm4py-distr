@@ -8,11 +8,6 @@ RUN pip install --no-cache-dir -U pm4py==1.1.27 requests Flask flask-cors netifa
 
 COPY . /
 
-RUN echo "DEFAULT_TYPE = 'master'" >> /pm4pydistr/configuration.py
-
-ENV pm4pydistr--port=5001
-#ENV pm4pydistr--master-port=5001
 ENV pm4pydistr--base-folders=/master
-ENV pm4pydistr--type=master
 
-ENTRYPOINT ["python3", "launch.py"]
+ENTRYPOINT ["python3", "cloud_main.py"]
