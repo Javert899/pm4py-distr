@@ -6,9 +6,9 @@ services:
       image: javert899/pm4pydistr:master_docker
       restart: always
       environment:
-        pm4pydistr--type: master
-        pm4pydistr--conf: master
-        pm4pydistr--port: 5001
+        pm4pydistrtype: master
+        pm4pydistrconf: master
+        pm4pydistrport: 5001
       ports:
         - "6001:5001"
       volumes:
@@ -19,11 +19,11 @@ services:
       image: javert899/pm4pydistr:slave_docker
       restart: always
       environment:
-        pm4pydistr--type: slave
-        pm4pydistr--conf: slave1
-        pm4pydistr--port: 5002
-        pm4pydistr--master-host: pm4pydistr_master
-        pm4pydistr--master-port: 5001
+        pm4pydistrtype: slave
+        pm4pydistrconf: slave1
+        pm4pydistrport: 5002
+        pm4pydistrmasterhost: pm4pydistr_master
+        pm4pydistrmasterport: 5001
       ports:
         - "6002:5002"
       volumes:
@@ -36,11 +36,11 @@ services:
       image: javert899/pm4pydistr:slave_docker
       restart: always
       environment:
-        pm4pydistr--type: slave
-        pm4pydistr--conf: slave2
-        pm4pydistr--port: 5003
-        pm4pydistr--master-host: pm4pydistr_master
-        pm4pydistr--master-port: 5001
+        pm4pydistrtype: slave
+        pm4pydistrconf: slave2
+        pm4pydistrport: 5003
+        pm4pydistrmasterhost: pm4pydistr_master
+        pm4pydistrmasterport: 5001
       ports:
         - "6003:5003"
       volumes:
@@ -53,8 +53,8 @@ services:
       image: javert899/pm4pyws:pm4pyDistrIntegration
       restart: always
       environment:
-        pm4pydistr--master-host: pm4pydistr_master
-        pm4pydistr--master-port: 5001
+        pm4pydistrmasterhost: pm4pydistr_master
+        pm4pydistrmasterport: 5001
       ports:
         - "6000:80"
       depends_on:
