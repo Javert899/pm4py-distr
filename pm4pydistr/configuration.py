@@ -17,6 +17,7 @@ else:
     PYTHON_PATH = "python"
 BASE_FOLDER_LIST_OPTIONS = ["master"]
 
+DEFAULT_TYPE = "slave"
 THIS_HOST = "127.0.0.1"
 PORT = 5001
 MASTER_HOST = "127.0.0.1"

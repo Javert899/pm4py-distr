@@ -4,12 +4,13 @@ from pm4pydistr.slave.slave import Slave
 from pm4pydistr import configuration
 from pm4pydistr.configuration import PARAMETERS_TYPE, PARAMETERS_PORT, PARAMETERS_MASTER_HOST, PARAMETERS_MASTER_PORT, \
     PARAMETERS_CONF, PARAMETERS_HOST, ENVIRON_PREFIX, PARAMETERS_AUTO_HOST, PARAMETERS_KEYPHRASE, PARAMETERS_BASE_FOLDERS
-from pm4pydistr.configuration import PORT, MASTER_HOST, MASTER_PORT, CONF, THIS_HOST
+from pm4pydistr.configuration import PORT, MASTER_HOST, MASTER_PORT, CONF, THIS_HOST, DEFAULT_TYPE
 import os
 
 
 parameters = {}
 
+parameters[PARAMETERS_TYPE] = DEFAULT_TYPE
 parameters[PARAMETERS_PORT] = PORT
 parameters[PARAMETERS_MASTER_HOST] = MASTER_HOST
 parameters[PARAMETERS_MASTER_PORT] = MASTER_PORT
