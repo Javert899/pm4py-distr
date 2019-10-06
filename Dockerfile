@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir -U pm4py==1.1.27 requests Flask flask-cors netifa
 
 COPY . /
 
+
 ENV pm4pydistr--base-folders=/master
 
 ENTRYPOINT ["python3", "cloud_main.py"]
