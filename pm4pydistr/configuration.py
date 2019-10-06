@@ -2,6 +2,7 @@ import os
 
 ENVIRON_PREFIX = "pm4pydistr"
 PARAMETERS_AUTO_HOST = "autohost"
+PARAMETERS_AUTO_PORT = "autoport"
 
 PARAMETER_USE_TRANSITION = "use_transition"
 DEFAULT_USE_TRANSITION = False

@@ -19,7 +19,7 @@ services:
       restart: always
       environment:
         pm4pydistrautohost: 1
-        pm4pydistrport: 5002
+        pm4pydistrautoport: 1
         pm4pydistrmasterhost: pm4pydistr_master
         pm4pydistrmasterport: 5001
       ports:
@@ -35,7 +35,7 @@ services:
       restart: always
       environment:
         pm4pydistrautohost: 1
-        pm4pydistrport: 5003
+        pm4pydistrautoport: 1
         pm4pydistrmasterhost: pm4pydistr_master
         pm4pydistrmasterport: 5001
       ports:

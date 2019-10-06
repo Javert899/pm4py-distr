@@ -1,5 +1,5 @@
 from pm4pydistr.configuration import PARAMETERS_PORT, PARAMETERS_HOST, PARAMETERS_MASTER_HOST, PARAMETERS_MASTER_PORT, \
-    PARAMETERS_CONF, BASE_FOLDER_LIST_OPTIONS, PARAMETERS_AUTO_HOST
+    PARAMETERS_CONF, BASE_FOLDER_LIST_OPTIONS, PARAMETERS_AUTO_HOST, PARAMETERS_AUTO_PORT
 
 from pm4pydistr.slave.slave_service import SlaveSocketListener
 from pm4pydistr.slave.slave_requests import SlaveRequests
@@ -8,11 +8,18 @@ from pm4py.objects.log.importer.parquet import factory as parquet_importer
 from pm4pydistr.slave.do_ms_ping import DoMasterPing
 import uuid
 import socket
+from contextlib import closing
 
 import os
 import shutil
 
 import time
+
+def find_free_port():
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(('', 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
 
 class Slave:
     def __init__(self, parameters):
@@ -23,12 +30,10 @@ class Slave:
         self.master_port = str(parameters[PARAMETERS_MASTER_PORT])
         self.conf = parameters[PARAMETERS_CONF]
         if PARAMETERS_AUTO_HOST in parameters and parameters[PARAMETERS_AUTO_HOST] == "1":
-            #import netifaces as ni
             self.conf = str(uuid.uuid4())
             self.host = str(socket.gethostname())
-            #ni.ifaddresses('eth0')
-            #ip = ni.ifaddresses('eth0')[ni.AF_INET][0]['addr']
-            #self.master_host = str(ip)
+        if PARAMETERS_AUTO_PORT in parameters and parameters[PARAMETERS_AUTO_PORT] == "1":
+            self.port = str(find_free_port())
         self.id = None
         self.ping_module = None
 
