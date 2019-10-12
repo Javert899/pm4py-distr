@@ -529,3 +529,57 @@ def get_numeric_attribute_values():
         return jsonify({"points": points})
 
     return jsonify({})
+
+
+@MasterSocketListener.app.route("/performAlignments", methods=["POST"])
+def perform_alignments():
+    check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
+
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    try:
+        content = json.loads(request.data)
+    except:
+        content = json.loads(request.data.decode('utf-8'))
+
+    petri_string = content["petri_string"]
+    var_list = content["var_list"]
+
+    if keyphrase == configuration.KEYPHRASE:
+        alignments = MasterVariableContainer.master.perform_alignments(session, process, use_transition, no_samples, petri_string, var_list)
+        return jsonify({"alignments": alignments})
+
+    return jsonify({})
+
+
+@MasterSocketListener.app.route("/performTbr", methods=["POST"])
+def perform_tbr():
+    check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
+
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    try:
+        content = json.loads(request.data)
+    except:
+        content = json.loads(request.data.decode('utf-8'))
+
+    petri_string = content["petri_string"]
+    var_list = content["var_list"]
+
+    if keyphrase == configuration.KEYPHRASE:
+        tbr = MasterVariableContainer.master.perform_tbr(session, process, use_transition, no_samples, petri_string, var_list)
+        return jsonify({"tbr": tbr})
+
+    return jsonify({})

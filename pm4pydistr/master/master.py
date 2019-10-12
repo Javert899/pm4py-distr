@@ -21,6 +21,9 @@ from pm4pydistr.master.rqsts.events_per_time_request import EventsPerTimeRequest
 from pm4pydistr.master.rqsts.case_duration_request import CaseDurationRequest
 from pm4pydistr.master.rqsts.numeric_attribute_request import NumericAttributeRequest
 from pm4pydistr.master.rqsts.caching_request import CachingRequest
+from pm4pydistr.master.rqsts.conf_align_request import AlignRequest
+from pm4pydistr.master.rqsts.conf_tbr_request import TbrRequest
+
 from pathlib import Path
 from random import randrange
 import os
@@ -576,6 +579,51 @@ class Master:
             slave_port = str(self.slaves[slave][2])
 
             m = CachingRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+
+            m.start()
+
+            threads.append(m)
+
+        for thread in threads:
+            thread.join()
+
+        return None
+
+    def perform_alignments(self, session, process, use_transition, no_samples, petri_string, var_list):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            content = {"petri_string": petri_string, "var_list": var_list}
+
+            m = AlignRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
+
+            m.start()
+
+            threads.append(m)
+
+        for thread in threads:
+            thread.join()
+
+        return None
+
+
+    def perform_tbr(self, session, process, use_transition, no_samples, petri_string, var_list):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            content = {"petri_string": petri_string, "var_list": var_list}
+
+            m = TbrRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
 
             m.start()
 
