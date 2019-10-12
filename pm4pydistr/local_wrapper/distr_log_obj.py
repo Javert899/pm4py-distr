@@ -59,3 +59,15 @@ class LocalDistrLogObj(object):
 
     def get_numeric_attribute(self, attribute_key, parameters=None):
         raise Exception("not implemented")
+
+    def perform_alignments_net_log(self, net, im, fm, log, parameters=None):
+        raise Exception("not implemented")
+
+    def perform_alignments_net_variants(self, net, im, fm, var_list=None, parameters=None):
+        raise Exception("not implemented")
+
+    def perform_tbr_net_log(self, net, im, fm, log, parameters=None):
+        raise Exception("not implemented")
+
+    def perform_tbr_net_variants(self, net, im, fm, var_list=None, parameters=None):
+        raise Exception("not implemented")

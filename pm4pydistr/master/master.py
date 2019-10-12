@@ -21,6 +21,10 @@ from pm4pydistr.master.rqsts.events_per_time_request import EventsPerTimeRequest
 from pm4pydistr.master.rqsts.case_duration_request import CaseDurationRequest
 from pm4pydistr.master.rqsts.numeric_attribute_request import NumericAttributeRequest
 from pm4pydistr.master.rqsts.caching_request import CachingRequest
+from pm4pydistr.master.rqsts.conf_align_request import AlignRequest
+from pm4pydistr.master.rqsts.conf_tbr_request import TbrRequest
+import math
+
 from pathlib import Path
 from random import randrange
 import os
@@ -585,3 +589,66 @@ class Master:
             thread.join()
 
         return None
+
+    def chunks(self, l, n):
+        for i in range(0, len(l), n):
+            yield l[i:i + n]
+
+    def perform_alignments(self, session, process, use_transition, no_samples, petri_string, var_list):
+        all_slaves = list(self.slaves.keys())
+
+        n = math.ceil(len(var_list) / len(all_slaves))
+        variants_list_split = list(self.chunks(var_list, n))
+
+        threads = []
+
+        for index, slave in enumerate(all_slaves):
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            content = {"petri_string": petri_string, "var_list": variants_list_split[index]}
+
+            m = AlignRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
+
+            m.start()
+
+            threads.append(m)
+
+        ret_dict = {}
+
+        for thread in threads:
+            thread.join()
+
+            ret_dict.update(thread.content["alignments"])
+
+        return ret_dict
+
+
+    def perform_tbr(self, session, process, use_transition, no_samples, petri_string, var_list):
+        all_slaves = list(self.slaves.keys())
+
+        n = math.ceil(len(var_list) / len(all_slaves))
+        variants_list_split = list(self.chunks(var_list, n))
+
+        threads = []
+
+        for index, slave in enumerate(all_slaves):
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            content = {"petri_string": petri_string, "var_list": variants_list_split[index]}
+
+            m = TbrRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
+
+            m.start()
+
+            threads.append(m)
+
+        ret_dict = []
+
+        for thread in threads:
+            thread.join()
+
+            ret_dict = ret_dict + thread.content["tbr"]
+
+        return ret_dict
