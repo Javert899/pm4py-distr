@@ -1,3 +1,8 @@
+try:
+    import pm4pycvxopt
+except:
+    pass
+
 from pm4pydistr import log_handlers, master, slave, util, configuration, local_wrapper, remote_wrapper
 
 __version__ = '0.1.11'
