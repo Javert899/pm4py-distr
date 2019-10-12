@@ -556,7 +556,7 @@ def perform_alignments():
     var_list = content["var_list"]
 
     if keyphrase == configuration.KEYPHRASE:
-        jsonify({"alignments": slave.perform_alignments(petri_string, var_list)})
+        return jsonify({"alignments": slave.perform_alignments(petri_string, var_list)})
 
     return jsonify({})
 
@@ -580,6 +580,6 @@ def perform_tbr():
     var_list = content["var_list"]
 
     if keyphrase == configuration.KEYPHRASE:
-        jsonify({"tbr": slave.perform_alignments(petri_string, var_list)})
+        return jsonify({"tbr": slave.perform_token_replay(petri_string, var_list)})
 
     return jsonify({})
