@@ -280,7 +280,7 @@ class ClassicDistrLogObject(DistrLogObj):
     def perform_alignments_net_log(self, net, im, fm, log, parameters=None):
         if parameters is None:
             parameters = {}
-        variants = log_variants_filter.get_variants_from_log_trace_idx(log)
+        variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
         var_list = [[x, y] for x,y in variants.items()]
 
         result = self.perform_alignments_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
@@ -302,7 +302,7 @@ class ClassicDistrLogObject(DistrLogObj):
         if var_list is None:
             variants = self.get_variants(parameters=parameters)
             var_list = [[x, y] for x,y in variants.items()]
-        petri_string = pnml_exporter.export_petri_as_string(net, im, fm)
+        petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
         return self.perform_alignments(petri_string, var_list, parameters=parameters)
 
     def perform_alignments(self, petri_string, var_list, parameters=None):
@@ -318,7 +318,7 @@ class ClassicDistrLogObject(DistrLogObj):
     def perform_tbr_net_log(self, net, im, fm, log, parameters=None):
         if parameters is None:
             parameters = {}
-        variants = log_variants_filter.get_variants_from_log_trace_idx(log)
+        variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
         var_list = [[x, y] for x,y in variants.items()]
 
         result = self.perform_tbr_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
@@ -340,7 +340,7 @@ class ClassicDistrLogObject(DistrLogObj):
         if var_list is None:
             variants = self.get_variants(parameters=parameters)
             var_list = [[x, y] for x,y in variants.items()]
-        petri_string = pnml_exporter.export_petri_as_string(net, im, fm)
+        petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
         return self.perform_token_replay(petri_string, var_list, parameters=parameters)
 
     def perform_token_replay(self, petri_string, var_list, parameters=None):

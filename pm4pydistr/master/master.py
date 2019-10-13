@@ -603,16 +603,17 @@ class Master:
         threads = []
 
         for index, slave in enumerate(all_slaves):
-            slave_host = self.slaves[slave][1]
-            slave_port = str(self.slaves[slave][2])
+            if len(variants_list_split) > index:
+                slave_host = self.slaves[slave][1]
+                slave_port = str(self.slaves[slave][2])
 
-            content = {"petri_string": petri_string, "var_list": variants_list_split[index]}
+                content = {"petri_string": petri_string, "var_list": variants_list_split[index]}
 
-            m = AlignRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
+                m = AlignRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
 
-            m.start()
+                m.start()
 
-            threads.append(m)
+                threads.append(m)
 
         ret_dict = {}
 
@@ -633,16 +634,17 @@ class Master:
         threads = []
 
         for index, slave in enumerate(all_slaves):
-            slave_host = self.slaves[slave][1]
-            slave_port = str(self.slaves[slave][2])
+            if len(variants_list_split) > index:
+                slave_host = self.slaves[slave][1]
+                slave_port = str(self.slaves[slave][2])
 
-            content = {"petri_string": petri_string, "var_list": variants_list_split[index]}
+                content = {"petri_string": petri_string, "var_list": variants_list_split[index]}
 
-            m = TbrRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
+                m = TbrRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
 
-            m.start()
+                m.start()
 
-            threads.append(m)
+                threads.append(m)
 
         ret_dict = []
 

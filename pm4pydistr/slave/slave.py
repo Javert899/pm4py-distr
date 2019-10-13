@@ -87,11 +87,15 @@ def perform_alignments(petri_string, var_list, parameters=None):
     if parameters is None:
         parameters = {}
 
+    parameters["ret_tuple_as_trans_desc"] = True
+
     return state_equation_a_star.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
 
 
 def perform_token_replay(petri_string, var_list, parameters=None):
     if parameters is None:
         parameters = {}
+
+    parameters["return_names"] = True
 
     return token_replay.apply_variants_list_petri_string(var_list, petri_string, parameters=parameters)
