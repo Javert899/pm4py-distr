@@ -11,9 +11,9 @@ class ExecutionThread(Thread):
         Thread.__init__(self)
 
     def run(self):
-        #os.system(self.command)
-        proc = subprocess.Popen(self.command, shell=True)
-        pid = proc.pid
+        os.system(self.command)
+        #proc = subprocess.Popen(self.command, shell=True)
+        #pid = proc.pid
 
 t1 = ExecutionThread(PYTHON_PATH+" launch.py type master conf master port 5001")
 t1.start()

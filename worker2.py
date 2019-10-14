@@ -13,10 +13,10 @@ class ExecutionThread(Thread):
         Thread.__init__(self)
 
     def run(self):
-        #os.system(self.command)
-        proc = subprocess.Popen(self.command, shell=True)
-        self.pid = proc.pid
-        os.system("taskset -cp "+str(self.core)+" "+str(self.pid))
+        os.system(self.command)
+        #proc = subprocess.Popen(self.command, shell=True)
+        #self.pid = proc.pid
+        #os.system("taskset -cp "+str(self.core)+" "+str(self.pid))
 
 MASTER_HOST = "137.226.117.71"
 THIS_HOST = "137.226.117.74"
