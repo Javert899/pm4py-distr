@@ -8,6 +8,28 @@ from pm4py.algo.filtering.common.filtering_constants import CASE_CONCEPT_NAME
 
 
 def transform_csv_dataset_to_parquet_distr_dataset(source_path, target_path, target_num_partitions, activity_key=xes.DEFAULT_NAME_KEY, timestamp_key=xes.DEFAULT_TIMESTAMP_KEY, caseid_key=CASE_CONCEPT_NAME):
+    """
+    Transforms the CSV dataset to a Parquet distributed dataset
+
+    Parameters
+    -------------
+    source_path
+        Source path
+    target_path
+        Target path
+    target_num_partitions
+        Target number of partitions (number of divisions of the output)
+    activity_key
+        Column that is the activity
+    timestamp_key
+        Column that is the timestamp
+    caseid_key
+        Column that is the case ID
+
+    Returns
+    -------------
+    void
+    """
     # create the folder
     try:
         os.mkdir(target_path)
