@@ -52,9 +52,10 @@ def transform_csv_dataset_to_parquet_distr_dataset(source_path, target_path, tar
                 source_df[xes.DEFAULT_TIMESTAMP_KEY] = source_df[timestamp_key]
             if caseid_key != CASE_CONCEPT_NAME:
                 source_df[CASE_CONCEPT_NAME] = source_df[caseid_key]
-            source_df["@@partition"] = source_df[caseid_key].rank(method='dense', ascending=False).astype(int) % target_num_partitions
+            #source_df["@@partition"] = source_df[caseid_key].rank(method='dense', ascending=False).astype(int) % target_num_partitions
+            source_df["@@partition"] = source_df[caseid_key].apply(hash)
+            source_df["@@partition"] = source_df["@@partition"] % target_num_partitions
             for i in range(target_num_partitions):
-                print("input %d/%d output %d/%d" % (index+1,len(files),i+1,target_num_partitions))
                 tp = os.path.join(target_path, str(i)+".parquet")
                 df2 = source_df[source_df["@@partition"] == i]
                 del df2["@@partition"]
@@ -63,4 +64,5 @@ def transform_csv_dataset_to_parquet_distr_dataset(source_path, target_path, tar
                 df = pd.concat([df1, df2])
                 if index == len(files)-1:
                     df = df.sort_values([caseid_key, timestamp_key])
+                print("input %d/%d output %d/%d len(df)=" % (index+1,len(files),i+1,target_num_partitions),len(df))
                 parquet_exporter.apply(df, tp)
