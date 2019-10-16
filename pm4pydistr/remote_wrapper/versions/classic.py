@@ -310,7 +310,7 @@ class ClassicDistrLogObject(DistrLogObj):
             parameters = {}
         if var_list is None:
             variants = self.get_variants(parameters=parameters)
-            var_list = [[x, y] for x, y in variants.items()]
+            var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
         petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
         return self.perform_alignments(petri_string, var_list, parameters=parameters)
 
@@ -356,7 +356,7 @@ class ClassicDistrLogObject(DistrLogObj):
             parameters = {}
         if var_list is None:
             variants = self.get_variants(parameters=parameters)
-            var_list = [[x, y] for x, y in variants.items()]
+            var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
         petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
         return self.perform_token_replay(petri_string, var_list, parameters=parameters)
 
