@@ -12,6 +12,12 @@ from datetime import datetime
 from pm4py.objects.petri.exporter.versions import pnml as pnml_exporter
 from pm4py.algo.filtering.log.variants import variants_filter as log_variants_filter
 from pm4pydistr.slave import slave
+import sys
+
+PARAM_MAX_ALIGN_TIME_TRACE = "max_align_time_trace"
+DEFAULT_MAX_ALIGN_TIME_TRACE = sys.maxsize
+PARAM_MAX_ALIGN_TIME = "max_align_time"
+DEFAULT_MAX_ALIGN_TIME = sys.maxsize
 
 
 class ClassicDistrLogObject(DistrLogObj):
@@ -42,8 +48,8 @@ class ClassicDistrLogObject(DistrLogObj):
                     print(time.time(), "password uncorrect!")
                     break
             except:
-                print(time.time(), "connection with host failed (%d out of %d)" % (i+1, max_retry_conn))
-                if i+1 == max_retry_conn:
+                print(time.time(), "connection with host failed (%d out of %d)" % (i + 1, max_retry_conn))
+                if i + 1 == max_retry_conn:
                     break
                 sleep_time = sleep_time * 1.5
                 time.sleep(sleep_time)
@@ -54,10 +60,13 @@ class ClassicDistrLogObject(DistrLogObj):
         while True:
             r = requests.get(url)
             content = json.loads(r.text)
-            if content["slave_loading_requested"] and content["finished_slaves"] > 0 and content["finished_slaves"] >= content["slaves_count"]:
+            if content["slave_loading_requested"] and content["finished_slaves"] > 0 and content["finished_slaves"] >= \
+                    content["slaves_count"]:
                 break
             else:
-                print(time.time(), "slaves still coming up, waiting a little more! finished log assignation for %d slaves out of %d" % (content["finished_slaves"], content["slaves_count"]))
+                print(time.time(),
+                      "slaves still coming up, waiting a little more! finished log assignation for %d slaves out of %d" % (
+                          content["finished_slaves"], content["slaves_count"]))
             sleep_time = sleep_time * 1.5
             time.sleep(sleep_time)
 
@@ -69,12 +78,13 @@ class ClassicDistrLogObject(DistrLogObj):
             if key not in parameters:
                 parameters[key] = self.init_parameters[key]
 
-        use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
+        use_transition = parameters[
+            PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
         no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
 
         stru = "http://" + self.hostname + ":" + str(
             self.port) + "/" + service + "?keyphrase=" + self.keyphrase + "&process=" + self.log_name + "&session=" + str(
-            self.session) + "&use_transition="+str(use_transition) + "&no_samples=" + str(no_samples)
+            self.session) + "&use_transition=" + str(use_transition) + "&no_samples=" + str(no_samples)
 
         for parameter in parameters:
             if parameter == constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY:
@@ -213,7 +223,7 @@ class ClassicDistrLogObject(DistrLogObj):
 
     def get_events(self, case_id, parameters=None):
         url = self.get_url("getEvents", parameters=parameters)
-        url = url + "&case_id="+str(case_id)
+        url = url + "&case_id=" + str(case_id)
         r = requests.get(url)
         ret_text = r.text
         ret_json = json.loads(ret_text)
@@ -229,7 +239,8 @@ class ClassicDistrLogObject(DistrLogObj):
     def get_events_per_dotted(self, attribute1, attribute2, attribute3, parameters=None):
         if parameters is None:
             parameters = {}
-        url = self.get_url("getEventsPerDotted", parameters={"attribute1": attribute1, "attribute2": attribute2, "attribute3": attribute3})
+        url = self.get_url("getEventsPerDotted",
+                           parameters={"attribute1": attribute1, "attribute2": attribute2, "attribute3": attribute3})
         r = requests.get(url)
         ret_text = r.text
         ret_json = json.loads(ret_text)
@@ -262,7 +273,6 @@ class ClassicDistrLogObject(DistrLogObj):
 
         return x, y
 
-
     def get_numeric_attribute(self, attribute_key, parameters=None):
         if parameters is None:
             parameters = {}
@@ -276,12 +286,11 @@ class ClassicDistrLogObject(DistrLogObj):
 
         return x, y
 
-
     def perform_alignments_net_log(self, net, im, fm, log, parameters=None):
         if parameters is None:
             parameters = {}
         variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
-        var_list = [[x, y] for x,y in variants.items()]
+        var_list = [[x, y] for x, y in variants.items()]
 
         result = self.perform_alignments_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
 
@@ -301,15 +310,23 @@ class ClassicDistrLogObject(DistrLogObj):
             parameters = {}
         if var_list is None:
             variants = self.get_variants(parameters=parameters)
-            var_list = [[x, y] for x,y in variants.items()]
+            var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
         petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
         return self.perform_alignments(petri_string, var_list, parameters=parameters)
 
     def perform_alignments(self, petri_string, var_list, parameters=None):
         if parameters is None:
             parameters = {}
-        url = self.get_url("performAlignments")
-        dictio = {"petri_string": petri_string, "var_list": var_list}
+
+        max_align_time = parameters[
+            PARAM_MAX_ALIGN_TIME] if PARAM_MAX_ALIGN_TIME in parameters else DEFAULT_MAX_ALIGN_TIME
+        max_align_time_trace = parameters[
+            PARAM_MAX_ALIGN_TIME_TRACE] if PARAM_MAX_ALIGN_TIME_TRACE in parameters else DEFAULT_MAX_ALIGN_TIME_TRACE
+
+        url = self.get_url("performAlignments", parameters=parameters)
+        dictio = {"petri_string": petri_string, "var_list": var_list, "max_align_time": max_align_time,
+                  "max_align_time_trace": max_align_time_trace}
+
         r = requests.post(url, json=dictio)
         ret_text = r.text
         ret_json = json.loads(ret_text)
@@ -319,7 +336,7 @@ class ClassicDistrLogObject(DistrLogObj):
         if parameters is None:
             parameters = {}
         variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
-        var_list = [[x, y] for x,y in variants.items()]
+        var_list = [[x, y] for x, y in variants.items()]
 
         result = self.perform_tbr_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
 
@@ -339,7 +356,7 @@ class ClassicDistrLogObject(DistrLogObj):
             parameters = {}
         if var_list is None:
             variants = self.get_variants(parameters=parameters)
-            var_list = [[x, y] for x,y in variants.items()]
+            var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
         petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
         return self.perform_token_replay(petri_string, var_list, parameters=parameters)
 
