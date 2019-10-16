@@ -12,9 +12,11 @@ from pm4pydistr.master.db_manager import DbManager
 from pm4py.objects.log.util import xes
 
 import logging, json
+import sys
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
+
 
 class MasterSocketListener(Thread):
     app = Flask(__name__)
@@ -114,10 +116,12 @@ def get_loading_status():
     if keyphrase == configuration.KEYPHRASE:
         slaves_count, finished_slaves = get_slaves_count()
         return jsonify({"keyphrase_correct": True, "first_loading_done": MasterVariableContainer.first_loading_done,
-                        "log_assignment_done": MasterVariableContainer.log_assignment_done, "slave_loading_requested": MasterVariableContainer.slave_loading_requested,
+                        "log_assignment_done": MasterVariableContainer.log_assignment_done,
+                        "slave_loading_requested": MasterVariableContainer.slave_loading_requested,
                         "slaves_count": slaves_count, "finished_slaves": finished_slaves})
 
     return jsonify({"keyphrase_correct": False})
+
 
 @MasterSocketListener.app.route("/doLogAssignment", methods=["GET"])
 def do_log_assignment():
@@ -162,6 +166,7 @@ def get_sublogs_correspondence():
         return jsonify({"sublogs_correspondence": MasterVariableContainer.master.sublogs_correspondence})
     return jsonify({})
 
+
 @MasterSocketListener.app.route("/setFilters", methods=["POST"])
 def set_filters():
     check_master_initialized()
@@ -201,6 +206,7 @@ def do_caching():
 
     return jsonify({})
 
+
 @MasterSocketListener.app.route("/calculateDfg", methods=["GET"])
 def calculate_dfg():
     check_master_initialized()
@@ -216,7 +222,8 @@ def calculate_dfg():
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
     if keyphrase == configuration.KEYPHRASE:
-        overall_dfg = MasterVariableContainer.master.calculate_dfg(session, process, use_transition, no_samples, attribute_key)
+        overall_dfg = MasterVariableContainer.master.calculate_dfg(session, process, use_transition, no_samples,
+                                                                   attribute_key)
 
         return jsonify({"dfg": overall_dfg})
 
@@ -238,7 +245,8 @@ def calculate_performance_dfg():
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
     if keyphrase == configuration.KEYPHRASE:
-        overall_dfg = MasterVariableContainer.master.calculate_performance_dfg(session, process, use_transition, no_samples, attribute_key)
+        overall_dfg = MasterVariableContainer.master.calculate_performance_dfg(session, process, use_transition,
+                                                                               no_samples, attribute_key)
 
         return jsonify({"dfg": overall_dfg})
 
@@ -265,7 +273,9 @@ def calculate_composite_obj():
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
     if keyphrase == configuration.KEYPHRASE:
-        overall_obj = MasterVariableContainer.master.calculate_composite_obj(session, process, use_transition, no_samples, attribute_key, performance_required=performance_required)
+        overall_obj = MasterVariableContainer.master.calculate_composite_obj(session, process, use_transition,
+                                                                             no_samples, attribute_key,
+                                                                             performance_required=performance_required)
 
         return jsonify({"obj": overall_obj})
 
@@ -326,7 +336,8 @@ def calculate_attribute_values():
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
     if keyphrase == configuration.KEYPHRASE:
-        values = MasterVariableContainer.master.get_attribute_values(session, process, use_transition, no_samples, attribute_key)
+        values = MasterVariableContainer.master.get_attribute_values(session, process, use_transition, no_samples,
+                                                                     attribute_key)
 
         return jsonify({"values": values})
 
@@ -388,7 +399,8 @@ def get_variants():
     max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
 
     if keyphrase == configuration.KEYPHRASE:
-        variants = MasterVariableContainer.master.get_variants(session, process, use_transition, no_samples, max_ret_items=max_no_ret_items)
+        variants = MasterVariableContainer.master.get_variants(session, process, use_transition, no_samples,
+                                                               max_ret_items=max_no_ret_items)
 
         return jsonify(variants)
     return jsonify({"variants": [], "events": 0, "cases": 0})
@@ -409,7 +421,8 @@ def get_cases():
     max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
 
     if keyphrase == configuration.KEYPHRASE:
-        cases = MasterVariableContainer.master.get_cases(session, process, use_transition, no_samples, max_ret_items=max_no_ret_items)
+        cases = MasterVariableContainer.master.get_cases(session, process, use_transition, no_samples,
+                                                         max_ret_items=max_no_ret_items)
 
         return jsonify(cases)
     return jsonify({"cases_list": [], "events": 0, "cases": 0})
@@ -456,7 +469,9 @@ def get_events_per_dotted():
     attribute3 = request.args.get("attribute3", type=str, default=None)
 
     if keyphrase == configuration.KEYPHRASE:
-        ret = MasterVariableContainer.master.get_events_per_dotted(session, process, use_transition, no_samples, attribute1, attribute2, attribute3, max_ret_items=max_no_ret_items)
+        ret = MasterVariableContainer.master.get_events_per_dotted(session, process, use_transition, no_samples,
+                                                                   attribute1, attribute2, attribute3,
+                                                                   max_ret_items=max_no_ret_items)
 
         return jsonify({"traces": ret[0], "types": ret[1], "attributes": ret[2], "third_unique_values": ret[3]})
 
@@ -478,7 +493,8 @@ def get_events_per_time():
     max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
 
     if keyphrase == configuration.KEYPHRASE:
-        points = MasterVariableContainer.master.get_events_per_time(session, process, use_transition, no_samples, max_ret_items=max_no_ret_items)
+        points = MasterVariableContainer.master.get_events_per_time(session, process, use_transition, no_samples,
+                                                                    max_ret_items=max_no_ret_items)
 
         return jsonify({"points": points})
 
@@ -500,7 +516,8 @@ def get_case_duration():
     max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
 
     if keyphrase == configuration.KEYPHRASE:
-        points = MasterVariableContainer.master.get_case_duration(session, process, use_transition, no_samples, max_ret_items=max_no_ret_items)
+        points = MasterVariableContainer.master.get_case_duration(session, process, use_transition, no_samples,
+                                                                  max_ret_items=max_no_ret_items)
 
         return jsonify({"points": points})
 
@@ -524,7 +541,9 @@ def get_numeric_attribute_values():
     attribute_key = request.args.get("attribute_key", type=str)
 
     if keyphrase == configuration.KEYPHRASE:
-        points = MasterVariableContainer.master.get_numeric_attribute_values(session, process, use_transition, no_samples, attribute_key, max_ret_items=max_no_ret_items)
+        points = MasterVariableContainer.master.get_numeric_attribute_values(session, process, use_transition,
+                                                                             no_samples, attribute_key,
+                                                                             max_ret_items=max_no_ret_items)
 
         return jsonify({"points": points})
 
@@ -550,9 +569,14 @@ def perform_alignments():
 
     petri_string = content["petri_string"]
     var_list = content["var_list"]
+    max_align_time = content["max_align_time"]
+    max_align_time_trace = content["max_align_time_trace"]
 
     if keyphrase == configuration.KEYPHRASE:
-        alignments = MasterVariableContainer.master.perform_alignments(session, process, use_transition, no_samples, petri_string, var_list)
+        alignments = MasterVariableContainer.master.perform_alignments(session, process, use_transition, no_samples,
+                                                                       petri_string, var_list,
+                                                                       max_align_time=max_align_time,
+                                                                       max_align_time_trace=max_align_time_trace)
         return jsonify({"alignments": alignments})
 
     return jsonify({})
@@ -579,7 +603,8 @@ def perform_tbr():
     var_list = content["var_list"]
 
     if keyphrase == configuration.KEYPHRASE:
-        tbr = MasterVariableContainer.master.perform_tbr(session, process, use_transition, no_samples, petri_string, var_list)
+        tbr = MasterVariableContainer.master.perform_tbr(session, process, use_transition, no_samples, petri_string,
+                                                         var_list)
         return jsonify({"tbr": tbr})
 
     return jsonify({})

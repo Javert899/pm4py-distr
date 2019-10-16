@@ -13,6 +13,7 @@ from pm4pydistr.log_handlers import parquet as parquet_handler
 
 import os
 import json
+import sys
 
 import logging
 log = logging.getLogger('werkzeug')
@@ -554,9 +555,15 @@ def perform_alignments():
 
     petri_string = content["petri_string"]
     var_list = content["var_list"]
+    max_align_time = content["max_align_time"]
+    max_align_time_trace = content["max_align_time_trace"]
 
     if keyphrase == configuration.KEYPHRASE:
-        return jsonify({"alignments": slave.perform_alignments(petri_string, var_list)})
+        parameters = {}
+        parameters["max_align_time"] = max_align_time
+        parameters["max_align_time_trace"] = max_align_time_trace
+
+        return jsonify({"alignments": slave.perform_alignments(petri_string, var_list, parameters=parameters)})
 
     return jsonify({})
 
