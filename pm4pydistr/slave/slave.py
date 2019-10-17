@@ -15,11 +15,16 @@ import shutil
 
 import time
 
+from pm4py.algo.conformance.alignments.versions import state_equation_a_star
+from pm4py.algo.conformance.tokenreplay.versions import token_replay
+
+
 def find_free_port():
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
         s.bind(('', 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
+
 
 class Slave:
     def __init__(self, parameters):
@@ -56,12 +61,12 @@ class Slave:
         self.slave_requests.register_to_webservice()
 
     def create_folder(self, folder_name):
-        #print("create folder " + str(folder_name))
+        # print("create folder " + str(folder_name))
         if not os.path.isdir(os.path.join(self.conf, folder_name)):
             os.mkdir(os.path.join(self.conf, folder_name))
 
     def load_log(self, folder_name, log_name):
-        #print("loading log " + str(log_name)+" into "+str(folder_name))
+        # print("loading log " + str(log_name)+" into "+str(folder_name))
         if not os.path.exists(os.path.join(self.conf, folder_name, log_name)):
             for folder in BASE_FOLDER_LIST_OPTIONS:
                 if folder_name in os.listdir(folder):
@@ -70,9 +75,27 @@ class Slave:
                     for x in list_paths:
                         list_paths_corr[Path(x).name] = x
                     if log_name in list_paths_corr:
-                        #print("log_name",log_name," in ",os.path.join(folder, folder_name),list_paths_corr[log_name])
+                        # print("log_name",log_name," in ",os.path.join(folder, folder_name),list_paths_corr[log_name])
                         shutil.copyfile(list_paths_corr[log_name], os.path.join(self.conf, folder_name, log_name))
 
     def enable_ping_of_master(self):
         self.ping_module = DoMasterPing(self, self.conf, self.id, self.master_host, self.master_port)
         self.ping_module.start()
+
+
+def perform_alignments(petri_string, var_list, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    parameters["ret_tuple_as_trans_desc"] = True
+
+    return state_equation_a_star.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
+
+
+def perform_token_replay(petri_string, var_list, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    parameters["return_names"] = True
+
+    return token_replay.apply_variants_list_petri_string(var_list, petri_string, parameters=parameters)

@@ -29,7 +29,8 @@ setup(
         'pm4py',
         'requests',
         'Flask',
-        'flask-cors'
+        'flask-cors',
+        'psutil'
     ],
     project_urls={
         'Documentation': 'http://pm4py.pads.rwth-aachen.de/documentation/',
