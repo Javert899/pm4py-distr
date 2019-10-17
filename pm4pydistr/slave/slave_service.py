@@ -13,6 +13,7 @@ from pm4pydistr.log_handlers import parquet as parquet_handler
 
 import os
 import json
+import sys
 
 import logging
 log = logging.getLogger('werkzeug')
@@ -533,5 +534,59 @@ def get_numeric_attribute_values():
         returned_list = parquet_handler.get_numeric_attribute_values(SlaveVariableContainer.conf, process, SlaveVariableContainer.managed_logs[process], parameters=parameters)
 
         return jsonify({"points": returned_list})
+
+    return jsonify({})
+
+
+@SlaveSocketListener.app.route("/performAlignments", methods=["POST"])
+def perform_alignments():
+    from pm4pydistr.slave import slave
+
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    try:
+        content = json.loads(request.data)
+    except:
+        content = json.loads(request.data.decode('utf-8'))
+
+    petri_string = content["petri_string"]
+    var_list = content["var_list"]
+    max_align_time = content["max_align_time"]
+    max_align_time_trace = content["max_align_time_trace"]
+
+    if keyphrase == configuration.KEYPHRASE:
+        parameters = {}
+        parameters["max_align_time"] = max_align_time
+        parameters["max_align_time_trace"] = max_align_time_trace
+
+        return jsonify({"alignments": slave.perform_alignments(petri_string, var_list, parameters=parameters)})
+
+    return jsonify({})
+
+
+@SlaveSocketListener.app.route("/performTbr", methods=["POST"])
+def perform_tbr():
+    from pm4pydistr.slave import slave
+
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    try:
+        content = json.loads(request.data)
+    except:
+        content = json.loads(request.data.decode('utf-8'))
+
+    petri_string = content["petri_string"]
+    var_list = content["var_list"]
+
+    if keyphrase == configuration.KEYPHRASE:
+        return jsonify({"tbr": slave.perform_token_replay(petri_string, var_list)})
 
     return jsonify({})

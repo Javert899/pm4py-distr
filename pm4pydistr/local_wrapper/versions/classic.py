@@ -5,8 +5,10 @@ from pm4py.util import constants as pm4py_constants
 from pathlib import Path
 from pm4py.algo.filtering.common.attributes import attributes_common
 from pm4py.statistics.traces.common import case_duration as case_duration_commons
-from copy import deepcopy
 from datetime import datetime
+from pm4py.objects.petri.exporter.versions import pnml as pnml_exporter
+from pm4py.algo.filtering.log.variants import variants_filter as log_variants_filter
+from pm4pydistr.slave import slave
 
 
 class ClassicDistrLogObject(LocalDistrLogObj):
@@ -246,6 +248,62 @@ class ClassicDistrLogObject(LocalDistrLogObj):
         x, y = attributes_common.get_kde_numeric_attribute(ret)
 
         return x, y
+
+    def perform_alignments_net_log(self, net, im, fm, log, parameters=None):
+        if parameters is None:
+            parameters = {}
+        variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
+        var_list = [[x, y] for x,y in variants.items()]
+
+        result = self.perform_alignments_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
+
+        al_idx = {}
+        for index_variant, variant in enumerate(variants):
+            for trace_idx in variants[variant]:
+                al_idx[trace_idx] = result[variant]
+
+        alignments = []
+        for i in range(len(log)):
+            alignments.append(al_idx[i])
+
+        return alignments
+
+    def perform_alignments_net_variants(self, net, im, fm, var_list=None, parameters=None):
+        if parameters is None:
+            parameters = {}
+        if var_list is None:
+            variants = self.get_variants(parameters=parameters)
+            var_list = [[x, y] for x,y in variants.items()]
+        petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
+        return slave.perform_alignments(petri_string, var_list, parameters=parameters)
+
+    def perform_tbr_net_log(self, net, im, fm, log, parameters=None):
+        if parameters is None:
+            parameters = {}
+        variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
+        var_list = [[x, y] for x,y in variants.items()]
+
+        result = self.perform_tbr_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
+
+        al_idx = {}
+        for index_variant, variant in enumerate(variants):
+            for trace_idx in variants[variant]:
+                al_idx[trace_idx] = result[index_variant]
+
+        tbr = []
+        for i in range(len(log)):
+            tbr.append(al_idx[i])
+
+        return tbr
+
+    def perform_tbr_net_variants(self, net, im, fm, var_list=None, parameters=None):
+        if parameters is None:
+            parameters = {}
+        if var_list is None:
+            variants = self.get_variants(parameters=parameters)
+            var_list = [[x, y] for x,y in variants.items()]
+        petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
+        return slave.perform_token_replay(petri_string, var_list, parameters=parameters)
 
 def apply(path, parameters=None):
     if parameters is None:
