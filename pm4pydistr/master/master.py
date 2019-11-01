@@ -23,6 +23,7 @@ from pm4pydistr.master.rqsts.numeric_attribute_request import NumericAttributeRe
 from pm4pydistr.master.rqsts.caching_request import CachingRequest
 from pm4pydistr.master.rqsts.conf_align_request import AlignRequest
 from pm4pydistr.master.rqsts.conf_tbr_request import TbrRequest
+from pm4pydistr.master.rqsts.shutdown_request import ShutdownRequest
 import math
 
 from pathlib import Path
@@ -663,3 +664,25 @@ class Master:
             ret_dict = ret_dict + thread.content["tbr"]
 
         return ret_dict
+
+    def perform_shutdown(self, session, process, use_transition, no_samples):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = ShutdownRequest(session, slave_host, slave_port, use_transition, no_samples, None)
+            m.start()
+
+            threads.append(m)
+
+        # do shutdown
+        os._exit(0)
+
+        for thread in threads:
+            thread.join()
+
+        return None
