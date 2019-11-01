@@ -22,3 +22,5 @@ elif ip_address == "137.226.117.75":
 elif ip_address == "137.226.117.76":
     time.sleep(20)
     os.system("nohup python3 worker4.py &")
+time.sleep(3)
+os.system("nohup python3 set_task_priority.py &")
