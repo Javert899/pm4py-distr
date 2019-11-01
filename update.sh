@@ -1,5 +1,7 @@
 pkill -f launch
+git clean -x -f
 git reset --hard HEAD
+rm -rRf slave*
 git pull
 pip3 install -U -r requirements.txt
 pip3 install -U pm4pycvxopt

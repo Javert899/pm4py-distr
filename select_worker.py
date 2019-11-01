@@ -4,7 +4,7 @@ import os
 ip_address = str(socket.gethostbyname(socket.gethostname()))
 
 if ip_address == "137.226.117.71":
-    os.system("nohup python3 server_launch.py &")
+    os.system("nohup python3 main.py &")
     time.sleep(15)
     os.system("nohup python3 worker6.py &")
 elif ip_address == "137.226.117.72":
