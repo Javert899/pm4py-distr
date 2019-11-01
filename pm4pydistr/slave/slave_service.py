@@ -590,3 +590,17 @@ def perform_tbr():
         return jsonify({"tbr": slave.perform_token_replay(petri_string, var_list)})
 
     return jsonify({})
+
+
+@SlaveSocketListener.app.route("/doShutdown", methods=["GET"])
+def do_shutdown():
+    keyphrase = request.args.get('keyphrase', type=str)
+    process = request.args.get('process', type=str)
+
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if keyphrase == configuration.KEYPHRASE:
+        # do shutdown
+        os._exit(0)
+
+    return jsonify({})

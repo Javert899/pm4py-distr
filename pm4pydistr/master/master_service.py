@@ -143,7 +143,7 @@ def get_slaves_list():
     keyphrase = request.args.get('keyphrase', type=str)
 
     if keyphrase == configuration.KEYPHRASE:
-        return jsonify({"slaves": MasterVariableContainer.master.slaves})
+        return jsonify({"slaves": MasterVariableContainer.master.slaves, "uuid": MasterVariableContainer.master.unique_identifier})
     return jsonify({})
 
 
@@ -606,5 +606,21 @@ def perform_tbr():
         tbr = MasterVariableContainer.master.perform_tbr(session, process, use_transition, no_samples, petri_string,
                                                          var_list)
         return jsonify({"tbr": tbr})
+
+    return jsonify({})
+
+
+@MasterSocketListener.app.route("/doShutdown", methods=["GET"])
+def do_shutdown():
+    check_master_initialized()
+
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if keyphrase == configuration.KEYPHRASE:
+        MasterVariableContainer.master.perform_shutdown(session, process, use_transition, no_samples)
 
     return jsonify({})
