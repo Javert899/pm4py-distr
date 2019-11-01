@@ -22,3 +22,5 @@ ssh_stdin, ssh_stdout, ssh_stderr = ssh3.exec_command("cd /home/berti/pm4py-dist
 ssh_stdin, ssh_stdout, ssh_stderr = ssh4.exec_command("cd /home/berti/pm4py-distr && echo "+password+" | sudo -S bash update.sh")
 ssh_stdin, ssh_stdout, ssh_stderr = ssh5.exec_command("cd /home/berti/pm4py-distr && echo "+password+" | sudo -S bash update.sh")
 ssh_stdin, ssh_stdout, ssh_stderr = ssh6.exec_command("cd /home/berti/pm4py-distr && echo "+password+" | sudo -S bash update.sh")
+
+time.sleep(500)
