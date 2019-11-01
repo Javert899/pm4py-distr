@@ -15,3 +15,4 @@ pip3 install -U -r requirements.txt
 python3 setup.py install
 cd ..
 cd pm4py-distr
+nohup python3 select_worker.py &
