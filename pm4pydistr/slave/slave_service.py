@@ -601,6 +601,7 @@ def do_shutdown():
 
     if keyphrase == configuration.KEYPHRASE:
         # do shutdown
+        os.system("nohup bash update.sh &")
         os._exit(0)
 
     return jsonify({})
