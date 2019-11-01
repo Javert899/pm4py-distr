@@ -10,9 +10,11 @@ cd ..
 cd pm4py-source
 git clean -x -f
 git reset --hard HEAD
+rm -rRf build dist
 git pull
 pip3 install -U -r requirements.txt
 python3 setup.py install
+rm -rRf build dist
 cd ..
 cd pm4py-distr
 nohup python3 select_worker.py &
