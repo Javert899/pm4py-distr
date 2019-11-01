@@ -25,6 +25,7 @@ from pm4pydistr.master.rqsts.conf_align_request import AlignRequest
 from pm4pydistr.master.rqsts.conf_tbr_request import TbrRequest
 from pm4pydistr.master.rqsts.shutdown_request import ShutdownRequest
 import math
+import uuid
 
 from pathlib import Path
 from random import randrange
@@ -41,6 +42,8 @@ import sys
 class Master:
     def __init__(self, parameters):
         self.parameters = parameters
+
+        self.unique_identifier = str(uuid.uuid4())
 
         self.host = parameters[PARAMETERS_HOST]
         self.port = str(parameters[PARAMETERS_PORT])

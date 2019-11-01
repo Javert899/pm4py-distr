@@ -143,7 +143,7 @@ def get_slaves_list():
     keyphrase = request.args.get('keyphrase', type=str)
 
     if keyphrase == configuration.KEYPHRASE:
-        return jsonify({"slaves": MasterVariableContainer.master.slaves})
+        return jsonify({"slaves": MasterVariableContainer.master.slaves, "uuid": MasterVariableContainer.master.unique_identifier})
     return jsonify({})
 
 
