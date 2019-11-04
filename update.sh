@@ -6,6 +6,7 @@ rm -f nohup.out
 git pull
 pip3 install -U -r requirements.txt
 pip3 install -U pm4pycvxopt
+pip3 install --no-deps pm4pyigraph
 pip3 uninstall -y pm4py
 cd ..
 cd pm4py-source
