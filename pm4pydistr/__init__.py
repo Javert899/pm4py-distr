@@ -1,4 +1,9 @@
 try:
+    import pm4pyigraph
+except:
+    pass
+
+try:
     import pm4pycvxopt
 except:
     pass
