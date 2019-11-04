@@ -15,7 +15,7 @@ import shutil
 
 import time
 
-from pm4py.algo.conformance.alignments.versions import state_equation_a_star
+from pm4py.algo.conformance.alignments.versions import dijkstra_heu_a_star
 from pm4py.algo.conformance.tokenreplay.versions import token_replay
 
 
@@ -89,7 +89,7 @@ def perform_alignments(petri_string, var_list, parameters=None):
 
     parameters["ret_tuple_as_trans_desc"] = True
 
-    return state_equation_a_star.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
+    return dijkstra_heu_a_star.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
 
 
 def perform_token_replay(petri_string, var_list, parameters=None):
