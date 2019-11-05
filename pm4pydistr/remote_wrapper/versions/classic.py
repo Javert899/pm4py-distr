@@ -371,6 +371,25 @@ class ClassicDistrLogObject(DistrLogObj):
         return ret_json["tbr"]
 
 
+    def calculate_fitness_with_tbr(self, net, im, fm, log, parameters=None):
+        if parameters is None:
+            parameters = {}
+        variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
+        var_list = [[x, y] for x, y in variants.items()]
+
+        result = self.perform_tbr_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
+        total_cases = 0
+        total_fit_cases = 0
+
+        for index_variant, variant in enumerate(variants):
+            total_cases = total_cases + len(variants[variant])
+            if result[index_variant]["trace_is_fit"]:
+                total_fit_cases = total_fit_cases + len(variants[variant])
+
+        if total_cases > 0:
+            return total_fit_cases / total_cases
+        return 0
+
     def calculate_fitness_with_alignments(self, net, im, fm, log, parameters=None):
         if parameters is None:
             parameters = {}
