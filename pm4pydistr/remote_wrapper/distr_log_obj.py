@@ -92,3 +92,6 @@ class DistrLogObj(object):
 
     def calculate_precision_with_tbr(self, net, im, fm, log, parameters=None):
         raise Exception("not implemented")
+
+    def calculate_fitness_with_tbr(self, net, im, fm, log, parameters=None):
+        raise Exception("not implemented")
