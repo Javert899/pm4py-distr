@@ -369,3 +369,58 @@ class ClassicDistrLogObject(DistrLogObj):
         ret_text = r.text
         ret_json = json.loads(ret_text)
         return ret_json["tbr"]
+
+
+    def calculate_fitness_with_alignments(self, net, im, fm, log, parameters=None):
+        if parameters is None:
+            parameters = {}
+        variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
+        var_list = [[x, y] for x, y in variants.items()]
+
+        result = self.perform_alignments_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
+        total_cases = 0
+        total_fit_cases = 0
+
+        for index_variant, variant in enumerate(variants):
+            total_cases = total_cases + len(variants[variant])
+            if result[variant]["cost"] < 10000:
+                total_fit_cases = total_fit_cases + len(variants[variant])
+
+        if total_cases > 0:
+            return total_fit_cases / total_cases
+        return 0
+
+    def calculate_precision_with_tbr(self, net, im, fm, log, parameters=None):
+        from pm4py import util as pmutil
+        from pm4py.algo.conformance.tokenreplay import factory as token_replay
+        from pm4py.objects import log as log_lib
+        from pm4py.evaluation.precision import utils as precision_utils
+
+        if parameters is None:
+            parameters = {}
+
+        sum_at = 0.0
+        sum_ee = 0.0
+
+        prefixes, prefix_count = precision_utils.get_log_prefixes(log)
+        prefixes_keys = list(prefixes.keys())
+        fake_log = precision_utils.form_fake_log(prefixes_keys)
+
+        variants = log_variants_filter.get_variants_from_log_trace_idx(fake_log, parameters=parameters)
+        var_list = [[x, y] for x, y in variants.items()]
+
+        aligned_traces = self.perform_tbr_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
+
+        for i in range(len(aligned_traces)):
+            if aligned_traces[i]["trace_is_fit"]:
+                log_transitions = set(prefixes[prefixes_keys[i]])
+                activated_transitions_labels = set(
+                    [x for x in aligned_traces[i]["enabled_transitions_in_marking_labels"] if x != "None"])
+                sum_at += len(activated_transitions_labels) * prefix_count[prefixes_keys[i]]
+                escaping_edges = activated_transitions_labels.difference(log_transitions)
+                sum_ee += len(escaping_edges) * prefix_count[prefixes_keys[i]]
+
+        if sum_at > 0:
+            precision = 1 - float(sum_ee) / float(sum_at)
+
+        return precision
