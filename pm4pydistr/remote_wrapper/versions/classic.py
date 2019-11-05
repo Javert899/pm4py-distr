@@ -403,13 +403,18 @@ class ClassicDistrLogObject(DistrLogObj):
         sum_ee = 0.0
 
         prefixes, prefix_count = precision_utils.get_log_prefixes(log)
+        print("got prefixes")
         prefixes_keys = list(prefixes.keys())
         fake_log = precision_utils.form_fake_log(prefixes_keys)
+        print("got fake log")
 
         variants = log_variants_filter.get_variants_from_log_trace_idx(fake_log, parameters=parameters)
+        print("got variants from fake log")
         var_list = [[x, y] for x, y in variants.items()]
+        print("got var list")
 
         aligned_traces = self.perform_tbr_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
+        print("got aligned traces")
 
         for i in range(len(aligned_traces)):
             if aligned_traces[i]["trace_is_fit"]:
