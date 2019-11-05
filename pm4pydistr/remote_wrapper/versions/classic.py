@@ -383,7 +383,7 @@ class ClassicDistrLogObject(DistrLogObj):
 
         for index_variant, variant in enumerate(variants):
             total_cases = total_cases + len(variants[variant])
-            if result[index_variant]["cost"] < 10000:
+            if result[variant]["cost"] < 10000:
                 total_fit_cases = total_fit_cases + len(variants[variant])
 
         if total_cases > 0:
@@ -399,6 +399,9 @@ class ClassicDistrLogObject(DistrLogObj):
         if parameters is None:
             parameters = {}
 
+        sum_at = 0.0
+        sum_ee = 0.0
+
         prefixes, prefix_count = precision_utils.get_log_prefixes(log)
         prefixes_keys = list(prefixes.keys())
         fake_log = precision_utils.form_fake_log(prefixes_keys)
@@ -412,7 +415,7 @@ class ClassicDistrLogObject(DistrLogObj):
             if aligned_traces[i]["trace_is_fit"]:
                 log_transitions = set(prefixes[prefixes_keys[i]])
                 activated_transitions_labels = set(
-                    [x for x in aligned_traces[i]["enabled_transitions_in_marking"] if x != "None"])
+                    [x for x in aligned_traces[i]["enabled_transitions_in_marking_labels"] if x != "None"])
                 sum_at += len(activated_transitions_labels) * prefix_count[prefixes_keys[i]]
                 escaping_edges = activated_transitions_labels.difference(log_transitions)
                 sum_ee += len(escaping_edges) * prefix_count[prefixes_keys[i]]
