@@ -571,12 +571,14 @@ def perform_alignments():
     var_list = content["var_list"]
     max_align_time = content["max_align_time"]
     max_align_time_trace = content["max_align_time_trace"]
+    align_variant = content["align_variant"]
 
     if keyphrase == configuration.KEYPHRASE:
         alignments = MasterVariableContainer.master.perform_alignments(session, process, use_transition, no_samples,
                                                                        petri_string, var_list,
                                                                        max_align_time=max_align_time,
-                                                                       max_align_time_trace=max_align_time_trace)
+                                                                       max_align_time_trace=max_align_time_trace,
+                                                                       align_variant=align_variant)
         return jsonify({"alignments": alignments})
 
     return jsonify({})
@@ -601,10 +603,12 @@ def perform_tbr():
 
     petri_string = content["petri_string"]
     var_list = content["var_list"]
+    enable_parameters_precision = content["enable_parameters_precision"] if "enable_parameters_precision" in content else False
+    consider_remaining_in_fitness = content["consider_remaining_in_fitness"] if "consider_remaining_in_fitness" in content else False
 
     if keyphrase == configuration.KEYPHRASE:
         tbr = MasterVariableContainer.master.perform_tbr(session, process, use_transition, no_samples, petri_string,
-                                                         var_list)
+                                                         var_list, enable_parameters_precision, consider_remaining_in_fitness)
         return jsonify({"tbr": tbr})
 
     return jsonify({})

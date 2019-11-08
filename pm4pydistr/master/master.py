@@ -607,7 +607,7 @@ class Master:
             yield l[i:i + n]
 
     def perform_alignments(self, session, process, use_transition, no_samples, petri_string, var_list,
-                           max_align_time=sys.maxsize, max_align_time_trace=sys.maxsize):
+                           max_align_time=sys.maxsize, max_align_time_trace=sys.maxsize, align_variant="dijkstra_no_heuristics"):
         all_slaves = list(self.slaves.keys())
 
         n = math.ceil(len(var_list) / len(all_slaves))
@@ -621,7 +621,8 @@ class Master:
                 slave_port = str(self.slaves[slave][2])
 
                 content = {"petri_string": petri_string, "var_list": variants_list_split[index],
-                           "max_align_time": max_align_time, "max_align_time_trace": max_align_time_trace}
+                           "max_align_time": max_align_time, "max_align_time_trace": max_align_time_trace,
+                           "align_variant": align_variant}
 
                 m = AlignRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
 
@@ -638,7 +639,8 @@ class Master:
 
         return ret_dict
 
-    def perform_tbr(self, session, process, use_transition, no_samples, petri_string, var_list):
+    def perform_tbr(self, session, process, use_transition, no_samples, petri_string, var_list,
+                    enable_parameters_precision, consider_remaining_in_fitness):
         all_slaves = list(self.slaves.keys())
 
         n = math.ceil(len(var_list) / len(all_slaves))
@@ -651,7 +653,9 @@ class Master:
                 slave_host = self.slaves[slave][1]
                 slave_port = str(self.slaves[slave][2])
 
-                content = {"petri_string": petri_string, "var_list": variants_list_split[index]}
+                content = {"petri_string": petri_string, "var_list": variants_list_split[index],
+                           "enable_parameters_precision": enable_parameters_precision,
+                           "consider_remaining_in_fitness": consider_remaining_in_fitness}
 
                 m = TbrRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
 

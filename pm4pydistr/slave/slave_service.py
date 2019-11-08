@@ -557,11 +557,13 @@ def perform_alignments():
     var_list = content["var_list"]
     max_align_time = content["max_align_time"]
     max_align_time_trace = content["max_align_time_trace"]
+    align_variant = content["align_variant"]
 
     if keyphrase == configuration.KEYPHRASE:
         parameters = {}
         parameters["max_align_time"] = max_align_time
         parameters["max_align_time_trace"] = max_align_time_trace
+        parameters["align_variant"] = align_variant
 
         return jsonify({"alignments": slave.perform_alignments(petri_string, var_list, parameters=parameters)})
 
@@ -585,9 +587,13 @@ def perform_tbr():
 
     petri_string = content["petri_string"]
     var_list = content["var_list"]
+    enable_parameters_precision = content["enable_parameters_precision"]
+    consider_remaining_in_fitness = content["consider_remaining_in_fitness"]
 
     if keyphrase == configuration.KEYPHRASE:
-        return jsonify({"tbr": slave.perform_token_replay(petri_string, var_list)})
+        parameters = {"enable_parameters_precision": enable_parameters_precision, "consider_remaining_in_fitness": consider_remaining_in_fitness}
+
+        return jsonify({"tbr": slave.perform_token_replay(petri_string, var_list, parameters=parameters)})
 
     return jsonify({})
 
