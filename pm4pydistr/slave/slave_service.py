@@ -585,9 +585,12 @@ def perform_tbr():
 
     petri_string = content["petri_string"]
     var_list = content["var_list"]
+    enable_parameters_precision = content["enable_parameters_precision"]
 
     if keyphrase == configuration.KEYPHRASE:
-        return jsonify({"tbr": slave.perform_token_replay(petri_string, var_list)})
+        parameters = {"enable_parameters_precision": enable_parameters_precision}
+
+        return jsonify({"tbr": slave.perform_token_replay(petri_string, var_list, parameters=parameters)})
 
     return jsonify({})
 

@@ -601,10 +601,11 @@ def perform_tbr():
 
     petri_string = content["petri_string"]
     var_list = content["var_list"]
+    enable_parameters_precision = content["enable_parameters_precision"] if "enable_parameters_precision" in content else False
 
     if keyphrase == configuration.KEYPHRASE:
         tbr = MasterVariableContainer.master.perform_tbr(session, process, use_transition, no_samples, petri_string,
-                                                         var_list)
+                                                         var_list, enable_parameters_precision)
         return jsonify({"tbr": tbr})
 
     return jsonify({})

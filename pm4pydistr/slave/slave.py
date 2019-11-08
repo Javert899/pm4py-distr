@@ -96,10 +96,14 @@ def perform_token_replay(petri_string, var_list, parameters=None):
     if parameters is None:
         parameters = {}
 
+    enable_parameters_precision = parameters["enable_parameters_precision"] if "enable_parameters_precision" in parameters else False
+
     parameters["return_names"] = True
-    parameters["consider_remaining_in_fitness"] = False
-    parameters["try_to_reach_final_marking_through_hidden"] = False
-    parameters["walk_through_hidden_trans"] = True
-    parameters["stop_immediately_unfit"] = True
+
+    if enable_parameters_precision:
+        parameters["consider_remaining_in_fitness"] = False
+        parameters["try_to_reach_final_marking_through_hidden"] = False
+        parameters["walk_through_hidden_trans"] = True
+        parameters["stop_immediately_unfit"] = True
 
     return token_replay.apply_variants_list_petri_string(var_list, petri_string, parameters=parameters)

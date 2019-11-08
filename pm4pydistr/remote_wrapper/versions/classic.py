@@ -8,6 +8,8 @@ import requests
 import json
 import time
 from pm4py.util import constants
+from pm4py.objects.petri import align_utils
+from pm4py.algo.conformance.alignments.versions import state_equation_a_star
 from datetime import datetime
 from pm4py.objects.petri.exporter.versions import pnml as pnml_exporter
 from pm4py.algo.filtering.log.variants import variants_filter as log_variants_filter
@@ -363,13 +365,16 @@ class ClassicDistrLogObject(DistrLogObj):
     def perform_token_replay(self, petri_string, var_list, parameters=None):
         if parameters is None:
             parameters = {}
+
+        enable_parameters_precision = parameters["enable_parameters_precision"] if "enable_parameters_precision" in parameters else False
+
         url = self.get_url("performTbr")
-        dictio = {"petri_string": petri_string, "var_list": var_list}
+        dictio = {"petri_string": petri_string, "var_list": var_list, "enable_parameters_precision": enable_parameters_precision}
+
         r = requests.post(url, json=dictio)
         ret_text = r.text
         ret_json = json.loads(ret_text)
         return ret_json["tbr"]
-
 
     def calculate_fitness_with_tbr(self, net, im, fm, log, parameters=None):
         if parameters is None:
@@ -380,20 +385,54 @@ class ClassicDistrLogObject(DistrLogObj):
         result = self.perform_tbr_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
         total_cases = 0
         total_fit_cases = 0
+        sum_of_fitness = 0
+        total_m = 0
+        total_r = 0
+        total_c = 0
+        total_p = 0
 
         for index_variant, variant in enumerate(variants):
-            total_cases = total_cases + len(variants[variant])
-            if result[index_variant]["trace_is_fit"]:
-                total_fit_cases = total_fit_cases + len(variants[variant])
+            if result[index_variant] is not None:
+                sum_of_fitness = sum_of_fitness + len(variants[variant]) * result[index_variant]["trace_fitness"]
+                total_m = total_m + len(variants[variant]) * result[index_variant]["missing_tokens"]
+                total_r = total_r + len(variants[variant]) * result[index_variant]["remaining_tokens"]
+                total_c = total_c + len(variants[variant]) * result[index_variant]["consumed_tokens"]
+                total_p = total_p + len(variants[variant]) * result[index_variant]["produced_tokens"]
+
+                total_cases = total_cases + len(variants[variant])
+                if result[index_variant]["trace_is_fit"]:
+                    total_fit_cases = total_fit_cases + len(variants[variant])
 
         if total_cases > 0:
-            return total_fit_cases / total_cases
-        return 0
+            perc_fit_traces = float(100.0 * total_fit_cases) / float(total_cases)
+            average_fitness = float(sum_of_fitness) / float(total_cases)
+            log_fitness = 0.5 * (1 - total_m / total_c) + 0.5 * (1 - total_r / total_p)
 
+            return {"perc_fit_traces": perc_fit_traces, "average_trace_fitness": average_fitness, "log_fitness": log_fitness}
+
+        return {"perc_fit_traces": 0.0, "average_trace_fitness": 0.0, "log_fitness": 0.0}
+
+
+    def fitness_alignment_internal(self, best_worst_cost, trace, cost):
+        len_trace = len(trace.split(","))
+
+        unfitness_upper_part = cost // align_utils.STD_MODEL_LOG_MOVE_COST
+        fitness = 0
+        if unfitness_upper_part == 0:
+            fitness = 1
+        elif (len_trace + best_worst_cost) > 0:
+            fitness = 1 - (
+                    (cost // align_utils.STD_MODEL_LOG_MOVE_COST) / (
+                    len_trace + best_worst_cost))
+
+        return fitness
 
     def calculate_fitness_with_alignments(self, net, im, fm, log, parameters=None):
         if parameters is None:
             parameters = {}
+
+        sum_fitness = 0
+
         variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
         var_list = [[x, y] for x, y in variants.items()]
 
@@ -401,14 +440,22 @@ class ClassicDistrLogObject(DistrLogObj):
         total_cases = 0
         total_fit_cases = 0
 
+        best_worst_cost = state_equation_a_star.get_best_worst_cost(net, im, fm, parameters={})
+
         for index_variant, variant in enumerate(variants):
             total_cases = total_cases + len(variants[variant])
-            if result[variant]["cost"] < 10000:
-                total_fit_cases = total_fit_cases + len(variants[variant])
+            if result[variant] is not None:
+                fitness = self.fitness_alignment_internal(best_worst_cost, variant, result[variant]["cost"])
+                sum_fitness = sum_fitness + fitness * len(variants[variant])
+
+                if result[variant]["cost"] < 10000:
+                    total_fit_cases = total_fit_cases + len(variants[variant])
 
         if total_cases > 0:
-            return total_fit_cases / total_cases
-        return 0
+            perc_fit_traces = float(100.0 * total_fit_cases) / float(total_cases)
+
+            return {"averageFitness": float(sum_fitness)/float(total_cases), "percFitTraces": perc_fit_traces}
+        return {"averageFitness": 0.0, "percFitTraces": 0.0}
 
     def calculate_precision_with_tbr(self, net, im, fm, log, parameters=None):
         from pm4py import util as pmutil
@@ -433,6 +480,7 @@ class ClassicDistrLogObject(DistrLogObj):
         var_list = [[x, y] for x, y in variants.items()]
         print("got var list")
 
+        parameters["enable_parameters_precision"] = True
         aligned_traces = self.perform_tbr_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
         print("got aligned traces")
 
