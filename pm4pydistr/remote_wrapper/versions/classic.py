@@ -366,10 +366,15 @@ class ClassicDistrLogObject(DistrLogObj):
         if parameters is None:
             parameters = {}
 
-        enable_parameters_precision = parameters["enable_parameters_precision"] if "enable_parameters_precision" in parameters else False
+        enable_parameters_precision = parameters[
+            "enable_parameters_precision"] if "enable_parameters_precision" in parameters else False
+        consider_remaining_in_fitness = parameters[
+            "consider_remaining_in_fitness"] if "consider_remaining_in_fitness" in parameters else False
 
         url = self.get_url("performTbr")
-        dictio = {"petri_string": petri_string, "var_list": var_list, "enable_parameters_precision": enable_parameters_precision}
+        dictio = {"petri_string": petri_string, "var_list": var_list,
+                  "enable_parameters_precision": enable_parameters_precision,
+                  "consider_remaining_in_fitness": consider_remaining_in_fitness}
 
         r = requests.post(url, json=dictio)
         ret_text = r.text
@@ -381,6 +386,9 @@ class ClassicDistrLogObject(DistrLogObj):
             parameters = {}
         variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
         var_list = [[x, y] for x, y in variants.items()]
+
+        parameters["enable_parameters_precision"] = False
+        parameters["consider_remaining_in_fitness"] = True
 
         result = self.perform_tbr_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
         total_cases = 0
@@ -408,10 +416,10 @@ class ClassicDistrLogObject(DistrLogObj):
             average_fitness = float(sum_of_fitness) / float(total_cases)
             log_fitness = 0.5 * (1 - total_m / total_c) + 0.5 * (1 - total_r / total_p)
 
-            return {"perc_fit_traces": perc_fit_traces, "average_trace_fitness": average_fitness, "log_fitness": log_fitness}
+            return {"perc_fit_traces": perc_fit_traces, "average_trace_fitness": average_fitness,
+                    "log_fitness": log_fitness}
 
         return {"perc_fit_traces": 0.0, "average_trace_fitness": 0.0, "log_fitness": 0.0}
-
 
     def fitness_alignment_internal(self, best_worst_cost, trace, cost):
         len_trace = len(trace.split(","))
@@ -454,7 +462,7 @@ class ClassicDistrLogObject(DistrLogObj):
         if total_cases > 0:
             perc_fit_traces = float(100.0 * total_fit_cases) / float(total_cases)
 
-            return {"averageFitness": float(sum_fitness)/float(total_cases), "percFitTraces": perc_fit_traces}
+            return {"averageFitness": float(sum_fitness) / float(total_cases), "percFitTraces": perc_fit_traces}
         return {"averageFitness": 0.0, "percFitTraces": 0.0}
 
     def calculate_precision_with_tbr(self, net, im, fm, log, parameters=None):
@@ -481,6 +489,8 @@ class ClassicDistrLogObject(DistrLogObj):
         print("got var list")
 
         parameters["enable_parameters_precision"] = True
+        parameters["consider_remaining_in_fitness"] = False
+
         aligned_traces = self.perform_tbr_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
         print("got aligned traces")
 

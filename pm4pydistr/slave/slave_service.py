@@ -586,9 +586,10 @@ def perform_tbr():
     petri_string = content["petri_string"]
     var_list = content["var_list"]
     enable_parameters_precision = content["enable_parameters_precision"]
+    consider_remaining_in_fitness = content["consider_remaining_in_fitness"]
 
     if keyphrase == configuration.KEYPHRASE:
-        parameters = {"enable_parameters_precision": enable_parameters_precision}
+        parameters = {"enable_parameters_precision": enable_parameters_precision, "consider_remaining_in_fitness": consider_remaining_in_fitness}
 
         return jsonify({"tbr": slave.perform_token_replay(petri_string, var_list, parameters=parameters)})
 

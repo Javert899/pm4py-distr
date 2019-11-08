@@ -97,6 +97,7 @@ def perform_token_replay(petri_string, var_list, parameters=None):
         parameters = {}
 
     enable_parameters_precision = parameters["enable_parameters_precision"] if "enable_parameters_precision" in parameters else False
+    consider_remaining_in_fitness = parameters["consider_remaining_in_fitness"] if "consider_remaining_in_fitness" in parameters else True
 
     parameters["return_names"] = True
 
@@ -105,5 +106,6 @@ def perform_token_replay(petri_string, var_list, parameters=None):
         parameters["try_to_reach_final_marking_through_hidden"] = False
         parameters["walk_through_hidden_trans"] = True
         parameters["stop_immediately_unfit"] = True
+        parameters["consider_remaining_in_fitness"] = consider_remaining_in_fitness
 
     return token_replay.apply_variants_list_petri_string(var_list, petri_string, parameters=parameters)
