@@ -324,10 +324,11 @@ class ClassicDistrLogObject(DistrLogObj):
             PARAM_MAX_ALIGN_TIME] if PARAM_MAX_ALIGN_TIME in parameters else DEFAULT_MAX_ALIGN_TIME
         max_align_time_trace = parameters[
             PARAM_MAX_ALIGN_TIME_TRACE] if PARAM_MAX_ALIGN_TIME_TRACE in parameters else DEFAULT_MAX_ALIGN_TIME_TRACE
+        align_variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_no_heuristics"
 
         url = self.get_url("performAlignments", parameters=parameters)
         dictio = {"petri_string": petri_string, "var_list": var_list, "max_align_time": max_align_time,
-                  "max_align_time_trace": max_align_time_trace}
+                  "max_align_time_trace": max_align_time_trace, "align_variant": align_variant}
 
         r = requests.post(url, json=dictio)
         ret_text = r.text

@@ -557,11 +557,13 @@ def perform_alignments():
     var_list = content["var_list"]
     max_align_time = content["max_align_time"]
     max_align_time_trace = content["max_align_time_trace"]
+    align_variant = content["align_variant"]
 
     if keyphrase == configuration.KEYPHRASE:
         parameters = {}
         parameters["max_align_time"] = max_align_time
         parameters["max_align_time_trace"] = max_align_time_trace
+        parameters["align_variant"] = align_variant
 
         return jsonify({"alignments": slave.perform_alignments(petri_string, var_list, parameters=parameters)})
 
