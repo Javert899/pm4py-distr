@@ -1,6 +1,7 @@
-pm4py
+pm4py==1.2.12
 requests
 Flask
 flask-cors
 netifaces
 psutil
+pyarrow==0.15.1
