@@ -8,11 +8,15 @@ import requests
 import json
 import time
 from pm4py.util import constants
+from pm4py.objects.petri import align_utils
+from pm4py.algo.conformance.alignments.versions import state_equation_a_star
 from datetime import datetime
 from pm4py.objects.petri.exporter.versions import pnml as pnml_exporter
 from pm4py.algo.filtering.log.variants import variants_filter as log_variants_filter
 from pm4pydistr.slave import slave
 import sys
+from pm4py.objects.petri.align_utils import get_visible_transitions_eventually_enabled_by_marking
+
 
 PARAM_MAX_ALIGN_TIME_TRACE = "max_align_time_trace"
 DEFAULT_MAX_ALIGN_TIME_TRACE = sys.maxsize
@@ -322,10 +326,11 @@ class ClassicDistrLogObject(DistrLogObj):
             PARAM_MAX_ALIGN_TIME] if PARAM_MAX_ALIGN_TIME in parameters else DEFAULT_MAX_ALIGN_TIME
         max_align_time_trace = parameters[
             PARAM_MAX_ALIGN_TIME_TRACE] if PARAM_MAX_ALIGN_TIME_TRACE in parameters else DEFAULT_MAX_ALIGN_TIME_TRACE
+        align_variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_no_heuristics"
 
         url = self.get_url("performAlignments", parameters=parameters)
         dictio = {"petri_string": petri_string, "var_list": var_list, "max_align_time": max_align_time,
-                  "max_align_time_trace": max_align_time_trace}
+                  "max_align_time_trace": max_align_time_trace, "align_variant": align_variant}
 
         r = requests.post(url, json=dictio)
         ret_text = r.text
@@ -363,9 +368,152 @@ class ClassicDistrLogObject(DistrLogObj):
     def perform_token_replay(self, petri_string, var_list, parameters=None):
         if parameters is None:
             parameters = {}
+
+        enable_parameters_precision = parameters[
+            "enable_parameters_precision"] if "enable_parameters_precision" in parameters else False
+        consider_remaining_in_fitness = parameters[
+            "consider_remaining_in_fitness"] if "consider_remaining_in_fitness" in parameters else False
+
         url = self.get_url("performTbr")
-        dictio = {"petri_string": petri_string, "var_list": var_list}
+        dictio = {"petri_string": petri_string, "var_list": var_list,
+                  "enable_parameters_precision": enable_parameters_precision,
+                  "consider_remaining_in_fitness": consider_remaining_in_fitness}
+
         r = requests.post(url, json=dictio)
         ret_text = r.text
         ret_json = json.loads(ret_text)
         return ret_json["tbr"]
+
+    def calculate_fitness_with_tbr(self, net, im, fm, log, parameters=None):
+        if parameters is None:
+            parameters = {}
+        variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
+        var_list = [[x, y] for x, y in variants.items()]
+
+        parameters["enable_parameters_precision"] = False
+        parameters["consider_remaining_in_fitness"] = True
+
+        result = self.perform_tbr_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
+        total_cases = 0
+        total_fit_cases = 0
+        sum_of_fitness = 0
+        total_m = 0
+        total_r = 0
+        total_c = 0
+        total_p = 0
+
+        for index_variant, variant in enumerate(variants):
+            if result[index_variant] is not None:
+                sum_of_fitness = sum_of_fitness + len(variants[variant]) * result[index_variant]["trace_fitness"]
+                total_m = total_m + len(variants[variant]) * result[index_variant]["missing_tokens"]
+                total_r = total_r + len(variants[variant]) * result[index_variant]["remaining_tokens"]
+                total_c = total_c + len(variants[variant]) * result[index_variant]["consumed_tokens"]
+                total_p = total_p + len(variants[variant]) * result[index_variant]["produced_tokens"]
+
+                total_cases = total_cases + len(variants[variant])
+                if result[index_variant]["trace_is_fit"]:
+                    total_fit_cases = total_fit_cases + len(variants[variant])
+
+        if total_cases > 0:
+            perc_fit_traces = float(100.0 * total_fit_cases) / float(total_cases)
+            average_fitness = float(sum_of_fitness) / float(total_cases)
+            log_fitness = 0.5 * (1 - total_m / total_c) + 0.5 * (1 - total_r / total_p)
+
+            return {"perc_fit_traces": perc_fit_traces, "average_trace_fitness": average_fitness,
+                    "log_fitness": log_fitness}
+
+        return {"perc_fit_traces": 0.0, "average_trace_fitness": 0.0, "log_fitness": 0.0}
+
+    def fitness_alignment_internal(self, best_worst_cost, trace, cost):
+        len_trace = len(trace.split(","))
+
+        unfitness_upper_part = cost // align_utils.STD_MODEL_LOG_MOVE_COST
+        fitness = 0
+        if unfitness_upper_part == 0:
+            fitness = 1
+        elif (len_trace + best_worst_cost) > 0:
+            fitness = 1 - (
+                    (cost // align_utils.STD_MODEL_LOG_MOVE_COST) / (
+                    len_trace + best_worst_cost))
+
+        return fitness
+
+    def calculate_fitness_with_alignments(self, net, im, fm, log, parameters=None):
+        if parameters is None:
+            parameters = {}
+
+        sum_fitness = 0
+
+        variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
+        var_list = [[x, y] for x, y in variants.items()]
+
+        result = self.perform_alignments_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
+        total_cases = 0
+        total_fit_cases = 0
+
+        best_worst_cost = state_equation_a_star.get_best_worst_cost(net, im, fm, parameters={})
+
+        for index_variant, variant in enumerate(variants):
+            total_cases = total_cases + len(variants[variant])
+            if result[variant] is not None:
+                fitness = self.fitness_alignment_internal(best_worst_cost, variant, result[variant]["cost"])
+                sum_fitness = sum_fitness + fitness * len(variants[variant])
+
+                if result[variant]["cost"] < 10000:
+                    total_fit_cases = total_fit_cases + len(variants[variant])
+
+        if total_cases > 0:
+            perc_fit_traces = float(100.0 * total_fit_cases) / float(total_cases)
+
+            return {"averageFitness": float(sum_fitness) / float(total_cases), "percFitTraces": perc_fit_traces}
+        return {"averageFitness": 0.0, "percFitTraces": 0.0}
+
+    def calculate_precision_with_tbr(self, net, im, fm, log, parameters=None):
+        from pm4py import util as pmutil
+        from pm4py.algo.conformance.tokenreplay import factory as token_replay
+        from pm4py.objects import log as log_lib
+        from pm4py.evaluation.precision import utils as precision_utils
+
+        if parameters is None:
+            parameters = {}
+
+        sum_at = 0.0
+        sum_ee = 0.0
+
+        prefixes, prefix_count = precision_utils.get_log_prefixes(log)
+        print("got prefixes")
+        prefixes_keys = list(prefixes.keys())
+        fake_log = precision_utils.form_fake_log(prefixes_keys)
+        print("got fake log")
+
+        variants = log_variants_filter.get_variants_from_log_trace_idx(fake_log, parameters=parameters)
+        print("got variants from fake log")
+        var_list = [[x, y] for x, y in variants.items()]
+        print("got var list")
+
+        parameters["enable_parameters_precision"] = True
+        parameters["consider_remaining_in_fitness"] = False
+
+        aligned_traces = self.perform_tbr_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
+        print("got aligned traces")
+
+        start_activities = set(x.split(",")[0] for x in variants)
+        trans_en_ini_marking = set(
+            [x.label for x in get_visible_transitions_eventually_enabled_by_marking(net, im)])
+        diff = trans_en_ini_marking.difference(start_activities)
+        sum_at += len(log) * len(trans_en_ini_marking)
+        sum_ee += len(log) * len(diff)
+
+        for i in range(len(aligned_traces)):
+            if aligned_traces[i]["trace_is_fit"]:
+                log_transitions = set(prefixes[prefixes_keys[i]])
+                activated_transitions_labels = set(
+                    [x for x in aligned_traces[i]["enabled_transitions_in_marking_labels"] if x != "None"])
+                sum_at += len(activated_transitions_labels) * prefix_count[prefixes_keys[i]]
+                escaping_edges = activated_transitions_labels.difference(log_transitions)
+                sum_ee += len(escaping_edges) * prefix_count[prefixes_keys[i]]
+
+        if sum_at > 0:
+            precision = 1 - float(sum_ee) / float(sum_at)
+
+        return precision

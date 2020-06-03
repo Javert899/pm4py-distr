@@ -86,3 +86,12 @@ class DistrLogObj(object):
 
     def perform_tbr_net_variants(self, net, im, fm, var_list=None, parameters=None):
         raise Exception("not implemented")
+
+    def calculate_fitness_with_alignments(self, net, im, fm, log, parameters=None):
+        raise Exception("not implemented")
+
+    def calculate_precision_with_tbr(self, net, im, fm, log, parameters=None):
+        raise Exception("not implemented")
+
+    def calculate_fitness_with_tbr(self, net, im, fm, log, parameters=None):
+        raise Exception("not implemented")
