@@ -14,7 +14,7 @@ from pm4py.algo.discovery.inductive import factory as inductive_miner
 # possibility to limit the number of sublogs (per slave) that are considered
 max_no_samples = 5
 # create the wrapper
-wrapper = wrapper_factory.apply("212.237.8.106", "5001", "hello", "receipt", parameters={"no_samples": max_no_samples})
+wrapper = wrapper_factory.apply("137.226.117.71", "5001", "hello", "receipt", parameters={"no_samples": max_no_samples})
 
 log = xes_importer.apply("C:/receipt.xes")
 net, im, fm = inductive_miner.apply(log)
