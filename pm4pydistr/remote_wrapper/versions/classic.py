@@ -15,6 +15,8 @@ from pm4py.objects.petri.exporter.versions import pnml as pnml_exporter
 from pm4py.algo.filtering.log.variants import variants_filter as log_variants_filter
 from pm4pydistr.slave import slave
 import sys
+from pm4py.objects.petri.align_utils import get_visible_transitions_eventually_enabled_by_marking
+
 
 PARAM_MAX_ALIGN_TIME_TRACE = "max_align_time_trace"
 DEFAULT_MAX_ALIGN_TIME_TRACE = sys.maxsize
@@ -494,6 +496,13 @@ class ClassicDistrLogObject(DistrLogObj):
 
         aligned_traces = self.perform_tbr_net_variants(net, im, fm, var_list=var_list, parameters=parameters)
         print("got aligned traces")
+
+        start_activities = set(x.split(",")[0] for x in variants)
+        trans_en_ini_marking = set(
+            [x.label for x in get_visible_transitions_eventually_enabled_by_marking(net, im)])
+        diff = trans_en_ini_marking.difference(start_activities)
+        sum_at += len(log) * len(trans_en_ini_marking)
+        sum_ee += len(log) * len(diff)
 
         for i in range(len(aligned_traces)):
             if aligned_traces[i]["trace_is_fit"]:
