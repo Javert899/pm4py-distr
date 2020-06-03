@@ -3,7 +3,7 @@ from pm4pydistr.remote_wrapper import factory as wrapper_factory
 # possibility to limit the number of sublogs (per slave) that are considered
 max_no_samples = 1
 # create the wrapper
-wrapper = wrapper_factory.apply("212.237.8.106", "5001", "hello", "roadtraffic", parameters={"no_samples": max_no_samples})
+wrapper = wrapper_factory.apply("137.226.117.71", "5001", "hello", "roadtraffic", parameters={"no_samples": max_no_samples})
 # gets the log summary (number of cases and number of events)
 print(wrapper.get_log_summary())
 # gets all the attributes of the log
