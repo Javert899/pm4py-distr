@@ -15,7 +15,7 @@ import shutil
 
 import time
 
-from pm4py.algo.conformance.alignments.versions import state_equation_a_star
+from pm4py.algo.conformance.alignments.versions import dijkstra_no_heuristics, state_equation_a_star
 from pm4py.algo.conformance.tokenreplay.versions import token_replay
 
 
@@ -87,15 +87,29 @@ def perform_alignments(petri_string, var_list, parameters=None):
     if parameters is None:
         parameters = {}
 
+    variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_no_heuristics"
     parameters["ret_tuple_as_trans_desc"] = True
 
-    return state_equation_a_star.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
+    if variant == "dijkstra_no_heuristics":
+        return dijkstra_no_heuristics.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
+    elif variant == "state_equation_a_star":
+        return state_equation_a_star.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
 
 
 def perform_token_replay(petri_string, var_list, parameters=None):
     if parameters is None:
         parameters = {}
 
+    enable_parameters_precision = parameters["enable_parameters_precision"] if "enable_parameters_precision" in parameters else False
+    consider_remaining_in_fitness = parameters["consider_remaining_in_fitness"] if "consider_remaining_in_fitness" in parameters else True
+
     parameters["return_names"] = True
+
+    if enable_parameters_precision:
+        parameters["consider_remaining_in_fitness"] = False
+        parameters["try_to_reach_final_marking_through_hidden"] = False
+        parameters["walk_through_hidden_trans"] = True
+        parameters["stop_immediately_unfit"] = True
+        parameters["consider_remaining_in_fitness"] = consider_remaining_in_fitness
 
     return token_replay.apply_variants_list_petri_string(var_list, petri_string, parameters=parameters)
