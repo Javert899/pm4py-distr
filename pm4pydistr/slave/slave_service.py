@@ -5,10 +5,11 @@ from flask_cors import CORS
 from pm4pydistr.slave.variable_container import SlaveVariableContainer
 from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
 from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
+import pm4py
+import pm4pydistr
 from pm4py.util import constants as pm4py_constants
 from pm4py.objects.log.util import xes
 from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_MAX_NO_RET_ITEMS
-
 from pm4pydistr.log_handlers import parquet as parquet_handler
 
 import os
@@ -35,6 +36,11 @@ class SlaveSocketListener(Thread):
 
     def run(self):
         self.app.run(host="0.0.0.0", port=SlaveVariableContainer.port, threaded=True)
+
+
+@SlaveSocketListener.app.route("/checkVersions", methods=["GET"])
+def check_versions():
+    return jsonify({"pm4py": pm4py.__version__, "pm4pydistr": pm4pydistr.__version__})
 
 
 @SlaveSocketListener.app.route("/synchronizeFiles", methods=["POST"])

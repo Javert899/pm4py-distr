@@ -481,7 +481,6 @@ def get_variants(path, log_name, managed_logs, parameters=None):
 
             #dictio = dictio + Counter(dict(df[attribute_key].value_counts()))
             stats = case_statistics.get_variant_statistics(df)
-            print(stats)
             d_variants = {x["variant"]: x for x in stats}
 
             for variant in d_variants:

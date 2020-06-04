@@ -9,6 +9,8 @@ from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLE
 from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_MAX_NO_RET_ITEMS
 from pm4pydistr.master.variable_container import MasterVariableContainer
 from pm4pydistr.master.db_manager import DbManager
+import pm4py
+import pm4pydistr
 from pm4py.objects.log.util import xes
 
 import logging, json
@@ -134,6 +136,13 @@ def do_log_assignment():
         MasterVariableContainer.master.make_slaves_load()
 
     return jsonify({})
+
+
+@MasterSocketListener.app.route("/checkVersions", methods=["GET"])
+def check_versions():
+    check_master_initialized()
+
+    return jsonify({"pm4py": pm4py.__version__, "pm4pydistr": pm4pydistr.__version__})
 
 
 @MasterSocketListener.app.route("/getSlavesList", methods=["GET"])
