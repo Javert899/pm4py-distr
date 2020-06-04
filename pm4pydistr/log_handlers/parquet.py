@@ -480,14 +480,16 @@ def get_variants(path, log_name, managed_logs, parameters=None):
             cases = cases + df[CASE_CONCEPT_NAME].nunique()
 
             #dictio = dictio + Counter(dict(df[attribute_key].value_counts()))
-            stats = case_statistics.get_variant_statistics_with_case_duration(df)
+            stats = case_statistics.get_variant_statistics(df)
+            print(stats)
             d_variants = {x["variant"]: x for x in stats}
 
             for variant in d_variants:
+                d_variants[variant]["count"] = d_variants[variant]["case:concept:name"]
+                del d_variants[variant]["case:concept:name"]
                 if not variant in dictio_variants:
                     dictio_variants[variant] = d_variants[variant]
                 else:
-                    dictio_variants[variant]["caseDuration"] = (dictio_variants[variant]["caseDuration"] * dictio_variants[variant]["count"] + d_variants[variant]["caseDuration"] * d_variants[variant]["count"])/(dictio_variants[variant]["count"] + d_variants[variant]["count"])
                     dictio_variants[variant]["count"] = dictio_variants[variant]["count"] + d_variants[variant]["count"]
 
             list_variants = sorted(list(dictio_variants.values()), key=lambda x: x["count"], reverse=True)
