@@ -275,7 +275,8 @@ class ClassicDistrLogObject(LocalDistrLogObj):
             variants = self.get_variants(parameters=parameters)
             var_list = [[x, y] for x,y in variants.items()]
         petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
-        return slave.perform_alignments(petri_string, var_list, parameters=parameters)
+        align = slave.perform_alignments(petri_string, var_list, parameters=parameters)
+        return align
 
     def perform_tbr_net_log(self, net, im, fm, log, parameters=None):
         if parameters is None:
