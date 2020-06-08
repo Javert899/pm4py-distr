@@ -31,7 +31,8 @@ setup(
         'Flask',
         'flask-cors',
         'psutil',
-        'pyarrow==0.15.1'
+        'pyarrow==0.15.1',
+        "pm4pycvxopt==0.0.8"
     ],
     project_urls={
         'Documentation': 'http://pm4py.pads.rwth-aachen.de/documentation/',
