@@ -8,14 +8,7 @@ def get_ssh_client(server, username, password):
     return ssh
 
 password = input("Insert password: ")
-update = None
-while update not in ["y", "n"]:
-    update = input("update (y/n)?")
-
-if update == "y":
-    script = "update.sh"
-elif update == "n":
-    script = "stop.sh"
+script = input("script ?")
 
 ssh1 = get_ssh_client("137.226.117.71", "berti", password)
 ssh2 = get_ssh_client("137.226.117.72", "berti", password)
