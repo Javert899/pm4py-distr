@@ -6,7 +6,7 @@ from random import randrange
 from time import time, sleep
 from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
 from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
-from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_WINDOW_SIZE
+from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_WINDOW_SIZE, PARAMETER_WINDOW_SIZE, PARAMETER_START
 from pm4pydistr.master.variable_container import MasterVariableContainer
 from pm4pydistr.master.db_manager import DbManager
 import pm4py
@@ -405,11 +405,12 @@ def get_variants():
 
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_WINDOW_SIZE)
+    window_size = request.args.get(PARAMETER_WINDOW_SIZE, type=int, default=DEFAULT_WINDOW_SIZE)
+    start = request.args.get(PARAMETER_START, type=int, default=0)
 
     if keyphrase == configuration.KEYPHRASE:
         variants = MasterVariableContainer.master.get_variants(session, process, use_transition, no_samples,
-                                                               max_ret_items=max_no_ret_items)
+                                                               start=start, window_size=window_size)
 
         return jsonify(variants)
     return jsonify({"variants": [], "events": 0, "cases": 0})
@@ -427,11 +428,12 @@ def get_cases():
 
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_WINDOW_SIZE)
+    window_size = request.args.get(PARAMETER_WINDOW_SIZE, type=int, default=DEFAULT_WINDOW_SIZE)
+    start = request.args.get(PARAMETER_START, type=int, default=0)
 
     if keyphrase == configuration.KEYPHRASE:
         cases = MasterVariableContainer.master.get_cases(session, process, use_transition, no_samples,
-                                                         max_ret_items=max_no_ret_items)
+                                                         window_size=window_size, start=start)
 
         return jsonify(cases)
     return jsonify({"cases_list": [], "events": 0, "cases": 0})

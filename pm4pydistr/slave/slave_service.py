@@ -405,7 +405,8 @@ def get_cases():
 
         use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
         no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-        max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_WINDOW_SIZE)
+        window_size = request.args.get(PARAMETER_WINDOW_SIZE, type=int, default=DEFAULT_WINDOW_SIZE)
+        start = request.args.get(PARAMETER_START, type=int, default=0)
 
         if use_transition == "True":
             use_transition = True
@@ -418,7 +419,8 @@ def get_cases():
             parameters["filters"] = filters
             parameters[PARAMETER_USE_TRANSITION] = use_transition
             parameters[PARAMETER_NO_SAMPLES] = no_samples
-            parameters[PARAMETER_NUM_RET_ITEMS] = max_no_ret_items
+            parameters[PARAMETER_WINDOW_SIZE] = window_size
+            parameters[PARAMETER_START] = start
 
             returned_dict = parquet_handler.get_cases(SlaveVariableContainer.conf, process,
                                                       SlaveVariableContainer.managed_logs[process],
