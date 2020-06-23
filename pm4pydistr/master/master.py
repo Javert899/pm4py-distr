@@ -35,7 +35,7 @@ import os
 import numpy as np
 from collections import Counter
 from pm4pydistr.master.session_checker import SessionChecker
-from pm4pydistr.configuration import DEFAULT_MAX_NO_RET_ITEMS
+from pm4pydistr.configuration import DEFAULT_WINDOW_SIZE
 from pm4py.util import points_subset
 import time
 import sys
@@ -368,7 +368,7 @@ class Master:
 
         return ret
 
-    def get_variants(self, session, process, use_transition, no_samples, max_ret_items=DEFAULT_MAX_NO_RET_ITEMS):
+    def get_variants(self, session, process, use_transition, no_samples, max_ret_items=DEFAULT_WINDOW_SIZE):
         all_slaves = list(self.slaves.keys())
 
         threads = []
@@ -408,7 +408,7 @@ class Master:
 
         return {"variants": list_variants, "events": events, "cases": cases}
 
-    def get_cases(self, session, process, use_transition, no_samples, max_ret_items=DEFAULT_MAX_NO_RET_ITEMS):
+    def get_cases(self, session, process, use_transition, no_samples, max_ret_items=DEFAULT_WINDOW_SIZE):
         all_slaves = list(self.slaves.keys())
 
         threads = []

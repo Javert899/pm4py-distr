@@ -17,6 +17,6 @@ class EventsPerTimeFirstRequest(BasicMasterRequest):
 
     def run(self):
         uri = "http://" + self.target_host + ":" + self.target_port + "/getEventsPerTimeFirst?keyphrase=" + KEYPHRASE + "&process=" + str(
-            self.content) + "&session=" + str(self.session) + "&use_transition=" + str(self.use_transition) + "&no_samples="+str(self.no_samples) + "&" + PARAMETER_NUM_RET_ITEMS+"="+str(self.max_ret_items)
+            self.content) + "&session=" + str(self.session) + "&use_transition=" + str(self.use_transition) + "&no_samples=" + str(self.no_samples) + "&" + PARAMETER_NUM_RET_ITEMS + "=" + str(self.max_ret_items)
         r = requests.get(uri)
         self.content = json.loads(r.text)

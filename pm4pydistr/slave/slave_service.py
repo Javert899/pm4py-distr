@@ -9,7 +9,7 @@ import pm4py
 import pm4pydistr
 from pm4py.util import constants as pm4py_constants
 from pm4py.objects.log.util import xes
-from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_MAX_NO_RET_ITEMS
+from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_WINDOW_SIZE, PARAMETER_WINDOW_SIZE, PARAMETER_START
 from pm4pydistr.log_handlers import parquet as parquet_handler
 import traceback
 
@@ -369,7 +369,8 @@ def get_variants():
 
         use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
         no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-        max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
+        window_size = request.args.get(PARAMETER_WINDOW_SIZE, type=int, default=DEFAULT_WINDOW_SIZE)
+        start = request.args.get(PARAMETER_START, type=int, default=0)
 
         if use_transition == "True":
             use_transition = True
@@ -382,7 +383,8 @@ def get_variants():
             parameters["filters"] = filters
             parameters[PARAMETER_USE_TRANSITION] = use_transition
             parameters[PARAMETER_NO_SAMPLES] = no_samples
-            parameters[PARAMETER_NUM_RET_ITEMS] = max_no_ret_items
+            parameters[PARAMETER_WINDOW_SIZE] = window_size
+            parameters[PARAMETER_START] = start
 
             returned_dict = parquet_handler.get_variants(SlaveVariableContainer.conf, process,
                                                          SlaveVariableContainer.managed_logs[process],
@@ -403,7 +405,7 @@ def get_cases():
 
         use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
         no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-        max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
+        max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_WINDOW_SIZE)
 
         if use_transition == "True":
             use_transition = True

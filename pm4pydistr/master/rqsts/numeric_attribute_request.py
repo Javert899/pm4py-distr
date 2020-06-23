@@ -17,6 +17,6 @@ class NumericAttributeRequest(BasicMasterRequest):
 
     def run(self):
         uri = "http://" + self.target_host + ":" + self.target_port + "/getNumericAttributeValues?keyphrase=" + KEYPHRASE + "&process=" + str(
-            self.content) + "&session=" + str(self.session) + "&use_transition=" + str(self.use_transition) + "&no_samples="+str(self.no_samples) + "&" + PARAMETER_NUM_RET_ITEMS+"="+str(self.max_ret_items)+"&attribute_key="+self.attribute_key
+            self.content) + "&session=" + str(self.session) + "&use_transition=" + str(self.use_transition) + "&no_samples=" + str(self.no_samples) + "&" + PARAMETER_NUM_RET_ITEMS + "=" + str(self.max_ret_items) + "&attribute_key=" + self.attribute_key
         r = requests.get(uri)
         self.content = json.loads(r.text)

@@ -19,7 +19,7 @@ class EventsDottedRequest(BasicMasterRequest):
 
     def run(self):
         uri = "http://" + self.target_host + ":" + self.target_port + "/getEventsPerDotted?keyphrase=" + KEYPHRASE + "&process=" + str(
-            self.content) + "&session=" + str(self.session) + "&use_transition=" + str(self.use_transition) + "&no_samples="+str(self.no_samples) + "&"+PARAMETER_NUM_RET_ITEMS+"="+str(self.max_ret_items)+"&attribute1="+self.attribute1+"&attribute2="+self.attribute2
+            self.content) + "&session=" + str(self.session) + "&use_transition=" + str(self.use_transition) + "&no_samples=" + str(self.no_samples) + "&" + PARAMETER_NUM_RET_ITEMS + "=" + str(self.max_ret_items) + "&attribute1=" + self.attribute1 + "&attribute2=" + self.attribute2
 
         if self.attribute3 is not None:
             uri = uri + "&attribute3=" + self.attribute3
