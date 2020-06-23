@@ -6,7 +6,7 @@ from random import randrange
 from time import time, sleep
 from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
 from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
-from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_MAX_NO_RET_ITEMS
+from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_WINDOW_SIZE, PARAMETER_WINDOW_SIZE, PARAMETER_START
 from pm4pydistr.master.variable_container import MasterVariableContainer
 from pm4pydistr.master.db_manager import DbManager
 import pm4py
@@ -405,11 +405,12 @@ def get_variants():
 
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
+    window_size = request.args.get(PARAMETER_WINDOW_SIZE, type=int, default=DEFAULT_WINDOW_SIZE)
+    start = request.args.get(PARAMETER_START, type=int, default=0)
 
     if keyphrase == configuration.KEYPHRASE:
         variants = MasterVariableContainer.master.get_variants(session, process, use_transition, no_samples,
-                                                               max_ret_items=max_no_ret_items)
+                                                               start=start, window_size=window_size)
 
         return jsonify(variants)
     return jsonify({"variants": [], "events": 0, "cases": 0})
@@ -427,11 +428,12 @@ def get_cases():
 
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
+    window_size = request.args.get(PARAMETER_WINDOW_SIZE, type=int, default=DEFAULT_WINDOW_SIZE)
+    start = request.args.get(PARAMETER_START, type=int, default=0)
 
     if keyphrase == configuration.KEYPHRASE:
         cases = MasterVariableContainer.master.get_cases(session, process, use_transition, no_samples,
-                                                         max_ret_items=max_no_ret_items)
+                                                         window_size=window_size, start=start)
 
         return jsonify(cases)
     return jsonify({"cases_list": [], "events": 0, "cases": 0})
@@ -471,7 +473,7 @@ def get_events_per_dotted():
 
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
+    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_WINDOW_SIZE)
 
     attribute1 = request.args.get("attribute1", type=str)
     attribute2 = request.args.get("attribute2", type=str)
@@ -483,6 +485,29 @@ def get_events_per_dotted():
                                                                    max_ret_items=max_no_ret_items)
 
         return jsonify({"traces": ret[0], "types": ret[1], "attributes": ret[2], "third_unique_values": ret[3]})
+
+    return jsonify({})
+
+
+@MasterSocketListener.app.route("/getEventsPerCase", methods=["GET"])
+def get_events_per_case():
+    check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
+
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_WINDOW_SIZE)
+
+    if keyphrase == configuration.KEYPHRASE:
+        events = MasterVariableContainer.master.get_events_per_case(session, process, use_transition, no_samples,
+                                                                    max_ret_items=max_no_ret_items)
+
+        return jsonify({"events_case": events})
 
     return jsonify({})
 
@@ -499,10 +524,33 @@ def get_events_per_time():
 
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
+    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_WINDOW_SIZE)
 
     if keyphrase == configuration.KEYPHRASE:
         points = MasterVariableContainer.master.get_events_per_time(session, process, use_transition, no_samples,
+                                                                    max_ret_items=max_no_ret_items)
+
+        return jsonify({"points": points})
+
+    return jsonify({})
+
+
+@MasterSocketListener.app.route("/getEventsPerTimeFirst", methods=["GET"])
+def get_events_per_time_first():
+    check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
+
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_WINDOW_SIZE)
+
+    if keyphrase == configuration.KEYPHRASE:
+        points = MasterVariableContainer.master.get_events_per_time_first(session, process, use_transition, no_samples,
                                                                     max_ret_items=max_no_ret_items)
 
         return jsonify({"points": points})
@@ -522,7 +570,7 @@ def get_case_duration():
 
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
+    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_WINDOW_SIZE)
 
     if keyphrase == configuration.KEYPHRASE:
         points = MasterVariableContainer.master.get_case_duration(session, process, use_transition, no_samples,
@@ -545,7 +593,7 @@ def get_numeric_attribute_values():
 
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
+    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_WINDOW_SIZE)
 
     attribute_key = request.args.get("attribute_key", type=str)
 
