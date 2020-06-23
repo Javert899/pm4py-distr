@@ -264,6 +264,19 @@ class ClassicDistrLogObject(DistrLogObj):
 
         return x, y
 
+    def get_events_per_time_first(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        url = self.get_url("getEventsPerTimeFirst")
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        ret = ret_json["points"]
+        ret = [datetime.fromtimestamp(x) for x in ret]
+        x, y = attributes_common.get_kde_date_attribute(ret)
+
+        return x, y
+
     def get_events_per_case(self, parameters=None):
         if parameters is None:
             parameters = {}

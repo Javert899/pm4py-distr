@@ -19,6 +19,7 @@ from pm4pydistr.master.rqsts.events import EventsRequest
 from pm4pydistr.master.rqsts.events_dotted_request import EventsDottedRequest
 from pm4pydistr.master.rqsts.events_per_case_requests import EventsPerCaseRequest
 from pm4pydistr.master.rqsts.events_per_time_request import EventsPerTimeRequest
+from pm4pydistr.master.rqsts.events_per_time_first_request import EventsPerTimeFirstRequest
 from pm4pydistr.master.rqsts.case_duration_request import CaseDurationRequest
 from pm4pydistr.master.rqsts.numeric_attribute_request import NumericAttributeRequest
 from pm4pydistr.master.rqsts.caching_request import CachingRequest
@@ -533,6 +534,34 @@ class Master:
             slave_port = str(self.slaves[slave][2])
 
             m = EventsPerTimeRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.max_ret_items = max_ret_items
+
+            m.start()
+
+            threads.append(m)
+
+        for thread in threads:
+            thread.join()
+
+            points = points + thread.content["points"]
+
+        points = sorted(points)
+        if len(points) > max_ret_items:
+            points = points_subset.pick_chosen_points_list(max_ret_items, points)
+
+        return points
+
+    def get_events_per_time_first(self, session, process, use_transition, no_samples, max_ret_items=100000):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+        points = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = EventsPerTimeFirstRequest(session, slave_host, slave_port, use_transition, no_samples, process)
             m.max_ret_items = max_ret_items
 
             m.start()

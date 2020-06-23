@@ -547,6 +547,42 @@ def get_events_per_case():
         return traceback.format_exc()
 
 
+@SlaveSocketListener.app.route("/getEventsPerTimeFirst", methods=["GET"])
+def get_events_per_time_first():
+    try:
+        process = request.args.get('process', type=str)
+        keyphrase = request.args.get('keyphrase', type=str)
+        session = request.args.get('session', type=str)
+
+        use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+        no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+        max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=100000)
+
+        if use_transition == "True":
+            use_transition = True
+        else:
+            use_transition = False
+
+        if keyphrase == configuration.KEYPHRASE:
+            filters = get_filters_per_session(process, session)
+            parameters = {}
+            parameters["filters"] = filters
+            parameters[PARAMETER_USE_TRANSITION] = use_transition
+            parameters[PARAMETER_NO_SAMPLES] = no_samples
+            parameters[PARAMETER_NUM_RET_ITEMS] = max_no_ret_items
+            parameters["max_no_of_points_to_sample"] = max_no_ret_items
+
+            returned_list = parquet_handler.get_events_per_time_first(SlaveVariableContainer.conf, process,
+                                                                SlaveVariableContainer.managed_logs[process],
+                                                                parameters=parameters)
+
+            return jsonify({"points": returned_list})
+
+        return jsonify({})
+    except:
+        return traceback.format_exc()
+
+
 @SlaveSocketListener.app.route("/getEventsPerTime", methods=["GET"])
 def get_events_per_time():
     try:

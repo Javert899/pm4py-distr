@@ -202,6 +202,22 @@ class ClassicDistrLogObject(LocalDistrLogObj):
 
         return {"traces": ret[0], "types": ret[1], "attributes": ret[2], "third_unique_values": ret[3]}
 
+    def get_events_per_time_first(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        list_logs = self.get_list_logs()
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
+        parameters["filters"] = self.filters
+
+        ret = parquet_handler.get_events_per_time_first(".", self.distr_log_path, list_logs, parameters=parameters)
+        ret = [datetime.fromtimestamp(x) for x in ret]
+
+        x, y = attributes_common.get_kde_date_attribute(ret)
+
+        return x, y
+
     def get_events_per_time(self, parameters=None):
         if parameters is None:
             parameters = {}

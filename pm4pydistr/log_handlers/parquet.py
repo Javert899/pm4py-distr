@@ -715,6 +715,51 @@ def get_events_per_time(path, log_name, managed_logs, parameters=None):
     return overall_list
 
 
+def get_events_per_time_first(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
+    use_transition = parameters[PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
+    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    filters = parameters[FILTERS] if FILTERS in parameters else []
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
+
+    max_no_of_points_to_sample = parameters[
+        "max_no_of_points_to_sample"] if "max_no_of_points_to_sample" in parameters else 100000
+
+    folder = os.path.join(path, log_name)
+    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_TIMESTAMP_KEY], use_transition=use_transition)
+
+    parquet_list = parquet_importer.get_list_parquet(folder)
+
+    overall_list = []
+    count = 0
+    for index, pq in enumerate(parquet_list):
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            count = count + 1
+
+            df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters)
+            df = df.groupby(CASE_CONCEPT_NAME).first()
+
+            if len(df) > max_no_of_points_to_sample:
+                df = df.sample(n=max_no_of_points_to_sample)
+
+            date_values = [x.timestamp() for x in list(df[DEFAULT_TIMESTAMP_KEY])]
+            overall_list = overall_list + date_values
+
+            if count >= no_samples:
+                break
+
+    overall_list = sorted(overall_list)
+    if len(overall_list) > max_no_of_points_to_sample:
+        overall_list = points_subset.pick_chosen_points_list(max_no_of_points_to_sample, overall_list)
+
+    return overall_list
+
+
 def get_case_duration(path, log_name, managed_logs, parameters=None):
     if parameters is None:
         parameters = {}
@@ -767,7 +812,7 @@ def get_events_per_case(path, log_name, managed_logs, parameters=None):
     filters = parameters[FILTERS] if FILTERS in parameters else []
 
     folder = os.path.join(path, log_name)
-    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_TIMESTAMP_KEY], use_transition=use_transition)
+    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME], use_transition=use_transition)
 
     parquet_list = parquet_importer.get_list_parquet(folder)
     length_counter = Counter()

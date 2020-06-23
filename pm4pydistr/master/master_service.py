@@ -533,6 +533,29 @@ def get_events_per_time():
     return jsonify({})
 
 
+@MasterSocketListener.app.route("/getEventsPerTimeFirst", methods=["GET"])
+def get_events_per_time_first():
+    check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
+
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+    max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
+
+    if keyphrase == configuration.KEYPHRASE:
+        points = MasterVariableContainer.master.get_events_per_time_first(session, process, use_transition, no_samples,
+                                                                    max_ret_items=max_no_ret_items)
+
+        return jsonify({"points": points})
+
+    return jsonify({})
+
+
 @MasterSocketListener.app.route("/getCaseDuration", methods=["GET"])
 def get_case_duration():
     check_master_initialized()
