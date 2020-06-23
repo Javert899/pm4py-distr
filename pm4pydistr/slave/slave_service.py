@@ -9,7 +9,7 @@ import pm4py
 import pm4pydistr
 from pm4py.util import constants as pm4py_constants
 from pm4py.objects.log.util import xes
-from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_MAX_NO_RET_ITEMS
+from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_WINDOW_SIZE, PARAMETER_WINDOW_SIZE, PARAMETER_START
 from pm4pydistr.log_handlers import parquet as parquet_handler
 import traceback
 
@@ -369,7 +369,8 @@ def get_variants():
 
         use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
         no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-        max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
+        window_size = request.args.get(PARAMETER_WINDOW_SIZE, type=int, default=DEFAULT_WINDOW_SIZE)
+        start = request.args.get(PARAMETER_START, type=int, default=0)
 
         if use_transition == "True":
             use_transition = True
@@ -382,7 +383,8 @@ def get_variants():
             parameters["filters"] = filters
             parameters[PARAMETER_USE_TRANSITION] = use_transition
             parameters[PARAMETER_NO_SAMPLES] = no_samples
-            parameters[PARAMETER_NUM_RET_ITEMS] = max_no_ret_items
+            parameters[PARAMETER_WINDOW_SIZE] = window_size
+            parameters[PARAMETER_START] = start
 
             returned_dict = parquet_handler.get_variants(SlaveVariableContainer.conf, process,
                                                          SlaveVariableContainer.managed_logs[process],
@@ -403,7 +405,8 @@ def get_cases():
 
         use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
         no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-        max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_MAX_NO_RET_ITEMS)
+        window_size = request.args.get(PARAMETER_WINDOW_SIZE, type=int, default=DEFAULT_WINDOW_SIZE)
+        start = request.args.get(PARAMETER_START, type=int, default=0)
 
         if use_transition == "True":
             use_transition = True
@@ -416,7 +419,8 @@ def get_cases():
             parameters["filters"] = filters
             parameters[PARAMETER_USE_TRANSITION] = use_transition
             parameters[PARAMETER_NO_SAMPLES] = no_samples
-            parameters[PARAMETER_NUM_RET_ITEMS] = max_no_ret_items
+            parameters[PARAMETER_WINDOW_SIZE] = window_size
+            parameters[PARAMETER_START] = start
 
             returned_dict = parquet_handler.get_cases(SlaveVariableContainer.conf, process,
                                                       SlaveVariableContainer.managed_logs[process],
@@ -515,6 +519,69 @@ def get_events_per_dotted():
                                                                   parameters=parameters)
 
             return jsonify(returned_dict)
+        return jsonify({})
+    except:
+        return traceback.format_exc()
+
+
+@SlaveSocketListener.app.route("/getEventsPerCase", methods=["GET"])
+def get_events_per_case():
+    try:
+        process = request.args.get('process', type=str)
+        keyphrase = request.args.get('keyphrase', type=str)
+        session = request.args.get('session', type=str)
+
+        no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+        max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=100000)
+
+        if keyphrase == configuration.KEYPHRASE:
+            filters = get_filters_per_session(process, session)
+            parameters = {}
+            parameters["filters"] = filters
+            parameters[PARAMETER_NO_SAMPLES] = no_samples
+            parameters[PARAMETER_NUM_RET_ITEMS] = max_no_ret_items
+            parameters["max_no_of_points_to_sample"] = max_no_ret_items
+
+            returned_dict = parquet_handler.get_events_per_case(SlaveVariableContainer.conf, process,
+                                                                SlaveVariableContainer.managed_logs[process],
+                                                                parameters=parameters)
+
+            return jsonify({"events_case": returned_dict})
+    except:
+        return traceback.format_exc()
+
+
+@SlaveSocketListener.app.route("/getEventsPerTimeFirst", methods=["GET"])
+def get_events_per_time_first():
+    try:
+        process = request.args.get('process', type=str)
+        keyphrase = request.args.get('keyphrase', type=str)
+        session = request.args.get('session', type=str)
+
+        use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+        no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+        max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=100000)
+
+        if use_transition == "True":
+            use_transition = True
+        else:
+            use_transition = False
+
+        if keyphrase == configuration.KEYPHRASE:
+            filters = get_filters_per_session(process, session)
+            parameters = {}
+            parameters["filters"] = filters
+            parameters[PARAMETER_USE_TRANSITION] = use_transition
+            parameters[PARAMETER_NO_SAMPLES] = no_samples
+            parameters[PARAMETER_NUM_RET_ITEMS] = max_no_ret_items
+            parameters["max_no_of_points_to_sample"] = max_no_ret_items
+
+            returned_list = parquet_handler.get_events_per_time_first(SlaveVariableContainer.conf, process,
+                                                                SlaveVariableContainer.managed_logs[process],
+                                                                parameters=parameters)
+
+            return jsonify({"points": returned_list})
+
         return jsonify({})
     except:
         return traceback.format_exc()
