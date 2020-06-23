@@ -727,6 +727,7 @@ def get_events_per_time(path, log_name, managed_logs, parameters=None):
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
     activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    timestamp_key = parameters["timestamp_key"] if "timestamp_key" in parameters else DEFAULT_TIMESTAMP_KEY
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
@@ -735,7 +736,7 @@ def get_events_per_time(path, log_name, managed_logs, parameters=None):
         "max_no_of_points_to_sample"] if "max_no_of_points_to_sample" in parameters else 100000
 
     folder = os.path.join(path, log_name)
-    columns = get_columns_to_import(filters, [DEFAULT_TIMESTAMP_KEY], use_transition=use_transition)
+    columns = get_columns_to_import(filters, [timestamp_key], use_transition=use_transition)
 
     parquet_list = parquet_importer.get_list_parquet(folder)
 
@@ -751,7 +752,7 @@ def get_events_per_time(path, log_name, managed_logs, parameters=None):
             if len(df) > max_no_of_points_to_sample:
                 df = df.sample(n=max_no_of_points_to_sample)
 
-            date_values = [x.timestamp() for x in list(df[DEFAULT_TIMESTAMP_KEY])]
+            date_values = [x.timestamp() for x in list(df[timestamp_key])]
             overall_list = overall_list + date_values
 
             if count >= no_samples:
