@@ -264,6 +264,17 @@ class ClassicDistrLogObject(DistrLogObj):
 
         return x, y
 
+    def get_events_per_case(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        url = self.get_url("getEventsPerCase")
+        r = requests.get(url)
+        ret_text = r.text
+        ret_json = json.loads(ret_text)
+        ret = ret_json["events_case"]
+
+        return ret
+
     def get_case_duration(self, parameters=None):
         if parameters is None:
             parameters = {}

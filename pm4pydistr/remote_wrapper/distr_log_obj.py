@@ -66,6 +66,9 @@ class DistrLogObj(object):
     def get_events_per_time(self, parameters=None):
         raise Exception("not implemented")
 
+    def get_events_per_case(self, parameters=None):
+        raise Exception("not implemented")
+
     def get_case_duration(self, parameters=None):
         raise Exception("not implemented")
 
