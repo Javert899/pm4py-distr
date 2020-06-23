@@ -15,7 +15,8 @@ import shutil
 
 import time
 
-from pm4py.algo.conformance.alignments.versions import dijkstra_no_heuristics, state_equation_a_star
+from pm4py.algo.conformance.alignments.versions import dijkstra_no_heuristics, state_equation_a_star, dijkstra_less_memory
+from pm4py.algo.conformance.decomp_alignments.versions import recompos_maximal
 from pm4py.algo.conformance.tokenreplay.versions import token_replay
 
 
@@ -94,6 +95,10 @@ def perform_alignments(petri_string, var_list, parameters=None):
         return dijkstra_no_heuristics.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
     elif variant == "state_equation_a_star":
         return state_equation_a_star.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
+    elif variant == "dijkstra_less_memory":
+        return dijkstra_less_memory.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
+    elif variant == "recomp_maximal":
+        return recompos_maximal.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
 
 
 def perform_token_replay(petri_string, var_list, parameters=None):

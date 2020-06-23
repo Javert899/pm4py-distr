@@ -20,5 +20,6 @@ log = xes_importer.apply("C:/receipt.xes")
 net, im, fm = inductive_miner.apply(log)
 
 print(wrapper.calculate_fitness_with_tbr(net, im, fm, log))
-print(wrapper.calculate_fitness_with_alignments(net, im, fm, log))
+#print(wrapper.calculate_fitness_with_alignments(net, im, fm, log, parameters={"align_variant": "dijkstra_less_memory"}))
+print(wrapper.calculate_fitness_with_alignments(net, im, fm, log, parameters={"align_variant": "recomp_maximal"}))
 print(wrapper.calculate_precision_with_tbr(net, im, fm, log))
