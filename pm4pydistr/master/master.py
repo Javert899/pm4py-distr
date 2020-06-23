@@ -17,7 +17,9 @@ from pm4pydistr.master.rqsts.variants import VariantsRequest
 from pm4pydistr.master.rqsts.cases_list import CasesListRequest
 from pm4pydistr.master.rqsts.events import EventsRequest
 from pm4pydistr.master.rqsts.events_dotted_request import EventsDottedRequest
+from pm4pydistr.master.rqsts.events_per_case_requests import EventsPerCaseRequest
 from pm4pydistr.master.rqsts.events_per_time_request import EventsPerTimeRequest
+from pm4pydistr.master.rqsts.events_per_time_first_request import EventsPerTimeFirstRequest
 from pm4pydistr.master.rqsts.case_duration_request import CaseDurationRequest
 from pm4pydistr.master.rqsts.numeric_attribute_request import NumericAttributeRequest
 from pm4pydistr.master.rqsts.caching_request import CachingRequest
@@ -33,7 +35,7 @@ import os
 import numpy as np
 from collections import Counter
 from pm4pydistr.master.session_checker import SessionChecker
-from pm4pydistr.configuration import DEFAULT_MAX_NO_RET_ITEMS
+from pm4pydistr.configuration import DEFAULT_WINDOW_SIZE
 from pm4py.util import points_subset
 import time
 import sys
@@ -366,7 +368,7 @@ class Master:
 
         return ret
 
-    def get_variants(self, session, process, use_transition, no_samples, max_ret_items=DEFAULT_MAX_NO_RET_ITEMS):
+    def get_variants(self, session, process, use_transition, no_samples, start=0, window_size=DEFAULT_WINDOW_SIZE):
         all_slaves = list(self.slaves.keys())
 
         threads = []
@@ -376,7 +378,8 @@ class Master:
             slave_port = str(self.slaves[slave][2])
 
             m = VariantsRequest(session, slave_host, slave_port, use_transition, no_samples, process)
-            m.max_ret_items = max_ret_items
+            m.window_size = window_size
+            m.start_parameter = start
             m.start()
 
             threads.append(m)
@@ -399,14 +402,14 @@ class Master:
                     dictio_variants[variant]["count"] = dictio_variants[variant]["count"] + d_variants[variant]["count"]
 
             list_variants = sorted(list(dictio_variants.values()), key=lambda x: x["count"], reverse=True)
-            list_variants = list_variants[:min(len(list_variants), max_ret_items)]
+            list_variants = list_variants[:min(len(list_variants), window_size)]
             dictio_variants = {x["variant"]: x for x in list_variants}
 
         list_variants = sorted(list(dictio_variants.values()), key=lambda x: x["count"], reverse=True)
 
         return {"variants": list_variants, "events": events, "cases": cases}
 
-    def get_cases(self, session, process, use_transition, no_samples, max_ret_items=DEFAULT_MAX_NO_RET_ITEMS):
+    def get_cases(self, session, process, use_transition, no_samples, start=0, window_size=DEFAULT_WINDOW_SIZE):
         all_slaves = list(self.slaves.keys())
 
         threads = []
@@ -416,7 +419,8 @@ class Master:
             slave_port = str(self.slaves[slave][2])
 
             m = CasesListRequest(session, slave_host, slave_port, use_transition, no_samples, process)
-            m.max_ret_items = max_ret_items
+            m.window_size = window_size
+            m.start_parameter = start
             m.start()
 
             threads.append(m)
@@ -431,7 +435,7 @@ class Master:
             c_list = thread.content["cases_list"]
 
             cases_list = sorted(cases_list + c_list, key=lambda x: x["caseDuration"], reverse=True)
-            cases_list = cases_list[:min(len(cases_list), max_ret_items)]
+            cases_list = cases_list[start:min(len(cases_list), window_size)]
 
             events = events + thread.content["events"]
             cases = cases + thread.content["cases"]
@@ -491,6 +495,36 @@ class Master:
 
             return thread.content
 
+    def get_events_per_case(self, session, process, use_transition, no_samples, max_ret_items=100000):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        ret = {}
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = EventsPerCaseRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.max_ret_items = max_ret_items
+
+            m.start()
+
+            threads.append(m)
+
+        for thread in threads:
+            thread.join()
+
+            d = thread.content["events_case"]
+
+            for k in d:
+                if not k in ret:
+                    ret[k] = 0
+                ret[k] = ret[k] + d[k]
+
+        return ret
+
     def get_events_per_time(self, session, process, use_transition, no_samples, max_ret_items=100000):
         all_slaves = list(self.slaves.keys())
 
@@ -502,6 +536,34 @@ class Master:
             slave_port = str(self.slaves[slave][2])
 
             m = EventsPerTimeRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.max_ret_items = max_ret_items
+
+            m.start()
+
+            threads.append(m)
+
+        for thread in threads:
+            thread.join()
+
+            points = points + thread.content["points"]
+
+        points = sorted(points)
+        if len(points) > max_ret_items:
+            points = points_subset.pick_chosen_points_list(max_ret_items, points)
+
+        return points
+
+    def get_events_per_time_first(self, session, process, use_transition, no_samples, max_ret_items=100000):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+        points = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = EventsPerTimeFirstRequest(session, slave_host, slave_port, use_transition, no_samples, process)
             m.max_ret_items = max_ret_items
 
             m.start()
