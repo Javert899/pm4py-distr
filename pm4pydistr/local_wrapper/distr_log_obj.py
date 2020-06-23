@@ -54,6 +54,9 @@ class LocalDistrLogObj(object):
     def get_events_per_time(self, parameters=None):
         raise Exception("not implemented")
 
+    def get_events_per_time_first(self, parameters=None):
+        raise Exception("not implemented")
+
     def get_case_duration(self, parameters=None):
         raise Exception("not implemented")
 
@@ -71,3 +74,7 @@ class LocalDistrLogObj(object):
 
     def perform_tbr_net_variants(self, net, im, fm, var_list=None, parameters=None):
         raise Exception("not implemented")
+
+    def events_per_case(self, parameters=None):
+        raise Exception("not implemented")
+
