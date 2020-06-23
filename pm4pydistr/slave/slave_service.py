@@ -520,6 +520,33 @@ def get_events_per_dotted():
         return traceback.format_exc()
 
 
+@SlaveSocketListener.app.route("/getEventsPerCase", methods=["GET"])
+def get_events_per_case():
+    try:
+        process = request.args.get('process', type=str)
+        keyphrase = request.args.get('keyphrase', type=str)
+        session = request.args.get('session', type=str)
+
+        no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+        max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=100000)
+
+        if keyphrase == configuration.KEYPHRASE:
+            filters = get_filters_per_session(process, session)
+            parameters = {}
+            parameters["filters"] = filters
+            parameters[PARAMETER_NO_SAMPLES] = no_samples
+            parameters[PARAMETER_NUM_RET_ITEMS] = max_no_ret_items
+            parameters["max_no_of_points_to_sample"] = max_no_ret_items
+
+            returned_dict = parquet_handler.get_events_per_case(SlaveVariableContainer.conf, process,
+                                                                SlaveVariableContainer.managed_logs[process],
+                                                                parameters=parameters)
+
+            return jsonify({"events_case": returned_dict})
+    except:
+        return traceback.format_exc()
+
+
 @SlaveSocketListener.app.route("/getEventsPerTime", methods=["GET"])
 def get_events_per_time():
     try:

@@ -249,6 +249,14 @@ class ClassicDistrLogObject(LocalDistrLogObj):
 
         return x, y
 
+    def events_per_case(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        list_logs = self.get_list_logs()
+
+        return parquet_handler.get_events_per_case(".", self.distr_log_path, list_logs, parameters=parameters)
+
+
     def perform_alignments_net_log(self, net, im, fm, log, parameters=None):
         if parameters is None:
             parameters = {}
@@ -305,6 +313,7 @@ class ClassicDistrLogObject(LocalDistrLogObj):
             var_list = [[x, y] for x,y in variants.items()]
         petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
         return slave.perform_token_replay(petri_string, var_list, parameters=parameters)
+
 
 def apply(path, parameters=None):
     if parameters is None:

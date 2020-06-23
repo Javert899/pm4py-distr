@@ -17,6 +17,7 @@ from pm4pydistr.master.rqsts.variants import VariantsRequest
 from pm4pydistr.master.rqsts.cases_list import CasesListRequest
 from pm4pydistr.master.rqsts.events import EventsRequest
 from pm4pydistr.master.rqsts.events_dotted_request import EventsDottedRequest
+from pm4pydistr.master.rqsts.events_per_case_requests import EventsPerCaseRequest
 from pm4pydistr.master.rqsts.events_per_time_request import EventsPerTimeRequest
 from pm4pydistr.master.rqsts.case_duration_request import CaseDurationRequest
 from pm4pydistr.master.rqsts.numeric_attribute_request import NumericAttributeRequest
@@ -490,6 +491,36 @@ class Master:
             thread.join()
 
             return thread.content
+
+    def get_events_per_case(self, session, process, use_transition, no_samples, max_ret_items=100000):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+
+        ret = {}
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            m = EventsPerCaseRequest(session, slave_host, slave_port, use_transition, no_samples, process)
+            m.max_ret_items = max_ret_items
+
+            m.start()
+
+            threads.append(m)
+
+        for thread in threads:
+            thread.join()
+
+            d = thread.content["events_case"]
+
+            for k in d:
+                if not k in ret:
+                    ret[k] = 0
+                ret[k] = ret[k] + d[k]
+
+        return ret
 
     def get_events_per_time(self, session, process, use_transition, no_samples, max_ret_items=100000):
         all_slaves = list(self.slaves.keys())

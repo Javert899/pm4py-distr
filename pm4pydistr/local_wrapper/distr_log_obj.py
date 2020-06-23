@@ -71,3 +71,7 @@ class LocalDistrLogObj(object):
 
     def perform_tbr_net_variants(self, net, im, fm, var_list=None, parameters=None):
         raise Exception("not implemented")
+
+    def events_per_case(self, parameters=None):
+        raise Exception("not implemented")
+
