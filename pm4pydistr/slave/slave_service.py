@@ -658,7 +658,9 @@ def perform_alignments():
             parameters["max_align_time_trace"] = max_align_time_trace
             parameters["align_variant"] = align_variant
 
-            return jsonify({"alignments": slave.perform_alignments(petri_string, var_list, parameters=parameters)})
+            align = slave.perform_alignments(petri_string, var_list, parameters=parameters)
+
+            return jsonify({"alignments": align})
 
         return jsonify({})
     except:
