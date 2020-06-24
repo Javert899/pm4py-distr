@@ -38,6 +38,13 @@ def get_columns_to_import(filters, columns, use_transition=False):
         if "timestamp_events" in fkeys or "timestamp_trace_containing" in fkeys or "timestamp_trace_intersecting" in fkeys or "timestamp_trace_intersecting" in fkeys or "case_performance_filter" in fkeys:
             columns.add(DEFAULT_TIMESTAMP_KEY)
             columns.add(CASE_CONCEPT_NAME)
+        if "paths_pos_trace" in fkeys or "paths_neg_trace" in fkeys:
+            columns.add(DEFAULT_TIMESTAMP_KEY)
+            columns.add(CASE_CONCEPT_NAME)
+        if "ltl" in fkeys:
+            columns.add(DEFAULT_TIMESTAMP_KEY)
+            columns.add(CASE_CONCEPT_NAME)
+            columns.add(DEFAULT_NAME_KEY)
         for f in filters:
             if type(f[1]) is list:
                 columns.add(f[1][0])
