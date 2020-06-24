@@ -95,6 +95,8 @@ class ClassicDistrLogObject(DistrLogObj):
                 stru = stru + "&attribute_key=" + str(parameters[constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY])
             elif parameter == "attribute_key":
                 stru = stru + "&attribute_key=" + str(parameters["attribute_key"])
+            elif parameter == "timestamp_key":
+                stru = stru + "&timestamp_key=" + str(parameters["timestamp_key"])
             elif parameter == "performance_required":
                 stru = stru + "&performance_required=" + str(parameters["performance_required"])
             elif PARAMETER_NUM_RET_ITEMS in parameters:
