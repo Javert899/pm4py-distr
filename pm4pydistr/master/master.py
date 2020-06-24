@@ -37,6 +37,7 @@ from collections import Counter
 from pm4pydistr.master.session_checker import SessionChecker
 from pm4pydistr.configuration import DEFAULT_WINDOW_SIZE
 from pm4py.util import points_subset
+from pm4py.objects.log.util import xes
 import time
 import sys
 
@@ -525,7 +526,7 @@ class Master:
 
         return ret
 
-    def get_events_per_time(self, session, process, use_transition, no_samples, max_ret_items=100000):
+    def get_events_per_time(self, session, process, use_transition, no_samples, max_ret_items=100000, timestamp_key=xes.DEFAULT_TIMESTAMP_KEY):
         all_slaves = list(self.slaves.keys())
 
         threads = []
@@ -537,6 +538,7 @@ class Master:
 
             m = EventsPerTimeRequest(session, slave_host, slave_port, use_transition, no_samples, process)
             m.max_ret_items = max_ret_items
+            m.timestamp_key = timestamp_key
 
             m.start()
 

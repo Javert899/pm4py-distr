@@ -10,7 +10,7 @@ from pm4py.util import constants as pm4py_constants
 from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
 from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
 from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_WINDOW_SIZE, PARAMETER_START, \
-    PARAMETER_WINDOW_SIZE
+    PARAMETER_WINDOW_SIZE, PARAMETER_PM4PYWS_CLASSIFIER
 from pm4pydistr.log_handlers.parquet_filtering import factory as parquet_filtering_factory
 import pyarrow.parquet as pqq
 from pm4py.statistics.traces.pandas import case_statistics
@@ -38,6 +38,13 @@ def get_columns_to_import(filters, columns, use_transition=False):
         if "timestamp_events" in fkeys or "timestamp_trace_containing" in fkeys or "timestamp_trace_intersecting" in fkeys or "timestamp_trace_intersecting" in fkeys or "case_performance_filter" in fkeys:
             columns.add(DEFAULT_TIMESTAMP_KEY)
             columns.add(CASE_CONCEPT_NAME)
+        if "paths_pos_trace" in fkeys or "paths_neg_trace" in fkeys:
+            columns.add(DEFAULT_TIMESTAMP_KEY)
+            columns.add(CASE_CONCEPT_NAME)
+        if "ltl" in fkeys:
+            columns.add(DEFAULT_TIMESTAMP_KEY)
+            columns.add(CASE_CONCEPT_NAME)
+            columns.add(DEFAULT_NAME_KEY)
         for f in filters:
             if type(f[1]) is list:
                 columns.add(f[1][0])
@@ -52,7 +59,7 @@ def get_columns_to_import(filters, columns, use_transition=False):
 
 
 def insert_classifier(df):
-    df["@@classifier"] = df[DEFAULT_NAME_KEY] + "+" + df[DEFAULT_TRANSITION_KEY]
+    df[PARAMETER_PM4PYWS_CLASSIFIER] = df[DEFAULT_NAME_KEY] + "+" + df[DEFAULT_TRANSITION_KEY]
     return df
 
 
@@ -74,7 +81,7 @@ def load_parquet_from_path(path, columns, filters, use_transition=False, force_c
     if use_transition:
         df = insert_classifier(df)
     elif force_classifier_insertion:
-        df["@@classifier"] = df[DEFAULT_NAME_KEY]
+        df[PARAMETER_PM4PYWS_CLASSIFIER] = df[DEFAULT_NAME_KEY]
 
     return df
 
@@ -130,7 +137,7 @@ def calculate_dfg(path, log_name, managed_logs, parameters=None):
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY], use_transition=use_transition)
@@ -171,7 +178,7 @@ def calculate_performance_dfg(path, log_name, managed_logs, parameters=None):
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY, DEFAULT_TIMESTAMP_KEY],
@@ -225,7 +232,7 @@ def calculate_process_schema_composite_object(path, log_name, managed_logs, para
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     if performance_required:
@@ -323,7 +330,7 @@ def get_end_activities(path, log_name, managed_logs, parameters=None):
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
@@ -360,7 +367,7 @@ def get_start_activities(path, log_name, managed_logs, parameters=None):
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
@@ -395,7 +402,7 @@ def get_log_summary(path, log_name, managed_logs, parameters=None):
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
@@ -429,7 +436,7 @@ def get_attribute_values(path, log_name, managed_logs, parameters=None):
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
 
@@ -494,7 +501,7 @@ def get_variants(path, log_name, managed_logs, parameters=None):
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
     window_size = parameters[PARAMETER_NUM_RET_ITEMS] if PARAMETER_NUM_RET_ITEMS in parameters else DEFAULT_WINDOW_SIZE
     start = parameters[PARAMETER_START] if PARAMETER_START in parameters else 0
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
 
@@ -552,7 +559,7 @@ def get_cases(path, log_name, managed_logs, parameters=None):
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
     window_size = parameters[PARAMETER_NUM_RET_ITEMS] if PARAMETER_NUM_RET_ITEMS in parameters else DEFAULT_WINDOW_SIZE
     start = parameters[PARAMETER_START] if PARAMETER_START in parameters else 0
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
 
@@ -599,7 +606,7 @@ def get_events(path, log_name, managed_logs, parameters=None):
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
@@ -624,7 +631,10 @@ def get_events(path, log_name, managed_logs, parameters=None):
                 events = case_statistics.get_events(df, case_id)
                 if len(events) > 0:
                     df = parquet_importer.apply(pq)
-                    ret = case_statistics.get_events(df, case_id)
+                    ret = df[df[CASE_CONCEPT_NAME] == case_id].dropna(how="all", axis=1)
+                    if activity_key != PARAMETER_PM4PYWS_CLASSIFIER:
+                        ret[PARAMETER_PM4PYWS_CLASSIFIER] = ret[activity_key]
+                    ret = ret.to_dict('r')
                     break
             except:
                 pass
@@ -642,7 +652,7 @@ def get_events_per_dotted(path, log_name, managed_logs, parameters=None):
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
@@ -726,7 +736,8 @@ def get_events_per_time(path, log_name, managed_logs, parameters=None):
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
+    timestamp_key = parameters["timestamp_key"] if "timestamp_key" in parameters else DEFAULT_TIMESTAMP_KEY
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
@@ -735,7 +746,7 @@ def get_events_per_time(path, log_name, managed_logs, parameters=None):
         "max_no_of_points_to_sample"] if "max_no_of_points_to_sample" in parameters else 100000
 
     folder = os.path.join(path, log_name)
-    columns = get_columns_to_import(filters, [DEFAULT_TIMESTAMP_KEY], use_transition=use_transition)
+    columns = get_columns_to_import(filters, [timestamp_key], use_transition=use_transition)
 
     parquet_list = parquet_importer.get_list_parquet(folder)
 
@@ -751,7 +762,7 @@ def get_events_per_time(path, log_name, managed_logs, parameters=None):
             if len(df) > max_no_of_points_to_sample:
                 df = df.sample(n=max_no_of_points_to_sample)
 
-            date_values = [x.timestamp() for x in list(df[DEFAULT_TIMESTAMP_KEY])]
+            date_values = [x.timestamp() for x in list(df[timestamp_key])]
             overall_list = overall_list + date_values
 
             if count >= no_samples:
@@ -771,7 +782,7 @@ def get_events_per_time_first(path, log_name, managed_logs, parameters=None):
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
@@ -817,7 +828,7 @@ def get_case_duration(path, log_name, managed_logs, parameters=None):
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
@@ -895,7 +906,7 @@ def get_numeric_attribute_values(path, log_name, managed_logs, parameters=None):
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[
         PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
-    activity_key = DEFAULT_NAME_KEY if not use_transition else "@@classifier"
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
