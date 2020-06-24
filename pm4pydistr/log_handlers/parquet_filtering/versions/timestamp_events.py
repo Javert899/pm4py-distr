@@ -1,6 +1,7 @@
 from pm4py.algo.filtering.pandas.timestamp import timestamp_filter
 from datetime import datetime
-
+from copy import copy
+from pm4py.util.constants import PARAMETER_CONSTANT_TIMESTAMP_KEY
 
 def apply(dataframe, filter, parameters=None):
     """
@@ -18,7 +19,10 @@ def apply(dataframe, filter, parameters=None):
     if parameters is None:
         parameters = {}
 
-    dt1 = str(datetime.utcfromtimestamp(int(filter[1].split("@@@")[0])))
-    dt2 = str(datetime.utcfromtimestamp(int(filter[1].split("@@@")[1])))
+    dt1 = str(datetime.utcfromtimestamp(int(filter[1][1].split("@@@")[0])))
+    dt2 = str(datetime.utcfromtimestamp(int(filter[1][1].split("@@@")[1])))
 
-    return timestamp_filter.apply_events(dataframe, dt1, dt2, parameters=parameters)
+    new_parameters = copy(parameters)
+    new_parameters[PARAMETER_CONSTANT_TIMESTAMP_KEY] = filter[1][0]
+
+    return timestamp_filter.apply_events(dataframe, dt1, dt2, parameters=new_parameters)
