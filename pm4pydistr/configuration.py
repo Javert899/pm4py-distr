@@ -13,6 +13,8 @@ PARAMETER_WINDOW_SIZE = "window_size"
 PARAMETER_NUM_RET_ITEMS = "num_ret_items"
 DEFAULT_WINDOW_SIZE = 500
 
+PARAMETER_PM4PYWS_CLASSIFIER = "@@classifier"
+
 KEYPHRASE = "hello"
 if str(os.name) == "posix":
     PYTHON_PATH = "python3"

@@ -6,7 +6,8 @@ from random import randrange
 from time import time, sleep
 from pm4pydistr.configuration import PARAMETER_USE_TRANSITION, DEFAULT_USE_TRANSITION
 from pm4pydistr.configuration import PARAMETER_NO_SAMPLES, DEFAULT_MAX_NO_SAMPLES
-from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_WINDOW_SIZE, PARAMETER_WINDOW_SIZE, PARAMETER_START
+from pm4pydistr.configuration import PARAMETER_NUM_RET_ITEMS, DEFAULT_WINDOW_SIZE, PARAMETER_WINDOW_SIZE, \
+    PARAMETER_START
 from pm4pydistr.master.variable_container import MasterVariableContainer
 from pm4pydistr.master.db_manager import DbManager
 import pm4py
@@ -152,7 +153,8 @@ def get_slaves_list():
     keyphrase = request.args.get('keyphrase', type=str)
 
     if keyphrase == configuration.KEYPHRASE:
-        return jsonify({"slaves": MasterVariableContainer.master.slaves, "uuid": MasterVariableContainer.master.unique_identifier})
+        return jsonify(
+            {"slaves": MasterVariableContainer.master.slaves, "uuid": MasterVariableContainer.master.unique_identifier})
     return jsonify({})
 
 
@@ -525,10 +527,12 @@ def get_events_per_time():
     use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
     max_no_ret_items = request.args.get(PARAMETER_NUM_RET_ITEMS, type=int, default=DEFAULT_WINDOW_SIZE)
+    timestamp_key = request.args.get('timestamp_key', type=str, default=xes.DEFAULT_TIMESTAMP_KEY)
 
     if keyphrase == configuration.KEYPHRASE:
         points = MasterVariableContainer.master.get_events_per_time(session, process, use_transition, no_samples,
-                                                                    max_ret_items=max_no_ret_items)
+                                                                    max_ret_items=max_no_ret_items,
+                                                                    timestamp_key=timestamp_key)
 
         return jsonify({"points": points})
 
@@ -551,7 +555,7 @@ def get_events_per_time_first():
 
     if keyphrase == configuration.KEYPHRASE:
         points = MasterVariableContainer.master.get_events_per_time_first(session, process, use_transition, no_samples,
-                                                                    max_ret_items=max_no_ret_items)
+                                                                          max_ret_items=max_no_ret_items)
 
         return jsonify({"points": points})
 
@@ -660,12 +664,15 @@ def perform_tbr():
 
     petri_string = content["petri_string"]
     var_list = content["var_list"]
-    enable_parameters_precision = content["enable_parameters_precision"] if "enable_parameters_precision" in content else False
-    consider_remaining_in_fitness = content["consider_remaining_in_fitness"] if "consider_remaining_in_fitness" in content else False
+    enable_parameters_precision = content[
+        "enable_parameters_precision"] if "enable_parameters_precision" in content else False
+    consider_remaining_in_fitness = content[
+        "consider_remaining_in_fitness"] if "consider_remaining_in_fitness" in content else False
 
     if keyphrase == configuration.KEYPHRASE:
         tbr = MasterVariableContainer.master.perform_tbr(session, process, use_transition, no_samples, petri_string,
-                                                         var_list, enable_parameters_precision, consider_remaining_in_fitness)
+                                                         var_list, enable_parameters_precision,
+                                                         consider_remaining_in_fitness)
         return jsonify({"tbr": tbr})
 
     return jsonify({})
