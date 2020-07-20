@@ -256,7 +256,7 @@ class ClassicDistrLogObject(DistrLogObj):
     def get_events_per_time(self, parameters=None):
         if parameters is None:
             parameters = {}
-        url = self.get_url("getEventsPerTime")
+        url = self.get_url("getEventsPerTime", parameters=parameters)
         r = requests.get(url)
         ret_text = r.text
         ret_json = json.loads(ret_text)

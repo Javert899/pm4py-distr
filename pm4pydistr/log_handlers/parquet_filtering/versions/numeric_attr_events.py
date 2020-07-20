@@ -24,9 +24,13 @@ def apply(dataframe, filter, parameters=None):
     if parameters is None:
         parameters = {}
 
-    parameters[constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = filter[1][0]
+    if not filter[1][0].startswith("@@"):
+        parameters[constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = filter[1][0]
 
-    min_value = float(filter[1][1].split("@@@")[0])
-    max_value = float(filter[1][1].split("@@@")[1])
+        min_value = float(filter[1][1].split("@@@")[0])
+        max_value = float(filter[1][1].split("@@@")[1])
 
-    return attributes_filter.apply_numeric_events(dataframe, min_value, max_value, parameters=parameters)
+        return attributes_filter.apply_numeric_events(dataframe, min_value, max_value, parameters=parameters)
+
+    return dataframe
+

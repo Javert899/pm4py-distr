@@ -198,6 +198,9 @@ class Master:
 
             overall_dfg = overall_dfg + Counter(thread.content['dfg'])
 
+        for el in overall_dfg:
+            overall_dfg[el] = overall_dfg[el] / len(threads)
+
         return overall_dfg
 
     def calculate_composite_obj(self, session, process, use_transition, no_samples, attribute_key,
@@ -248,6 +251,8 @@ class Master:
         overall_obj["end_activities"] = dict(overall_obj["end_activities"])
         overall_obj["frequency_dfg"] = dict(overall_obj["frequency_dfg"])
         if performance_required:
+            for el in overall_obj["performance_dfg"]:
+                overall_obj["performance_dfg"][el] = overall_obj["performance_dfg"][el] / len(threads)
             overall_obj["performance_dfg"] = dict(overall_obj["performance_dfg"])
 
         return overall_obj
