@@ -16,6 +16,7 @@ from pm4py.algo.filtering.log.variants import variants_filter as log_variants_fi
 from pm4pydistr.slave import slave
 import sys
 from pm4py.objects.petri.align_utils import get_visible_transitions_eventually_enabled_by_marking
+from pm4py.algo.discovery.causal import algorithm as causal_discovery
 
 
 PARAM_MAX_ALIGN_TIME_TRACE = "max_align_time_trace"
@@ -543,3 +544,18 @@ class ClassicDistrLogObject(DistrLogObj):
             precision = 1 - float(sum_ee) / float(sum_at)
 
         return precision
+
+    def get_distr_log_footprints(self, parameters=None):
+        comp_obj = self.calculate_composite_object(parameters=parameters)
+
+        parallel = {(x, y) for (x, y) in comp_obj["frequency_dfg"] if (y, x) in comp_obj["frequency_dfg"]}
+        sequence = set(causal_discovery.apply(comp_obj["frequency_dfg"], causal_discovery.Variants.CAUSAL_ALPHA))
+
+        ret = {}
+        ret["dfg"] = comp_obj["frequency_dfg"]
+        ret["sequence"] = sequence
+        ret["parallel"] = parallel
+        ret["start_activities"] = set(comp_obj["start_activities"])
+        ret["end_activities"] = set(comp_obj["end_activities"])
+
+        return ret
