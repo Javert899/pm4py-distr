@@ -101,3 +101,6 @@ class DistrLogObj(object):
 
     def calculate_fitness_with_tbr(self, net, im, fm, log, parameters=None):
         raise Exception("not implemented")
+
+    def get_distr_log_footprints(self, parameters=None):
+        raise Exception("not implemented")
