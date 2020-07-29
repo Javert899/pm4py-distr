@@ -9,6 +9,10 @@ from datetime import datetime
 from pm4py.objects.petri.exporter.versions import pnml as pnml_exporter
 from pm4py.algo.filtering.log.variants import variants_filter as log_variants_filter
 from pm4pydistr.slave import slave
+from pm4py.algo.discovery.causal import algorithm as causal_discovery
+from pm4py.algo.discovery.inductive import algorithm as inductive_miner
+from pm4py.algo.discovery.inductive.versions.dfg import dfg_based
+from pm4py.objects.conversion.process_tree import converter
 
 
 class ClassicDistrLogObject(LocalDistrLogObj):
@@ -329,6 +333,43 @@ class ClassicDistrLogObject(LocalDistrLogObj):
             var_list = [[x, y] for x,y in variants.items()]
         petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
         return slave.perform_token_replay(petri_string, var_list, parameters=parameters)
+
+    def get_distr_log_footprints(self, parameters=None):
+        comp_obj = self.calculate_composite_object(parameters=parameters)
+
+        parallel = {(x, y) for (x, y) in comp_obj["frequency_dfg"] if (y, x) in comp_obj["frequency_dfg"]}
+        sequence = set(causal_discovery.apply(comp_obj["frequency_dfg"], causal_discovery.Variants.CAUSAL_ALPHA))
+
+        ret = {}
+        ret["dfg"] = comp_obj["frequency_dfg"]
+        ret["sequence"] = sequence
+        ret["parallel"] = parallel
+        ret["start_activities"] = set(comp_obj["start_activities"])
+        ret["end_activities"] = set(comp_obj["end_activities"])
+
+        return ret
+
+    def get_imd_tree_from_dfg(self, parameters=None):
+        comp_obj = self.calculate_composite_object(parameters=parameters)
+        tree = dfg_based.apply_tree_dfg(comp_obj["frequency_dfg"], start_activities=comp_obj["start_activities"],
+                                        end_activities=comp_obj["end_activities"], activities=comp_obj["activities"])
+        return tree
+
+    def get_imd_net_im_fm_from_dfg(self, parameters=None):
+        tree = self.get_imd_tree_from_dfg(parameters=parameters)
+        net, im, fm = converter.apply(tree, parameters=parameters)
+        return net, im, fm
+
+    def get_im_tree_from_variants(self, parameters=None):
+        variants = {x["variant"]: x["count"] for x in self.get_variants(parameters=parameters)["variants"]}
+        tree = inductive_miner.apply_tree_variants(variants, parameters=parameters)
+        return tree
+
+    def get_im_net_im_fm_from_variants(self, parameters=None):
+        tree = self.get_im_tree_from_variants(parameters=parameters)
+        net, im, fm = converter.apply(tree, parameters=parameters)
+        return net, im, fm
+
 
 
 def apply(path, parameters=None):

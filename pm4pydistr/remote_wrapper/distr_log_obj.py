@@ -104,3 +104,15 @@ class DistrLogObj(object):
 
     def get_distr_log_footprints(self, parameters=None):
         raise Exception("not implemented")
+
+    def get_imd_tree_from_dfg(self, parameters=None):
+        raise Exception("not implemented")
+
+    def get_imd_net_im_fm_from_dfg(self, parameters=None):
+        raise Exception("not implemented")
+
+    def get_im_tree_from_variants(self, parameters=None):
+        raise Exception("not implemented")
+
+    def get_im_net_im_fm_from_variants(self, parameters=None):
+        raise Exception("not implemented")
