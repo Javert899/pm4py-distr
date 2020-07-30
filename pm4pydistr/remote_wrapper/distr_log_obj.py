@@ -116,3 +116,9 @@ class DistrLogObj(object):
 
     def get_im_net_im_fm_from_variants(self, parameters=None):
         raise Exception("not implemented")
+
+    def perform_alignments_tree_variants(self, tree, var_list=None, parameters=None):
+        raise Exception("not implemented")
+
+    def perform_alignments_tree_log(self,tree, log, parameters=None):
+        raise Exception("not implemented")
