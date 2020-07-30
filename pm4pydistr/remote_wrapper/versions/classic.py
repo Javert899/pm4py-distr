@@ -374,7 +374,7 @@ class ClassicDistrLogObject(DistrLogObj):
         if var_list is None:
             variants = self.get_variants(parameters=parameters)
             var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
-        ptml_string = ptml_exporter.apply(tree, parameters=parameters)
+        ptml_string = ptml_exporter.export_tree_as_string(tree, parameters=parameters)
         return self.perform_alignments(ptml_string, var_list, parameters=parameters)
 
     def perform_alignments(self, petri_string, var_list, parameters=None):

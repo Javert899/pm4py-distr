@@ -92,6 +92,8 @@ def perform_alignments(petri_string, var_list, parameters=None):
     variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_no_heuristics"
     parameters["ret_tuple_as_trans_desc"] = True
 
+    print(variant)
+
     if variant == "dijkstra_no_heuristics":
         return dijkstra_no_heuristics.apply_from_variants_list_petri_string(var_list, petri_string,
                                                                             parameters=parameters)
@@ -106,7 +108,9 @@ def perform_alignments(petri_string, var_list, parameters=None):
         return state_equation_less_memory.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
     elif variant == "tree_approximated":
         from pm4py.algo.conformance.tree_alignments.variants.approximated import algorithm as approx_alignments
-        return approx_alignments.apply_from_variants_list_tree_string(var_list, petri_string, parameters=parameters)
+        alignments =  approx_alignments.apply_from_variants_tree_string(var_list, petri_string, parameters=parameters)
+        return alignments
+
 
 
 def perform_token_replay(petri_string, var_list, parameters=None):
