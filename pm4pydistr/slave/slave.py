@@ -104,7 +104,9 @@ def perform_alignments(petri_string, var_list, parameters=None):
         return recompos_maximal.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
     elif variant == "state_equation_less_memory":
         return state_equation_less_memory.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
-
+    elif variant == "tree_approximated":
+        from pm4py.algo.conformance.tree_alignments.variants.approximated import algorithm as approx_alignments
+        return approx_alignments.apply_from_variants_list_tree_string(var_list, petri_string, parameters=parameters)
 
 def perform_token_replay(petri_string, var_list, parameters=None):
     if parameters is None:

@@ -12,6 +12,7 @@ from pm4py.objects.petri import align_utils
 from pm4py.algo.conformance.alignments.versions import state_equation_a_star
 from datetime import datetime
 from pm4py.objects.petri.exporter.versions import pnml as pnml_exporter
+from pm4py.objects.process_tree.exporter.variants import ptml as ptml_exporter
 from pm4py.algo.filtering.log.variants import variants_filter as log_variants_filter
 import sys
 from pm4py.objects.petri.align_utils import get_visible_transitions_eventually_enabled_by_marking
@@ -337,6 +338,25 @@ class ClassicDistrLogObject(DistrLogObj):
 
         return alignments
 
+    def perform_alignments_tree_log(self,tree, log, parameters=None):
+        if parameters is None:
+            parameters = {}
+        variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
+        var_list = [[x, y] for x, y in variants.items()]
+
+        result = self.perform_alignments_tree_variants(tree, var_list=var_list, parameters=parameters)
+
+        al_idx = {}
+        for index_variant, variant in enumerate(variants):
+            for trace_idx in variants[variant]:
+                al_idx[trace_idx] = result[variant]
+
+        alignments = []
+        for i in range(len(log)):
+            alignments.append(al_idx[i])
+
+        return alignments
+
     def perform_alignments_net_variants(self, net, im, fm, var_list=None, parameters=None):
         if parameters is None:
             parameters = {}
@@ -345,6 +365,17 @@ class ClassicDistrLogObject(DistrLogObj):
             var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
         petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
         return self.perform_alignments(petri_string, var_list, parameters=parameters)
+
+    def perform_alignments_tree_variants(self, tree, var_list=None, parameters=None):
+        if parameters is None:
+            parameters = {}
+        if "align_variant" not in parameters:
+            parameters["align_variant"] = "tree_approximated"
+        if var_list is None:
+            variants = self.get_variants(parameters=parameters)
+            var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
+        ptml_string = ptml_exporter.apply(tree, parameters=parameters)
+        return self.perform_alignments(ptml_string, var_list, parameters=parameters)
 
     def perform_alignments(self, petri_string, var_list, parameters=None):
         if parameters is None:
