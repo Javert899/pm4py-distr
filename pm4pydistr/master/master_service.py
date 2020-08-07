@@ -633,13 +633,15 @@ def perform_alignments():
     max_align_time = content["max_align_time"]
     max_align_time_trace = content["max_align_time_trace"]
     align_variant = content["align_variant"]
+    classic_alignments_variant = content["classic_alignments_variant"]
 
     if keyphrase == configuration.KEYPHRASE:
         alignments = MasterVariableContainer.master.perform_alignments(session, process, use_transition, no_samples,
                                                                        petri_string, var_list,
                                                                        max_align_time=max_align_time,
                                                                        max_align_time_trace=max_align_time_trace,
-                                                                       align_variant=align_variant)
+                                                                       align_variant=align_variant,
+                                                                       classic_alignments_variant=classic_alignments_variant)
         return jsonify({"alignments": alignments})
 
     return jsonify({})

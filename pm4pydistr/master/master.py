@@ -531,7 +531,8 @@ class Master:
 
         return ret
 
-    def get_events_per_time(self, session, process, use_transition, no_samples, max_ret_items=100000, timestamp_key=xes.DEFAULT_TIMESTAMP_KEY):
+    def get_events_per_time(self, session, process, use_transition, no_samples, max_ret_items=100000,
+                            timestamp_key=xes.DEFAULT_TIMESTAMP_KEY):
         all_slaves = list(self.slaves.keys())
 
         threads = []
@@ -671,7 +672,8 @@ class Master:
             yield l[i:i + n]
 
     def perform_alignments(self, session, process, use_transition, no_samples, petri_string, var_list,
-                           max_align_time=sys.maxsize, max_align_time_trace=sys.maxsize, align_variant="dijkstra_no_heuristics"):
+                           max_align_time=sys.maxsize, max_align_time_trace=sys.maxsize,
+                           align_variant="dijkstra_less_memory", classic_alignments_variant="dijkstra_less_memory"):
         all_slaves = list(self.slaves.keys())
 
         n = math.ceil(len(var_list) / len(all_slaves))
@@ -686,7 +688,7 @@ class Master:
 
                 content = {"petri_string": petri_string, "var_list": variants_list_split[index],
                            "max_align_time": max_align_time, "max_align_time_trace": max_align_time_trace,
-                           "align_variant": align_variant}
+                           "align_variant": align_variant, "classic_alignments_variant": classic_alignments_variant}
 
                 m = AlignRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
 
