@@ -701,39 +701,38 @@ def get_numeric_attribute_values():
 
 @SlaveSocketListener.app.route("/performAlignments", methods=["POST"])
 def perform_alignments():
+    from pm4pydistr.slave import slave
+
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
     try:
-        from pm4pydistr.slave import slave
-
-        process = request.args.get('process', type=str)
-        keyphrase = request.args.get('keyphrase', type=str)
-        session = request.args.get('session', type=str)
-        use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
-        no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-
-        try:
-            content = json.loads(request.data)
-        except:
-            content = json.loads(request.data.decode('utf-8'))
-
-        petri_string = content["petri_string"]
-        var_list = content["var_list"]
-        max_align_time = content["max_align_time"]
-        max_align_time_trace = content["max_align_time_trace"]
-        align_variant = content["align_variant"]
-
-        if keyphrase == configuration.KEYPHRASE:
-            parameters = {}
-            parameters["max_align_time"] = max_align_time
-            parameters["max_align_time_trace"] = max_align_time_trace
-            parameters["align_variant"] = align_variant
-
-            align = slave.perform_alignments(petri_string, var_list, parameters=parameters)
-
-            return jsonify({"alignments": align})
-
-        return jsonify({})
+        content = json.loads(request.data)
     except:
-        return traceback.format_exc()
+        content = json.loads(request.data.decode('utf-8'))
+
+    petri_string = content["petri_string"]
+    var_list = content["var_list"]
+    max_align_time = content["max_align_time"]
+    max_align_time_trace = content["max_align_time_trace"]
+    align_variant = content["align_variant"]
+    classic_alignments_variant = content["classic_alignments_variant"]
+
+    if keyphrase == configuration.KEYPHRASE:
+        parameters = {}
+        parameters["max_align_time"] = max_align_time
+        parameters["max_align_time_trace"] = max_align_time_trace
+        parameters["align_variant"] = align_variant
+        parameters["classic_alignments_variant"] = classic_alignments_variant
+
+        align = slave.perform_alignments(petri_string, var_list, parameters=parameters)
+
+        return jsonify({"alignments": align})
+
+    return jsonify({})
 
 
 @SlaveSocketListener.app.route("/performTbr", methods=["POST"])

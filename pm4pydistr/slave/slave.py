@@ -92,8 +92,6 @@ def perform_alignments(petri_string, var_list, parameters=None):
     variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_no_heuristics"
     parameters["ret_tuple_as_trans_desc"] = True
 
-    print(variant)
-
     if variant == "dijkstra_no_heuristics":
         return dijkstra_no_heuristics.apply_from_variants_list_petri_string(var_list, petri_string,
                                                                             parameters=parameters)
@@ -105,10 +103,23 @@ def perform_alignments(petri_string, var_list, parameters=None):
     elif variant == "recomp_maximal":
         return recompos_maximal.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
     elif variant == "state_equation_less_memory":
-        return state_equation_less_memory.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
+        return state_equation_less_memory.apply_from_variants_list_petri_string(var_list, petri_string,
+                                                                                parameters=parameters)
     elif variant == "tree_approximated":
-        from pm4py.algo.conformance.tree_alignments.variants.approximated import algorithm as approx_alignments
-        alignments =  approx_alignments.apply_from_variants_tree_string(var_list, petri_string, parameters=parameters)
+        if "classic_alignments_variant" in parameters:
+            if parameters["classic_alignments_variant"] == "dijkstra_no_heuristics":
+                parameters["classic_alignments_variant"] = dijkstra_no_heuristics
+            elif parameters["classic_alignments_variant"] == "dijkstra_less_memory":
+                parameters["classic_alignments_variant"] = dijkstra_less_memory
+            elif parameters["classic_alignments_variant"] == "recomp_maximal":
+                parameters["classic_alignments_variant"] = recompos_maximal
+            elif parameters["classic_alignments_variant"] == "state_equation_less_memory":
+                parameters["classic_alignments_variant"] = state_equation_less_memory
+            elif parameters["classic_alignments_variant"] == "state_equation_a_star":
+                parameters["classic_alignments_variant"] = state_equation_a_star
+        from pm4py.algo.conformance.tree_alignments.variants.approximated import matrix_lp as approx_alignments
+        alignments = approx_alignments.apply_from_variants_tree_string(var_list, petri_string,
+                                                                       parameters=parameters)
         return alignments
 
 
