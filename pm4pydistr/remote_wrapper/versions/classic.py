@@ -661,7 +661,6 @@ class ClassicDistrLogObject(DistrLogObj):
 
         url = self.get_url("correlationMiner", parameters=parameters)
         r = requests.post(url, json=content)
-        print(r.text)
 
         resp = json.loads(r.text)
         PS_matrix = np.asmatrix(resp["PS_matrix"]).reshape(len(activities), len(activities))
