@@ -613,36 +613,43 @@ def get_numeric_attribute_values():
 
 @MasterSocketListener.app.route("/performAlignments", methods=["POST"])
 def perform_alignments():
-    check_master_initialized()
-    except_if_not_slave_loading_requested()
-    wait_till_slave_load_requested()
-
-    process = request.args.get('process', type=str)
-    keyphrase = request.args.get('keyphrase', type=str)
-    session = request.args.get('session', type=str)
-    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
-    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
-
     try:
-        content = json.loads(request.data)
+        check_master_initialized()
+        except_if_not_slave_loading_requested()
+        wait_till_slave_load_requested()
+
+        process = request.args.get('process', type=str)
+        keyphrase = request.args.get('keyphrase', type=str)
+        session = request.args.get('session', type=str)
+        use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+        no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+        try:
+            content = json.loads(request.data)
+        except:
+            content = json.loads(request.data.decode('utf-8'))
+
+        petri_string = content["petri_string"]
+        var_list = content["var_list"]
+        max_align_time = content["max_align_time"]
+        max_align_time_trace = content["max_align_time_trace"]
+        align_variant = content["align_variant"]
+        classic_alignments_variant = content["classic_alignments_variant"]
+
+        if keyphrase == configuration.KEYPHRASE:
+            alignments = MasterVariableContainer.master.perform_alignments(session, process, use_transition, no_samples,
+                                                                           petri_string, var_list,
+                                                                           max_align_time=max_align_time,
+                                                                           max_align_time_trace=max_align_time_trace,
+                                                                           align_variant=align_variant,
+                                                                           classic_alignments_variant=classic_alignments_variant)
+            return jsonify({"alignments": alignments})
+
+        return jsonify({})
     except:
-        content = json.loads(request.data.decode('utf-8'))
-
-    petri_string = content["petri_string"]
-    var_list = content["var_list"]
-    max_align_time = content["max_align_time"]
-    max_align_time_trace = content["max_align_time_trace"]
-    align_variant = content["align_variant"]
-
-    if keyphrase == configuration.KEYPHRASE:
-        alignments = MasterVariableContainer.master.perform_alignments(session, process, use_transition, no_samples,
-                                                                       petri_string, var_list,
-                                                                       max_align_time=max_align_time,
-                                                                       max_align_time_trace=max_align_time_trace,
-                                                                       align_variant=align_variant)
-        return jsonify({"alignments": alignments})
-
-    return jsonify({})
+        import traceback
+        exc = traceback.format_exc()
+        return exc
 
 
 @MasterSocketListener.app.route("/performTbr", methods=["POST"])
@@ -692,3 +699,39 @@ def do_shutdown():
         MasterVariableContainer.master.perform_shutdown(session, process, use_transition, no_samples)
 
     return jsonify({})
+
+
+@MasterSocketListener.app.route("/correlationMiner", methods=["POST"])
+def correlation_miner():
+    check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
+
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    try:
+        try:
+            content = json.loads(request.data)
+        except:
+            content = json.loads(request.data.decode('utf-8'))
+
+        activities = content["activities"]
+        start_timestamp = content["start_timestamp"]
+        end_timestamp = content["complete_timestamp"]
+
+        if keyphrase == configuration.KEYPHRASE:
+            ret = MasterVariableContainer.master.correlation_miner(session, process, use_transition, no_samples,
+                                                                   activities,
+                                                                   start_timestamp, end_timestamp)
+            return jsonify(ret)
+
+        return jsonify({"PS_matrix": [], "duration_matrix": []})
+    except:
+        import traceback
+        exc = traceback.format_exc()
+        return exc

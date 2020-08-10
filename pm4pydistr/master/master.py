@@ -26,8 +26,10 @@ from pm4pydistr.master.rqsts.caching_request import CachingRequest
 from pm4pydistr.master.rqsts.conf_align_request import AlignRequest
 from pm4pydistr.master.rqsts.conf_tbr_request import TbrRequest
 from pm4pydistr.master.rqsts.shutdown_request import ShutdownRequest
+from pm4pydistr.master.rqsts.corr_mining_req import CorrMiningRequest
 import math
 import uuid
+import json
 
 from pathlib import Path
 from random import randrange
@@ -198,6 +200,9 @@ class Master:
 
             overall_dfg = overall_dfg + Counter(thread.content['dfg'])
 
+        for el in overall_dfg:
+            overall_dfg[el] = overall_dfg[el] / len(threads)
+
         return overall_dfg
 
     def calculate_composite_obj(self, session, process, use_transition, no_samples, attribute_key,
@@ -248,6 +253,8 @@ class Master:
         overall_obj["end_activities"] = dict(overall_obj["end_activities"])
         overall_obj["frequency_dfg"] = dict(overall_obj["frequency_dfg"])
         if performance_required:
+            for el in overall_obj["performance_dfg"]:
+                overall_obj["performance_dfg"][el] = overall_obj["performance_dfg"][el] / len(threads)
             overall_obj["performance_dfg"] = dict(overall_obj["performance_dfg"])
 
         return overall_obj
@@ -526,7 +533,8 @@ class Master:
 
         return ret
 
-    def get_events_per_time(self, session, process, use_transition, no_samples, max_ret_items=100000, timestamp_key=xes.DEFAULT_TIMESTAMP_KEY):
+    def get_events_per_time(self, session, process, use_transition, no_samples, max_ret_items=100000,
+                            timestamp_key=xes.DEFAULT_TIMESTAMP_KEY):
         all_slaves = list(self.slaves.keys())
 
         threads = []
@@ -666,7 +674,8 @@ class Master:
             yield l[i:i + n]
 
     def perform_alignments(self, session, process, use_transition, no_samples, petri_string, var_list,
-                           max_align_time=sys.maxsize, max_align_time_trace=sys.maxsize, align_variant="dijkstra_no_heuristics"):
+                           max_align_time=sys.maxsize, max_align_time_trace=sys.maxsize,
+                           align_variant="dijkstra_less_memory", classic_alignments_variant="dijkstra_less_memory"):
         all_slaves = list(self.slaves.keys())
 
         n = math.ceil(len(var_list) / len(all_slaves))
@@ -681,7 +690,7 @@ class Master:
 
                 content = {"petri_string": petri_string, "var_list": variants_list_split[index],
                            "max_align_time": max_align_time, "max_align_time_trace": max_align_time_trace,
-                           "align_variant": align_variant}
+                           "align_variant": align_variant, "classic_alignments_variant": classic_alignments_variant}
 
                 m = AlignRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
 
@@ -694,7 +703,11 @@ class Master:
         for thread in threads:
             thread.join()
 
-            ret_dict.update(thread.content["alignments"])
+            try:
+                ret_dict.update(thread.content["alignments"])
+            except:
+                import traceback
+                raise Exception(thread.content)
 
         return ret_dict
 
@@ -752,3 +765,48 @@ class Master:
             thread.join()
 
         return None
+
+    def correlation_miner(self, session, process, use_transition, no_samples, activities, start_timestamp,
+                          complete_timestamp):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+        PS_matrixes = []
+        duration_matrixes = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            content = {"activities": activities, "start_timestamp": start_timestamp,
+                       "complete_timestamp": complete_timestamp}
+
+            m = CorrMiningRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
+            m.start()
+
+            threads.append(m)
+
+        for thread in threads:
+            thread.join()
+
+            PS_matrixes.append(thread.PS_matrix)
+            duration_matrixes.append(thread.duration_matrix)
+
+        PS_matrix = np.zeros((len(activities), len(activities)))
+        duration_matrix = np.zeros((len(activities), len(activities)))
+
+        z = 0
+        while z < len(PS_matrixes):
+            try:
+                PS_matrix = PS_matrix + np.asmatrix(PS_matrixes[z]).reshape(len(activities), len(activities))
+                duration_matrix = np.maximum(duration_matrix, np.asmatrix(duration_matrixes[z]).reshape(len(activities), len(activities)))
+            except:
+                pass
+            z = z + 1
+
+        PS_matrix = PS_matrix / float(len(PS_matrixes))
+
+        PS_matrix = PS_matrix.tolist()
+        duration_matrix = duration_matrix.tolist()
+
+        return {"PS_matrix": json.dumps(PS_matrix), "duration_matrix": json.dumps(duration_matrix)}
