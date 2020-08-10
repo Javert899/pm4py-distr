@@ -25,6 +25,9 @@ class CorrMiningRequest(BasicMasterRequest):
             self.process) + "&session=" + str(self.session) + "&use_transition=" + str(
             self.use_transition) + "&no_samples=" + str(self.no_samples)
         r = requests.post(uri, json=self.json_content)
-        resp = json.loads(r.text)
+        try:
+            resp = json.loads(r.text)
+        except:
+            raise Exception(r.text)
         self.PS_matrix = np.asmatrix(resp["PS_matrix"])
         self.duration_matrix = np.asmatrix(resp["duration_matrix"])
