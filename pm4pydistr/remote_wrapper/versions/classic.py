@@ -397,8 +397,11 @@ class ClassicDistrLogObject(DistrLogObj):
 
         r = requests.post(url, json=dictio)
         ret_text = r.text
-        ret_json = json.loads(ret_text)
-        return ret_json["alignments"]
+        try:
+            ret_json = json.loads(ret_text)
+            return ret_json["alignments"]
+        except:
+            print(r.text)
 
     def perform_tbr_net_log(self, net, im, fm, log, parameters=None):
         if parameters is None:
