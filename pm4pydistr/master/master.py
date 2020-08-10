@@ -26,8 +26,10 @@ from pm4pydistr.master.rqsts.caching_request import CachingRequest
 from pm4pydistr.master.rqsts.conf_align_request import AlignRequest
 from pm4pydistr.master.rqsts.conf_tbr_request import TbrRequest
 from pm4pydistr.master.rqsts.shutdown_request import ShutdownRequest
+from pm4pydistr.master.rqsts.corr_mining_req import CorrMiningRequest
 import math
 import uuid
+import json
 
 from pathlib import Path
 from random import randrange
@@ -759,3 +761,45 @@ class Master:
             thread.join()
 
         return None
+
+    def correlation_miner(self, session, process, use_transition, no_samples, activities, start_timestamp,
+                          complete_timestamp):
+        all_slaves = list(self.slaves.keys())
+
+        threads = []
+        PS_matrixes = []
+        duration_matrixes = []
+
+        for slave in all_slaves:
+            slave_host = self.slaves[slave][1]
+            slave_port = str(self.slaves[slave][2])
+
+            content = {"activities": activities, "start_timestamp": start_timestamp,
+                       "complete_timestamp": complete_timestamp}
+
+            m = CorrMiningRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
+            m.start()
+
+            threads.append(m)
+
+        for thread in threads:
+            thread.join()
+
+            PS_matrixes.append(thread.PS_matrix)
+            duration_matrixes.append(thread.duration_matrix)
+
+        PS_matrix = np.zeros((len(activities), len(activities)))
+        duration_matrix = np.zeros((len(activities), len(activities)))
+
+        z = 0
+        while z < len(PS_matrixes):
+            PS_matrix = PS_matrix + PS_matrixes[z].reshape(len(activities), len(activities))
+            duration_matrix = np.maximum(duration_matrix, duration_matrixes[z].reshape(len(activities), len(activities)))
+            z = z + 1
+
+        PS_matrix = PS_matrix / float(len(PS_matrixes))
+
+        PS_matrix = PS_matrix.tolist()
+        duration_matrix = duration_matrix.tolist()
+
+        return {"PS_matrix": json.dumps(PS_matrix), "duration_matrix": json.dumps(duration_matrix)}

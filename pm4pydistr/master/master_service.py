@@ -694,3 +694,33 @@ def do_shutdown():
         MasterVariableContainer.master.perform_shutdown(session, process, use_transition, no_samples)
 
     return jsonify({})
+
+
+@MasterSocketListener.app.route("/correlationMiner", methods=["POST"])
+def correlation_miner():
+    check_master_initialized()
+    except_if_not_slave_loading_requested()
+    wait_till_slave_load_requested()
+
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    try:
+        content = json.loads(request.data)
+    except:
+        content = json.loads(request.data.decode('utf-8'))
+
+    activities = content["activities"]
+    start_timestamp = content["start_timestamp"]
+    end_timestamp = content["complete_timestamp"]
+
+    if keyphrase == configuration.KEYPHRASE:
+        ret = MasterVariableContainer.master.correlation_miner(session, process, use_transition, no_samples, activities,
+                                                         start_timestamp, end_timestamp)
+        return jsonify(ret)
+
+    return jsonify({"PS_matrix": [], "duration_matrix": []})

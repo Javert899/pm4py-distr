@@ -15,7 +15,9 @@ from pm4pydistr.log_handlers.parquet_filtering import factory as parquet_filteri
 import pyarrow.parquet as pqq
 from pm4py.statistics.traces.pandas import case_statistics
 import pandas as pd
+import numpy as np
 from pm4py.util import points_subset
+import json
 
 from pathlib import Path
 
@@ -946,3 +948,68 @@ def get_numeric_attribute_values(path, log_name, managed_logs, parameters=None):
         overall_list = points_subset.pick_chosen_points_list(max_no_of_points_to_sample, overall_list)
 
     return overall_list
+
+
+def correlation_miner(path, log_name, managed_logs, parameters=None):
+    if parameters is None:
+        parameters = {}
+
+    activities = parameters["activities"] if "activities" in parameters else None
+    complete_timestamp = parameters["complete_timestamp"] if "complete_timestamp" in parameters else DEFAULT_TIMESTAMP_KEY
+    start_timestamp = parameters["start_timestamp"] if "start_timestamp" in parameters else DEFAULT_TIMESTAMP_KEY
+
+    from pm4py.algo.discovery.correlation_mining.versions import classic
+
+    no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
+    use_transition = parameters[
+        PARAMETER_USE_TRANSITION] if PARAMETER_USE_TRANSITION in parameters else DEFAULT_USE_TRANSITION
+    activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
+    filters = parameters[FILTERS] if FILTERS in parameters else []
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
+    parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
+    parameters[classic.Parameters.ACTIVITY_KEY] = activity_key
+    parameters[classic.Parameters.TIMESTAMP_KEY] = complete_timestamp
+    parameters[classic.Parameters.START_TIMESTAMP_KEY] = start_timestamp
+
+    folder = os.path.join(path, log_name)
+    columns = get_columns_to_import(filters, [activity_key, complete_timestamp, start_timestamp], use_transition=use_transition)
+
+    parquet_list = parquet_importer.get_list_parquet(folder)
+
+    PS_matrixes = []
+    duration_matrixes = []
+
+    count = 0
+    for index, pq in enumerate(parquet_list):
+        pq_basename = Path(pq).name
+        if pq_basename in managed_logs:
+            count = count + 1
+
+            df = get_filtered_parquet(pq, columns, filters, use_transition=use_transition, parameters=parameters)
+
+            transf_stream, activities_grouped, activities = classic.preprocess_log(df, activities=activities,
+                                                                                   parameters=parameters)
+
+            PS_matrix, duration_matrix = classic.get_PS_dur_matrix(activities_grouped, activities,
+                                                                   parameters=parameters)
+
+            PS_matrixes.append(PS_matrix)
+            duration_matrixes.append(duration_matrix)
+
+            if count >= no_samples:
+                break
+
+    PS_matrix = np.zeros((len(activities), len(activities)))
+    duration_matrix = np.zeros((len(activities), len(activities)))
+
+    z = 0
+    while z < len(PS_matrixes):
+        PS_matrix = PS_matrix + PS_matrixes[z]
+        duration_matrix = np.maximum(duration_matrix, duration_matrixes[z])
+        z = z + 1
+    PS_matrix = PS_matrix / float(len(PS_matrixes))
+
+    PS_matrix = PS_matrix.tolist()
+    duration_matrix = duration_matrix.tolist()
+
+    return {"PS_matrix": json.dumps(PS_matrix), "duration_matrix": json.dumps(duration_matrix)}

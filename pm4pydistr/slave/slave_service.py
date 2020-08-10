@@ -782,3 +782,46 @@ def do_shutdown():
         return jsonify({})
     except:
         return traceback.format_exc()
+
+
+@SlaveSocketListener.app.route("/correlationMiner", methods=["POST"])
+def correlation_miner():
+
+    process = request.args.get('process', type=str)
+    keyphrase = request.args.get('keyphrase', type=str)
+    session = request.args.get('session', type=str)
+    use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+    no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+    if use_transition == "True":
+        use_transition = True
+    else:
+        use_transition = False
+
+    try:
+        content = json.loads(request.data)
+    except:
+        content = json.loads(request.data.decode('utf-8'))
+
+    activities = content["activities"]
+    start_timestamp = content["start_timestamp"]
+    complete_timestamp = content["complete_timestamp"]
+
+    if keyphrase == configuration.KEYPHRASE:
+        filters = get_filters_per_session(process, session)
+        parameters = {}
+        parameters["filters"] = filters
+        parameters["activities"] = activities
+        parameters["start_timestamp"] = start_timestamp
+        parameters["complete_timestamp"] = complete_timestamp
+
+        parameters[PARAMETER_USE_TRANSITION] = use_transition
+        parameters[PARAMETER_NO_SAMPLES] = no_samples
+
+        ret = parquet_handler.correlation_miner(SlaveVariableContainer.conf, process,
+                                                                     SlaveVariableContainer.managed_logs[process],
+                                                                     parameters=parameters)
+
+        return jsonify(ret)
+
+    return jsonify({"PS_matrix": [], "duration_matrix": []})
