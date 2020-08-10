@@ -703,7 +703,11 @@ class Master:
         for thread in threads:
             thread.join()
 
-            ret_dict.update(thread.content["alignments"])
+            try:
+                ret_dict.update(thread.content["alignments"])
+            except:
+                import traceback
+                raise Exception(thread.content)
 
         return ret_dict
 

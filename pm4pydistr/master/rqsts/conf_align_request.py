@@ -25,4 +25,5 @@ class AlignRequest(BasicMasterRequest):
             r = requests.post(uri, data=json.dumps(self.content))
             self.content = json.loads(r.text)
         except:
+            self.content = r.text
             raise Exception(r.text)
