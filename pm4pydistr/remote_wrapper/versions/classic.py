@@ -633,3 +633,6 @@ class ClassicDistrLogObject(DistrLogObj):
 
         from pm4py.algo.conformance.log_skeleton.versions import classic
         return classic.apply_from_variants_list(var_list, model)
+
+    def correlation_miner(self, parameters=None):
+        raise Exception("not implemented")

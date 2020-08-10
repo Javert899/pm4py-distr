@@ -955,6 +955,8 @@ def correlation_miner(path, log_name, managed_logs, parameters=None):
         parameters = {}
 
     activities = parameters["activities"] if "activities" in parameters else None
+    complete_timestamp = parameters["complete_timestamp"] if "complete_timestamp" in parameters else DEFAULT_TIMESTAMP_KEY
+    start_timestamp = parameters["start_timestamp"] if "start_timestamp" in parameters else DEFAULT_TIMESTAMP_KEY
 
     from pm4py.algo.discovery.correlation_mining.versions import classic
 
@@ -965,9 +967,12 @@ def correlation_miner(path, log_name, managed_logs, parameters=None):
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
     parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY] = activity_key
+    parameters[classic.Parameters.ACTIVITY_KEY] = activity_key
+    parameters[classic.Parameters.TIMESTAMP_KEY] = complete_timestamp
+    parameters[classic.Parameters.START_TIMESTAMP_KEY] = start_timestamp
 
     folder = os.path.join(path, log_name)
-    columns = get_columns_to_import(filters, [activity_key, DEFAULT_TIMESTAMP_KEY], use_transition=use_transition)
+    columns = get_columns_to_import(filters, [activity_key, complete_timestamp, start_timestamp], use_transition=use_transition)
 
     parquet_list = parquet_importer.get_list_parquet(folder)
 

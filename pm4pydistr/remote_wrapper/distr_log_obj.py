@@ -128,3 +128,6 @@ class DistrLogObj(object):
 
     def conformance_skeleton(self, model, parameters=None):
         raise Exception("not implemented")
+
+    def correlation_miner(self, parameters=None):
+        raise Exception("not implemented")
