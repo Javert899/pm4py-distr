@@ -2,6 +2,7 @@ from pm4pydistr.master.rqsts.basic_request import BasicMasterRequest
 from pm4pydistr.configuration import KEYPHRASE
 import requests
 import json
+import numpy as np
 
 
 class CorrMiningRequest(BasicMasterRequest):
@@ -17,14 +18,13 @@ class CorrMiningRequest(BasicMasterRequest):
         self.PS_matrix = []
         self.duration_matrix = []
 
-        BasicMasterRequest.__init__(self, session, target_host, target_port, use_transition, no_samples, content)
+        BasicMasterRequest.__init__(self, session, target_host, target_port, use_transition, no_samples, json_content)
 
     def run(self):
         uri = "http://" + self.target_host + ":" + self.target_port + "/correlationMiner?keyphrase=" + KEYPHRASE + "&process=" + str(
             self.process) + "&session=" + str(self.session) + "&use_transition=" + str(
             self.use_transition) + "&no_samples=" + str(self.no_samples)
-        print(self.json_content)
         r = requests.post(uri, json=self.json_content)
         resp = json.loads(r.text)
-        self.PS_matrix = resp["PS_matrix"]
-        self.duration_matrix = resp["duration_matrix"]
+        self.PS_matrix = np.asmatrix(resp["PS_matrix"])
+        self.duration_matrix = np.asmatrix(resp["duration_matrix"])
