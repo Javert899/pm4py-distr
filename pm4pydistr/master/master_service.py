@@ -710,17 +710,22 @@ def correlation_miner():
     no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
 
     try:
-        content = json.loads(request.data)
+        try:
+            content = json.loads(request.data)
+        except:
+            content = json.loads(request.data.decode('utf-8'))
+
+        activities = content["activities"]
+        start_timestamp = content["start_timestamp"]
+        end_timestamp = content["complete_timestamp"]
+
+        if keyphrase == configuration.KEYPHRASE:
+            ret = MasterVariableContainer.master.correlation_miner(session, process, use_transition, no_samples, activities,
+                                                             start_timestamp, end_timestamp)
+            return jsonify(ret)
+
+        return jsonify({"PS_matrix": [], "duration_matrix": []})
     except:
-        content = json.loads(request.data.decode('utf-8'))
-
-    activities = content["activities"]
-    start_timestamp = content["start_timestamp"]
-    end_timestamp = content["complete_timestamp"]
-
-    if keyphrase == configuration.KEYPHRASE:
-        ret = MasterVariableContainer.master.correlation_miner(session, process, use_transition, no_samples, activities,
-                                                         start_timestamp, end_timestamp)
-        return jsonify(ret)
-
-    return jsonify({"PS_matrix": [], "duration_matrix": []})
+        import traceback
+        exc = traceback.format_exc()
+        return exc
