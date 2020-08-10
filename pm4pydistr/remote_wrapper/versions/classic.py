@@ -20,6 +20,7 @@ from pm4py.algo.discovery.causal import algorithm as causal_discovery
 from pm4py.algo.discovery.inductive import algorithm as inductive_miner
 from pm4py.algo.discovery.inductive.versions.dfg import dfg_based
 from pm4py.objects.conversion.process_tree import converter
+import numpy as np
 
 PARAM_MAX_ALIGN_TIME_TRACE = "max_align_time_trace"
 DEFAULT_MAX_ALIGN_TIME_TRACE = sys.maxsize
@@ -635,4 +636,35 @@ class ClassicDistrLogObject(DistrLogObj):
         return classic.apply_from_variants_list(var_list, model)
 
     def correlation_miner(self, parameters=None):
-        raise Exception("not implemented")
+        if parameters is None:
+            parameters = {}
+
+        activity_key = parameters["activity_key"] if "activity_key" in parameters else "concept:name"
+        start_timestamp = parameters["start_timestamp"] if "start_timestamp" in parameters else "time:timestamp"
+        complete_timestamp = parameters[
+            "complete_timestamp"] if "complete_timestamp" in parameters else "time:timestamp"
+        activities = parameters["activities"] if "activities" in parameters else None
+        activities_counter = self.get_attribute_values(activity_key)
+
+        if activities is None:
+            activities = sorted(list(activities_counter.keys()))
+
+        activities_counter = {x:y for x,y in activities_counter.items() if x in activities}
+
+        content = {}
+        content["activities"] = activities
+        content["start_timestamp"] = start_timestamp
+        content["complete_timestamp"] = complete_timestamp
+
+        url = self.get_url("correlationMiner", parameters=parameters)
+        r = requests.post(url, json=content)
+
+        resp = json.loads(r.text)
+        PS_matrix = np.asmatrix(resp["PS_matrix"]).reshape(len(activities), len(activities))
+        duration_matrix = np.asmatrix(resp["duration_matrix"]).reshape(len(activities), len(activities))
+
+        from pm4py.algo.discovery.correlation_mining.versions import classic
+
+        dfg, performance_dfg = classic.resolve_lp_get_dfg(PS_matrix, duration_matrix, activities, activities_counter)
+
+        return dfg, performance_dfg, activities_counter
