@@ -639,6 +639,8 @@ class ClassicDistrLogObject(DistrLogObj):
         if parameters is None:
             parameters = {}
 
+        min_act_freq = parameters["min_act_freq"] if "min_act_freq" in parameters else 0
+
         activity_key = parameters["activity_key"] if "activity_key" in parameters else "concept:name"
         start_timestamp = parameters["start_timestamp"] if "start_timestamp" in parameters else "time:timestamp"
         complete_timestamp = parameters[
@@ -647,6 +649,7 @@ class ClassicDistrLogObject(DistrLogObj):
         activities_counter = self.get_attribute_values(activity_key)
 
         if activities is None:
+            activities_counter = {x:y for x,y in activities_counter.items() if y >= min_act_freq}
             activities = sorted(list(activities_counter.keys()))
 
         activities_counter = {x:y for x,y in activities_counter.items() if x in activities}
