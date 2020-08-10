@@ -720,12 +720,14 @@ def perform_alignments():
         max_align_time = content["max_align_time"]
         max_align_time_trace = content["max_align_time_trace"]
         align_variant = content["align_variant"]
+        classic_alignments_variant = content["classic_alignments_variant"]
 
         if keyphrase == configuration.KEYPHRASE:
             parameters = {}
             parameters["max_align_time"] = max_align_time
             parameters["max_align_time_trace"] = max_align_time_trace
             parameters["align_variant"] = align_variant
+            parameters["classic_alignments_variant"] = classic_alignments_variant
 
             align = slave.perform_alignments(petri_string, var_list, parameters=parameters)
 
@@ -733,7 +735,8 @@ def perform_alignments():
 
         return jsonify({})
     except:
-        return traceback.format_exc()
+        exc = traceback.format_exc()
+        return exc
 
 
 @SlaveSocketListener.app.route("/performTbr", methods=["POST"])
@@ -783,3 +786,49 @@ def do_shutdown():
         return jsonify({})
     except:
         return traceback.format_exc()
+
+
+@SlaveSocketListener.app.route("/correlationMiner", methods=["POST"])
+def correlation_miner():
+    try:
+        process = request.args.get('process', type=str)
+        keyphrase = request.args.get('keyphrase', type=str)
+        session = request.args.get('session', type=str)
+        use_transition = request.args.get(PARAMETER_USE_TRANSITION, type=str, default=str(DEFAULT_USE_TRANSITION))
+        no_samples = request.args.get(PARAMETER_NO_SAMPLES, type=int, default=DEFAULT_MAX_NO_SAMPLES)
+
+        if use_transition == "True":
+            use_transition = True
+        else:
+            use_transition = False
+
+        try:
+            content = json.loads(request.data)
+        except:
+            content = json.loads(request.data.decode('utf-8'))
+
+        activities = content["activities"]
+        start_timestamp = content["start_timestamp"]
+        complete_timestamp = content["complete_timestamp"]
+
+        if keyphrase == configuration.KEYPHRASE:
+            filters = get_filters_per_session(process, session)
+            parameters = {}
+            parameters["filters"] = filters
+            parameters["activities"] = activities
+            parameters["start_timestamp"] = start_timestamp
+            parameters["complete_timestamp"] = complete_timestamp
+
+            parameters[PARAMETER_USE_TRANSITION] = use_transition
+            parameters[PARAMETER_NO_SAMPLES] = no_samples
+
+            ret = parquet_handler.correlation_miner(SlaveVariableContainer.conf, process,
+                                                                         SlaveVariableContainer.managed_logs[process],
+                                                                         parameters=parameters)
+
+            return jsonify(ret)
+
+        return jsonify({"PS_matrix": [], "duration_matrix": []})
+    except:
+        exc = traceback.format_exc()
+        return exc

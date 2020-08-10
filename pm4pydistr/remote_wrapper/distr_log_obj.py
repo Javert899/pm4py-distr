@@ -101,3 +101,33 @@ class DistrLogObj(object):
 
     def calculate_fitness_with_tbr(self, net, im, fm, log, parameters=None):
         raise Exception("not implemented")
+
+    def get_distr_log_footprints(self, parameters=None):
+        raise Exception("not implemented")
+
+    def get_imd_tree_from_dfg(self, parameters=None):
+        raise Exception("not implemented")
+
+    def get_imd_net_im_fm_from_dfg(self, parameters=None):
+        raise Exception("not implemented")
+
+    def get_im_tree_from_variants(self, parameters=None):
+        raise Exception("not implemented")
+
+    def get_im_net_im_fm_from_variants(self, parameters=None):
+        raise Exception("not implemented")
+
+    def perform_alignments_tree_variants(self, tree, var_list=None, parameters=None):
+        raise Exception("not implemented")
+
+    def perform_alignments_tree_log(self,tree, log, parameters=None):
+        raise Exception("not implemented")
+
+    def discover_skeleton(self, parameters=None):
+        raise Exception("not implemented")
+
+    def conformance_skeleton(self, model, parameters=None):
+        raise Exception("not implemented")
+
+    def correlation_miner(self, parameters=None):
+        raise Exception("not implemented")

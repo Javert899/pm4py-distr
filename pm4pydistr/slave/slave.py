@@ -15,7 +15,8 @@ import shutil
 
 import time
 
-from pm4py.algo.conformance.alignments.versions import dijkstra_no_heuristics, state_equation_a_star, dijkstra_less_memory
+from pm4py.algo.conformance.alignments.versions import dijkstra_no_heuristics, state_equation_a_star, \
+    dijkstra_less_memory, state_equation_less_memory
 from pm4py.algo.conformance.decomp_alignments.versions import recompos_maximal
 from pm4py.algo.conformance.tokenreplay.versions import token_replay
 
@@ -92,21 +93,44 @@ def perform_alignments(petri_string, var_list, parameters=None):
     parameters["ret_tuple_as_trans_desc"] = True
 
     if variant == "dijkstra_no_heuristics":
-        return dijkstra_no_heuristics.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
+        return dijkstra_no_heuristics.apply_from_variants_list_petri_string(var_list, petri_string,
+                                                                            parameters=parameters)
     elif variant == "state_equation_a_star":
-        return state_equation_a_star.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
+        return state_equation_a_star.apply_from_variants_list_petri_string(var_list, petri_string,
+                                                                           parameters=parameters)
     elif variant == "dijkstra_less_memory":
         return dijkstra_less_memory.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
     elif variant == "recomp_maximal":
         return recompos_maximal.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
+    elif variant == "state_equation_less_memory":
+        return state_equation_less_memory.apply_from_variants_list_petri_string(var_list, petri_string,
+                                                                                parameters=parameters)
+    elif variant == "tree_approximated":
+        if "classic_alignments_variant" in parameters:
+            if parameters["classic_alignments_variant"] == "dijkstra_no_heuristics":
+                parameters["classic_alignments_variant"] = dijkstra_no_heuristics
+            elif parameters["classic_alignments_variant"] == "dijkstra_less_memory":
+                parameters["classic_alignments_variant"] = dijkstra_less_memory
+            elif parameters["classic_alignments_variant"] == "recomp_maximal":
+                parameters["classic_alignments_variant"] = recompos_maximal
+            elif parameters["classic_alignments_variant"] == "state_equation_less_memory":
+                parameters["classic_alignments_variant"] = state_equation_less_memory
+            elif parameters["classic_alignments_variant"] == "state_equation_a_star":
+                parameters["classic_alignments_variant"] = state_equation_a_star
+        from pm4py.algo.conformance.tree_alignments.variants.approximated import matrix_lp as approx_alignments
+        alignments = approx_alignments.apply_from_variants_tree_string(var_list, petri_string,
+                                                                       parameters=parameters)
+        return alignments
 
 
 def perform_token_replay(petri_string, var_list, parameters=None):
     if parameters is None:
         parameters = {}
 
-    enable_parameters_precision = parameters["enable_parameters_precision"] if "enable_parameters_precision" in parameters else False
-    consider_remaining_in_fitness = parameters["consider_remaining_in_fitness"] if "consider_remaining_in_fitness" in parameters else True
+    enable_parameters_precision = parameters[
+        "enable_parameters_precision"] if "enable_parameters_precision" in parameters else False
+    consider_remaining_in_fitness = parameters[
+        "consider_remaining_in_fitness"] if "consider_remaining_in_fitness" in parameters else True
 
     parameters["return_names"] = True
 
