@@ -388,7 +388,7 @@ class ClassicDistrLogObject(DistrLogObj):
             PARAM_MAX_ALIGN_TIME_TRACE] if PARAM_MAX_ALIGN_TIME_TRACE in parameters else DEFAULT_MAX_ALIGN_TIME_TRACE
         align_variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_less_memory"
         classic_alignments_variant = parameters[
-            "classic_alignments_variant"] if "classic_alignments_variant" in parameters else "dijkstra_less_memory"
+            "classic_alignments_variant"] if "classic_alignments_variant" in parameters else "state_equation_less_memory"
 
         url = self.get_url("performAlignments", parameters=parameters)
         dictio = {"petri_string": petri_string, "var_list": var_list, "max_align_time": max_align_time,
