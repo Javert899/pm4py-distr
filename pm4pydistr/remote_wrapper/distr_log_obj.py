@@ -122,3 +122,9 @@ class DistrLogObj(object):
 
     def perform_alignments_tree_log(self,tree, log, parameters=None):
         raise Exception("not implemented")
+
+    def discover_skeleton(self, parameters=None):
+        raise Exception("not implemented")
+
+    def conformance_skeleton(self, model, parameters=None):
+        raise Exception("not implemented")

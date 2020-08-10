@@ -615,3 +615,21 @@ class ClassicDistrLogObject(DistrLogObj):
         tree = self.get_im_tree_from_variants(parameters=parameters)
         net, im, fm = converter.apply(tree, parameters=parameters)
         return net, im, fm
+
+    def discover_skeleton(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        min_var_freq = parameters["min_var_freq"] if "min_var_freq" in parameters else 0
+
+        variants = self.get_variants(parameters=parameters)
+        var_list = [[x["variant"], x["count"]] for x in variants["variants"] if x["count"] >= min_var_freq]
+
+        from pm4py.algo.discovery.log_skeleton.versions import classic
+        return classic.apply_from_variants_list(var_list)
+
+    def conformance_skeleton(self, model, parameters=None):
+        variants = self.get_variants()
+        var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
+
+        from pm4py.algo.conformance.log_skeleton.versions import classic
+        return classic.apply_from_variants_list(var_list, model)
