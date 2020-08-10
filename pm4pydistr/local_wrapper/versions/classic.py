@@ -370,6 +370,20 @@ class ClassicDistrLogObject(LocalDistrLogObj):
         net, im, fm = converter.apply(tree, parameters=parameters)
         return net, im, fm
 
+    def correlation_miner(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        list_logs = self.get_list_logs()
+        for key in self.init_parameters:
+            if key not in parameters:
+                parameters[key] = self.init_parameters[key]
+        parameters["filters"] = self.filters
+        activities_counter = self.get_attribute_values("concept:name", parameters=parameters)
+        activities = list(activities_counter.keys())
+        parameters["activities"] = activities
+
+        ret = parquet_handler.correlation_miner(".", self.distr_log_path, list_logs, parameters=parameters)
+        print(ret)
 
 
 def apply(path, parameters=None):

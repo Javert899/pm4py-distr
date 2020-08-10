@@ -93,3 +93,5 @@ class LocalDistrLogObj(object):
     def get_im_net_im_fm_from_variants(self, parameters=None):
         raise Exception("not implemented")
 
+    def correlation_miner(self, parameters=None):
+        raise Exception("not implemented")
