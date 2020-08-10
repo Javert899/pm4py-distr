@@ -12,11 +12,15 @@ from pm4py.objects.petri import align_utils
 from pm4py.algo.conformance.alignments.versions import state_equation_a_star
 from datetime import datetime
 from pm4py.objects.petri.exporter.versions import pnml as pnml_exporter
+from pm4py.objects.process_tree.exporter.variants import ptml as ptml_exporter
 from pm4py.algo.filtering.log.variants import variants_filter as log_variants_filter
-from pm4pydistr.slave import slave
 import sys
 from pm4py.objects.petri.align_utils import get_visible_transitions_eventually_enabled_by_marking
-
+from pm4py.algo.discovery.causal import algorithm as causal_discovery
+from pm4py.algo.discovery.inductive import algorithm as inductive_miner
+from pm4py.algo.discovery.inductive.versions.dfg import dfg_based
+from pm4py.objects.conversion.process_tree import converter
+import numpy as np
 
 PARAM_MAX_ALIGN_TIME_TRACE = "max_align_time_trace"
 DEFAULT_MAX_ALIGN_TIME_TRACE = sys.maxsize
@@ -256,7 +260,7 @@ class ClassicDistrLogObject(DistrLogObj):
     def get_events_per_time(self, parameters=None):
         if parameters is None:
             parameters = {}
-        url = self.get_url("getEventsPerTime")
+        url = self.get_url("getEventsPerTime", parameters=parameters)
         r = requests.get(url)
         ret_text = r.text
         ret_json = json.loads(ret_text)
@@ -335,6 +339,25 @@ class ClassicDistrLogObject(DistrLogObj):
 
         return alignments
 
+    def perform_alignments_tree_log(self, tree, log, parameters=None):
+        if parameters is None:
+            parameters = {}
+        variants = log_variants_filter.get_variants_from_log_trace_idx(log, parameters=parameters)
+        var_list = [[x, y] for x, y in variants.items()]
+
+        result = self.perform_alignments_tree_variants(tree, var_list=var_list, parameters=parameters)
+
+        al_idx = {}
+        for index_variant, variant in enumerate(variants):
+            for trace_idx in variants[variant]:
+                al_idx[trace_idx] = result[variant]
+
+        alignments = []
+        for i in range(len(log)):
+            alignments.append(al_idx[i])
+
+        return alignments
+
     def perform_alignments_net_variants(self, net, im, fm, var_list=None, parameters=None):
         if parameters is None:
             parameters = {}
@@ -344,6 +367,17 @@ class ClassicDistrLogObject(DistrLogObj):
         petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
         return self.perform_alignments(petri_string, var_list, parameters=parameters)
 
+    def perform_alignments_tree_variants(self, tree, var_list=None, parameters=None):
+        if parameters is None:
+            parameters = {}
+        if "align_variant" not in parameters:
+            parameters["align_variant"] = "tree_approximated"
+        if var_list is None:
+            variants = self.get_variants(parameters=parameters)
+            var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
+        ptml_string = ptml_exporter.export_tree_as_string(tree, parameters=parameters)
+        return self.perform_alignments(ptml_string, var_list, parameters=parameters)
+
     def perform_alignments(self, petri_string, var_list, parameters=None):
         if parameters is None:
             parameters = {}
@@ -352,16 +386,22 @@ class ClassicDistrLogObject(DistrLogObj):
             PARAM_MAX_ALIGN_TIME] if PARAM_MAX_ALIGN_TIME in parameters else DEFAULT_MAX_ALIGN_TIME
         max_align_time_trace = parameters[
             PARAM_MAX_ALIGN_TIME_TRACE] if PARAM_MAX_ALIGN_TIME_TRACE in parameters else DEFAULT_MAX_ALIGN_TIME_TRACE
-        align_variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_no_heuristics"
+        align_variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_less_memory"
+        classic_alignments_variant = parameters[
+            "classic_alignments_variant"] if "classic_alignments_variant" in parameters else "state_equation_less_memory"
 
         url = self.get_url("performAlignments", parameters=parameters)
         dictio = {"petri_string": petri_string, "var_list": var_list, "max_align_time": max_align_time,
-                  "max_align_time_trace": max_align_time_trace, "align_variant": align_variant}
+                  "max_align_time_trace": max_align_time_trace, "align_variant": align_variant,
+                  "classic_alignments_variant": classic_alignments_variant}
 
         r = requests.post(url, json=dictio)
         ret_text = r.text
-        ret_json = json.loads(ret_text)
-        return ret_json["alignments"]
+        try:
+            ret_json = json.loads(ret_text)
+            return ret_json["alignments"]
+        except:
+            print(r.text)
 
     def perform_tbr_net_log(self, net, im, fm, log, parameters=None):
         if parameters is None:
@@ -543,3 +583,94 @@ class ClassicDistrLogObject(DistrLogObj):
             precision = 1 - float(sum_ee) / float(sum_at)
 
         return precision
+
+    def get_distr_log_footprints(self, parameters=None):
+        comp_obj = self.calculate_composite_object(parameters=parameters)
+
+        parallel = {(x, y) for (x, y) in comp_obj["frequency_dfg"] if (y, x) in comp_obj["frequency_dfg"]}
+        sequence = set(causal_discovery.apply(comp_obj["frequency_dfg"], causal_discovery.Variants.CAUSAL_ALPHA))
+
+        ret = {}
+        ret["dfg"] = comp_obj["frequency_dfg"]
+        ret["sequence"] = sequence
+        ret["parallel"] = parallel
+        ret["start_activities"] = set(comp_obj["start_activities"])
+        ret["end_activities"] = set(comp_obj["end_activities"])
+
+        return ret
+
+    def get_imd_tree_from_dfg(self, parameters=None):
+        comp_obj = self.calculate_composite_object(parameters=parameters)
+        tree = dfg_based.apply_tree_dfg(comp_obj["frequency_dfg"], start_activities=comp_obj["start_activities"],
+                                        end_activities=comp_obj["end_activities"], activities=comp_obj["activities"])
+        return tree
+
+    def get_imd_net_im_fm_from_dfg(self, parameters=None):
+        tree = self.get_imd_tree_from_dfg(parameters=parameters)
+        net, im, fm = converter.apply(tree, parameters=parameters)
+        return net, im, fm
+
+    def get_im_tree_from_variants(self, parameters=None):
+        variants = {x["variant"]: x["count"] for x in self.get_variants(parameters=parameters)["variants"]}
+        tree = inductive_miner.apply_tree_variants(variants, parameters=parameters)
+        return tree
+
+    def get_im_net_im_fm_from_variants(self, parameters=None):
+        tree = self.get_im_tree_from_variants(parameters=parameters)
+        net, im, fm = converter.apply(tree, parameters=parameters)
+        return net, im, fm
+
+    def discover_skeleton(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+        min_var_freq = parameters["min_var_freq"] if "min_var_freq" in parameters else 0
+
+        variants = self.get_variants(parameters=parameters)
+        var_list = [[x["variant"], x["count"]] for x in variants["variants"] if x["count"] >= min_var_freq]
+
+        from pm4py.algo.discovery.log_skeleton.versions import classic
+        return classic.apply_from_variants_list(var_list)
+
+    def conformance_skeleton(self, model, parameters=None):
+        variants = self.get_variants()
+        var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
+
+        from pm4py.algo.conformance.log_skeleton.versions import classic
+        return classic.apply_from_variants_list(var_list, model)
+
+    def correlation_miner(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+
+        min_act_freq = parameters["min_act_freq"] if "min_act_freq" in parameters else 0
+
+        activity_key = parameters["activity_key"] if "activity_key" in parameters else "concept:name"
+        start_timestamp = parameters["start_timestamp"] if "start_timestamp" in parameters else "time:timestamp"
+        complete_timestamp = parameters[
+            "complete_timestamp"] if "complete_timestamp" in parameters else "time:timestamp"
+        activities = parameters["activities"] if "activities" in parameters else None
+        activities_counter = self.get_attribute_values(activity_key)
+
+        if activities is None:
+            activities_counter = {x:y for x,y in activities_counter.items() if y >= min_act_freq}
+            activities = sorted(list(activities_counter.keys()))
+
+        activities_counter = {x:y for x,y in activities_counter.items() if x in activities}
+
+        content = {}
+        content["activities"] = activities
+        content["start_timestamp"] = start_timestamp
+        content["complete_timestamp"] = complete_timestamp
+
+        url = self.get_url("correlationMiner", parameters=parameters)
+        r = requests.post(url, json=content)
+
+        resp = json.loads(r.text)
+        PS_matrix = np.asmatrix(resp["PS_matrix"]).reshape(len(activities), len(activities))
+        duration_matrix = np.asmatrix(resp["duration_matrix"]).reshape(len(activities), len(activities))
+
+        from pm4py.algo.discovery.correlation_mining.versions import classic
+
+        dfg, performance_dfg = classic.resolve_lp_get_dfg(PS_matrix, duration_matrix, activities, activities_counter)
+
+        return dfg, performance_dfg, activities_counter
