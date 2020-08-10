@@ -13,6 +13,8 @@ from pm4py.algo.discovery.causal import algorithm as causal_discovery
 from pm4py.algo.discovery.inductive import algorithm as inductive_miner
 from pm4py.algo.discovery.inductive.versions.dfg import dfg_based
 from pm4py.objects.conversion.process_tree import converter
+import numpy as np
+import json
 
 
 class ClassicDistrLogObject(LocalDistrLogObj):
@@ -383,7 +385,14 @@ class ClassicDistrLogObject(LocalDistrLogObj):
         parameters["activities"] = activities
 
         ret = parquet_handler.correlation_miner(".", self.distr_log_path, list_logs, parameters=parameters)
-        print(ret)
+        PS_matrix = np.asmatrix(json.loads(ret["PS_matrix"]))
+        duration_matrix = np.asmatrix(json.loads(ret["duration_matrix"]))
+
+        from pm4py.algo.discovery.correlation_mining.versions import classic
+
+        dfg, performance_dfg = classic.resolve_lp_get_dfg(PS_matrix, duration_matrix, activities, activities_counter)
+
+        return dfg, performance_dfg
 
 
 def apply(path, parameters=None):
