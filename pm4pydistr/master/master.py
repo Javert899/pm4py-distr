@@ -793,8 +793,8 @@ class Master:
 
         z = 0
         while z < len(PS_matrixes):
-            PS_matrix = PS_matrix + PS_matrixes[z].reshape(len(activities), len(activities))
-            duration_matrix = np.maximum(duration_matrix, duration_matrixes[z].reshape(len(activities), len(activities)))
+            PS_matrix = PS_matrix + np.asmatrix(PS_matrixes[z]).reshape(len(activities), len(activities))
+            duration_matrix = np.maximum(duration_matrix, np.asmatrix(duration_matrixes[z]).reshape(len(activities), len(activities)))
             z = z + 1
 
         PS_matrix = PS_matrix / float(len(PS_matrixes))
