@@ -708,7 +708,7 @@ class Master:
             except:
                 import traceback
                 raise Exception(thread.content)
-        
+
         return ret_dict
 
     def perform_tbr(self, session, process, use_transition, no_samples, petri_string, var_list,
