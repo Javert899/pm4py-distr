@@ -364,6 +364,7 @@ class ClassicDistrLogObject(DistrLogObj):
         if parameters is None:
             parameters = {}
         if var_list is None:
+            parameters["window_size"] = 1000000000000
             variants = self.get_variants(parameters=parameters)
             var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
         petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
