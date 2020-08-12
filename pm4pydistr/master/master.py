@@ -699,11 +699,15 @@ class Master:
                 threads.append(m)
 
         ret_dict = {}
+        rem_waiting_time = min(max_align_time, 4000000)
 
         for index, thread in enumerate(threads):
             try:
                 # max align time
-                thread.join(min(max_align_time, 4000000))
+                aa = time.time()
+                thread.join(rem_waiting_time)
+                bb = time.time()
+                rem_waiting_time = min(0, rem_waiting_time - (bb - aa))
 
                 try:
                     ret_dict.update(thread.content["alignments"])
@@ -712,7 +716,7 @@ class Master:
                     raise Exception(thread.content)
             except:
                 import traceback
-                #traceback.print_exc()
+                # traceback.print_exc()
                 for var in variants_list_split[index]:
                     ret_dict[var[0]] = None
 
@@ -806,7 +810,9 @@ class Master:
         while z < len(PS_matrixes):
             try:
                 PS_matrix = PS_matrix + np.asmatrix(PS_matrixes[z]).reshape(len(activities), len(activities))
-                duration_matrix = np.maximum(duration_matrix, np.asmatrix(duration_matrixes[z]).reshape(len(activities), len(activities)))
+                duration_matrix = np.maximum(duration_matrix, np.asmatrix(duration_matrixes[z]).reshape(len(activities),
+                                                                                                        len(
+                                                                                                            activities)))
             except:
                 pass
             z = z + 1
