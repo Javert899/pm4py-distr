@@ -8,7 +8,7 @@ tree = wrapper.get_imd_tree_from_dfg()
 gviz = pt_visualizer.apply(tree, parameters={"format": "svg"})
 pt_visualizer.view(gviz)
 aa = time.time()
-alignments = wrapper.perform_alignments_tree_variants(tree)
+alignments = wrapper.perform_alignments_tree_variants(tree, parameters={"max_align_time_trace": 10, "max_align_time": 100})
 align_list = [y for x,y in alignments.items()]
 bb = time.time()
 print(alignments)
