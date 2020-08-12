@@ -101,6 +101,8 @@ class ClassicDistrLogObject(DistrLogObj):
                 stru = stru + "&attribute_key=" + str(parameters["attribute_key"])
             elif parameter == "timestamp_key":
                 stru = stru + "&timestamp_key=" + str(parameters["timestamp_key"])
+            elif parameter == "window_size":
+                stru = stru + "&window_size=" + str(parameters["window_size"])
             elif parameter == "performance_required":
                 stru = stru + "&performance_required=" + str(parameters["performance_required"])
             elif PARAMETER_NUM_RET_ITEMS in parameters:
@@ -373,6 +375,7 @@ class ClassicDistrLogObject(DistrLogObj):
         if "align_variant" not in parameters:
             parameters["align_variant"] = "tree_approximated"
         if var_list is None:
+            parameters["window_size"] = 1000000000000
             variants = self.get_variants(parameters=parameters)
             var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
         ptml_string = ptml_exporter.export_tree_as_string(tree, parameters=parameters)
