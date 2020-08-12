@@ -699,11 +699,15 @@ class Master:
                 threads.append(m)
 
         ret_dict = {}
+        rem_waiting_time = min(max_align_time, 4000000)
 
         for index, thread in enumerate(threads):
             try:
                 # max align time
-                thread.join(min(max_align_time, 4000000))
+                aa = time.time()
+                thread.join(rem_waiting_time)
+                bb = time.time()
+                rem_waiting_time = min(0.001, rem_waiting_time - (bb - aa))
 
                 try:
                     ret_dict.update(thread.content["alignments"])
