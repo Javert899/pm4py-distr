@@ -700,14 +700,21 @@ class Master:
 
         ret_dict = {}
 
-        for thread in threads:
-            thread.join()
-
+        for index, thread in enumerate(threads):
             try:
-                ret_dict.update(thread.content["alignments"])
+                # max align time
+                thread.join(min(max_align_time, 4000000))
+
+                try:
+                    ret_dict.update(thread.content["alignments"])
+                except:
+                    import traceback
+                    raise Exception(thread.content)
             except:
                 import traceback
-                raise Exception(thread.content)
+                #traceback.print_exc()
+                for var in variants_list_split[index]:
+                    ret_dict[var[0]] = None
 
         return ret_dict
 
