@@ -707,7 +707,7 @@ class Master:
                 aa = time.time()
                 thread.join(rem_waiting_time)
                 bb = time.time()
-                rem_waiting_time = min(0.001, rem_waiting_time - (bb - aa))
+                rem_waiting_time = max(0.001, rem_waiting_time - (bb - aa))
 
                 try:
                     ret_dict.update(thread.content["alignments"])
