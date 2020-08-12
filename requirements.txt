@@ -1,4 +1,4 @@
-pm4pyexperimental==1.4.2.5.1
+pm4py==1.4.1
 requests
 Flask
 flask-cors
