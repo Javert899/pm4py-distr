@@ -689,8 +689,11 @@ class Master:
             if len(variants_list_split) > index:
                 slave_host = self.slaves[slave][1]
                 slave_port = str(self.slaves[slave][2])
+                var_list = variants_list_split[index]
 
-                content = {"petri_string": petri_string, "var_list": variants_list_split[index],
+                var_list = sorted(var_list, key=lambda x: len(x[0].split(',')))
+
+                content = {"petri_string": petri_string, "var_list": var_list,
                            "max_align_time": max_align_time, "max_align_time_trace": max_align_time_trace,
                            "align_variant": align_variant, "classic_alignments_variant": classic_alignments_variant,
                            "tree_align_variant": tree_align_variant, "petri_conversion_version": petri_conversion_version,
