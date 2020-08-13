@@ -675,7 +675,9 @@ class Master:
 
     def perform_alignments(self, session, process, use_transition, no_samples, petri_string, var_list,
                            max_align_time=sys.maxsize, max_align_time_trace=sys.maxsize,
-                           align_variant="dijkstra_less_memory", classic_alignments_variant="dijkstra_less_memory"):
+                           align_variant="dijkstra_less_memory", classic_alignments_variant="dijkstra_less_memory",
+                           tree_align_variant="matrix_lp", petri_conversion_version="to_petri_net",
+                           require_ilp_computation="False"):
         all_slaves = list(self.slaves.keys())
 
         n = math.ceil(len(var_list) / len(all_slaves))
@@ -690,7 +692,9 @@ class Master:
 
                 content = {"petri_string": petri_string, "var_list": variants_list_split[index],
                            "max_align_time": max_align_time, "max_align_time_trace": max_align_time_trace,
-                           "align_variant": align_variant, "classic_alignments_variant": classic_alignments_variant}
+                           "align_variant": align_variant, "classic_alignments_variant": classic_alignments_variant,
+                           "tree_align_variant": tree_align_variant, "petri_conversion_version": petri_conversion_version,
+                           "require_ilp_computation": require_ilp_computation}
 
                 m = AlignRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
 

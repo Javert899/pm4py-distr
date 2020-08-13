@@ -393,11 +393,18 @@ class ClassicDistrLogObject(DistrLogObj):
         align_variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_less_memory"
         classic_alignments_variant = parameters[
             "classic_alignments_variant"] if "classic_alignments_variant" in parameters else "state_equation_less_memory"
+        tree_align_variant = parameters["tree_align_variant"] if "tree_align_variant" in parameters else "matrix_lp"
+        petri_conversion_version = parameters[
+            "petri_conversion_version"] if "petri_conversion_version" in parameters else "to_petri_net"
+        require_ilp_computation = parameters[
+            "require_ilp_computation"] if "require_ilp_computation" in parameters else "False"
 
         url = self.get_url("performAlignments", parameters=parameters)
         dictio = {"petri_string": petri_string, "var_list": var_list, "max_align_time": max_align_time,
                   "max_align_time_trace": max_align_time_trace, "align_variant": align_variant,
-                  "classic_alignments_variant": classic_alignments_variant}
+                  "classic_alignments_variant": classic_alignments_variant,
+                  "tree_align_variant": tree_align_variant, "petri_conversion_version": petri_conversion_version,
+                  "require_ilp_computation": require_ilp_computation}
 
         r = requests.post(url, json=dictio)
         ret_text = r.text
@@ -430,6 +437,7 @@ class ClassicDistrLogObject(DistrLogObj):
         if parameters is None:
             parameters = {}
         if var_list is None:
+            parameters["window_size"] = 1000000000000
             variants = self.get_variants(parameters=parameters)
             var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
         petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
@@ -656,10 +664,10 @@ class ClassicDistrLogObject(DistrLogObj):
         activities_counter = self.get_attribute_values(activity_key)
 
         if activities is None:
-            activities_counter = {x:y for x,y in activities_counter.items() if y >= min_act_freq}
+            activities_counter = {x: y for x, y in activities_counter.items() if y >= min_act_freq}
             activities = sorted(list(activities_counter.keys()))
 
-        activities_counter = {x:y for x,y in activities_counter.items() if x in activities}
+        activities_counter = {x: y for x, y in activities_counter.items() if x in activities}
 
         content = {}
         content["activities"] = activities

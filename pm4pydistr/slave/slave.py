@@ -118,8 +118,17 @@ def perform_alignments(petri_string, var_list, parameters=None):
             elif parameters["classic_alignments_variant"] == "state_equation_a_star":
                 parameters["classic_alignments_variant"] = state_equation_a_star
         from pm4py.objects.conversion.process_tree import converter
-        parameters["petri_conversion_version"] = converter.Variants.TO_PETRI_NET
-        from pm4py.algo.conformance.tree_alignments.variants.approximated import matrix_lp as approx_alignments
+        if parameters["petri_conversion_version"] == "to_petri_net":
+            parameters["petri_conversion_version"] = converter.Variants.TO_PETRI_NET
+        elif parameters["petri_conversion_version"] == "to_petri_net_transition_bordered":
+            parameters["petri_conversion_version"] = converter.Variants.TO_PETRI_NET_TRANSITION_BORDERED
+        tree_align_variant = parameters["tree_align_variant"]
+        if tree_align_variant == "matrix_lp":
+            from pm4py.algo.conformance.tree_alignments.variants.approximated import matrix_lp as approx_alignments
+
+        else:
+            from pm4py.algo.conformance.tree_alignments.variants.approximated import original as approx_alignments
+
         alignments = approx_alignments.apply_from_variants_tree_string(var_list, petri_string,
                                                                        parameters=parameters)
         return alignments
