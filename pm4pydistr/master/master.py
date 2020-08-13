@@ -675,7 +675,9 @@ class Master:
 
     def perform_alignments(self, session, process, use_transition, no_samples, petri_string, var_list,
                            max_align_time=sys.maxsize, max_align_time_trace=sys.maxsize,
-                           align_variant="dijkstra_less_memory", classic_alignments_variant="dijkstra_less_memory"):
+                           align_variant="dijkstra_less_memory", classic_alignments_variant="dijkstra_less_memory",
+                           tree_align_variant="matrix_lp", petri_conversion_version="to_petri_net",
+                           require_ilp_computation="False", max_thread_join_time=sys.maxsize):
         all_slaves = list(self.slaves.keys())
 
         n = math.ceil(len(var_list) / len(all_slaves))
@@ -687,10 +689,15 @@ class Master:
             if len(variants_list_split) > index:
                 slave_host = self.slaves[slave][1]
                 slave_port = str(self.slaves[slave][2])
+                var_list = variants_list_split[index]
 
-                content = {"petri_string": petri_string, "var_list": variants_list_split[index],
+                var_list = sorted(var_list, key=lambda x: len(x[0].split(',')))
+
+                content = {"petri_string": petri_string, "var_list": var_list,
                            "max_align_time": max_align_time, "max_align_time_trace": max_align_time_trace,
-                           "align_variant": align_variant, "classic_alignments_variant": classic_alignments_variant}
+                           "align_variant": align_variant, "classic_alignments_variant": classic_alignments_variant,
+                           "tree_align_variant": tree_align_variant, "petri_conversion_version": petri_conversion_version,
+                           "require_ilp_computation": require_ilp_computation}
 
                 m = AlignRequest(session, slave_host, slave_port, use_transition, no_samples, process, content)
 
@@ -699,7 +706,7 @@ class Master:
                 threads.append(m)
 
         ret_dict = {}
-        rem_waiting_time = min(max_align_time, 4000000)
+        rem_waiting_time = min(max_thread_join_time, 4000000)
 
         for index, thread in enumerate(threads):
             try:
