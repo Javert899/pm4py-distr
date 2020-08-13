@@ -625,6 +625,10 @@ class ClassicDistrLogObject(DistrLogObj):
         return net, im, fm
 
     def get_im_tree_from_variants(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+
+        parameters["window_size"] = 1000000000000
         variants = {x["variant"]: x["count"] for x in self.get_variants(parameters=parameters)["variants"]}
         tree = inductive_miner.apply_tree_variants(variants, parameters=parameters)
         return tree
@@ -639,6 +643,7 @@ class ClassicDistrLogObject(DistrLogObj):
             parameters = {}
         min_var_freq = parameters["min_var_freq"] if "min_var_freq" in parameters else 0
 
+        parameters["window_size"] = 1000000000000
         variants = self.get_variants(parameters=parameters)
         var_list = [[x["variant"], x["count"]] for x in variants["variants"] if x["count"] >= min_var_freq]
 
@@ -646,6 +651,10 @@ class ClassicDistrLogObject(DistrLogObj):
         return classic.apply_from_variants_list(var_list)
 
     def conformance_skeleton(self, model, parameters=None):
+        if parameters is None:
+            parameters = {}
+
+        parameters["window_size"] = 1000000000000
         variants = self.get_variants()
         var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
 

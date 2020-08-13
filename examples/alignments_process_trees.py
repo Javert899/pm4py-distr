@@ -8,8 +8,8 @@ tree = pt_importer.apply('../tests/receipt.ptml')
 # tree = wrapper.get_imd_tree_from_dfg()
 aa = time.time()
 alignments = wrapper.perform_alignments_tree_variants(tree,
-                                                      parameters={"max_align_time_trace": 0.001, "max_align_time": 1.0,
-                                                                  "max_thread_join_time": 1.5})
+                                                      parameters={"max_align_time_trace": 10.0, "max_align_time": 100.0,
+                                                                  "max_thread_join_time": 150.0})
 alignments = [y for x, y in alignments.items()]
 bb = time.time()
 # print(alignments)
