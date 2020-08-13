@@ -633,6 +633,7 @@ def perform_alignments():
         var_list = content["var_list"]
         max_align_time = content["max_align_time"]
         max_align_time_trace = content["max_align_time_trace"]
+        max_thread_join_time = content["max_thread_join_time"]
         align_variant = content["align_variant"]
         classic_alignments_variant = content["classic_alignments_variant"]
         tree_align_variant = content["tree_align_variant"]
@@ -648,7 +649,8 @@ def perform_alignments():
                                                                            classic_alignments_variant=classic_alignments_variant,
                                                                            tree_align_variant=tree_align_variant,
                                                                            petri_conversion_version=petri_conversion_version,
-                                                                           require_ilp_computation=require_ilp_computation)
+                                                                           require_ilp_computation=require_ilp_computation,
+                                                                           max_thread_join_time=max_thread_join_time)
             return jsonify({"alignments": alignments})
 
         return jsonify({})

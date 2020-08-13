@@ -398,13 +398,15 @@ class ClassicDistrLogObject(DistrLogObj):
             "petri_conversion_version"] if "petri_conversion_version" in parameters else "to_petri_net"
         require_ilp_computation = parameters[
             "require_ilp_computation"] if "require_ilp_computation" in parameters else "False"
+        max_thread_join_time = parameters[
+            "max_thread_join_time"] if "max_thread_join_time" in parameters else sys.maxsize
 
         url = self.get_url("performAlignments", parameters=parameters)
         dictio = {"petri_string": petri_string, "var_list": var_list, "max_align_time": max_align_time,
                   "max_align_time_trace": max_align_time_trace, "align_variant": align_variant,
                   "classic_alignments_variant": classic_alignments_variant,
                   "tree_align_variant": tree_align_variant, "petri_conversion_version": petri_conversion_version,
-                  "require_ilp_computation": require_ilp_computation}
+                  "require_ilp_computation": require_ilp_computation, "max_thread_join_time": max_thread_join_time}
 
         r = requests.post(url, json=dictio)
         ret_text = r.text

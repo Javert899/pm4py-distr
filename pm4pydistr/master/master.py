@@ -677,7 +677,7 @@ class Master:
                            max_align_time=sys.maxsize, max_align_time_trace=sys.maxsize,
                            align_variant="dijkstra_less_memory", classic_alignments_variant="dijkstra_less_memory",
                            tree_align_variant="matrix_lp", petri_conversion_version="to_petri_net",
-                           require_ilp_computation="False"):
+                           require_ilp_computation="False", max_thread_join_time=sys.maxsize):
         all_slaves = list(self.slaves.keys())
 
         n = math.ceil(len(var_list) / len(all_slaves))
@@ -706,7 +706,7 @@ class Master:
                 threads.append(m)
 
         ret_dict = {}
-        rem_waiting_time = min(max_align_time, 4000000)
+        rem_waiting_time = min(max_thread_join_time, 4000000)
 
         for index, thread in enumerate(threads):
             try:
