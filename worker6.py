@@ -26,6 +26,6 @@ THIS_COUNT = 19
 
 for i in range(THIS_COUNT):
     conf = "slave"+str(THIS_START+i+1)
-    port = str(5000 + i + 2)
+    port = str(7000 + i + 2)
     t = ExecutionThread(PYTHON_PATH+" custom_launch.py type slave host "+THIS_HOST+" conf "+conf+" port "+port+" masterhost "+MASTER_HOST+" masterport 7001", i)
     t.start()
