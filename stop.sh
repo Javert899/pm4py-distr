@@ -1,4 +1,4 @@
-pkill -f launch
+pkill -f custom_launch
 git clean -x -f
 git reset --hard HEAD
 rm -rRf slave*
