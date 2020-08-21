@@ -1,3 +1,5 @@
+import cvxopt
+import pm4pycvxopt
 from threading import Thread
 from pm4pydistr import configuration
 from flask import Flask, request, jsonify
@@ -143,7 +145,9 @@ def do_log_assignment():
 def check_versions():
     check_master_initialized()
 
-    return jsonify({"pm4py": pm4py.__version__, "pm4pydistr": pm4pydistr.__version__, "default_lp_solver": str(pm4py.util.lp.solver.DEFAULT_LP_SOLVER_VARIANT)})
+    return jsonify({"pm4py": pm4py.__version__, "pm4pydistr": pm4pydistr.__version__,
+                    "default_lp_solver": str(pm4py.util.lp.solver.DEFAULT_LP_SOLVER_VARIANT),
+                    "cvxopt": str(cvxopt.__version__), "pm4pycvxopt": str(pm4pycvxopt.__version__)})
 
 
 @MasterSocketListener.app.route("/getSlavesList", methods=["GET"])
