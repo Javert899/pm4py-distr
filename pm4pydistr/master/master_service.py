@@ -143,7 +143,7 @@ def do_log_assignment():
 def check_versions():
     check_master_initialized()
 
-    return jsonify({"pm4py": pm4py.__version__, "pm4pydistr": pm4pydistr.__version__})
+    return jsonify({"pm4py": pm4py.__version__, "pm4pydistr": pm4pydistr.__version__, "default_lp_solver": str(pm4py.util.lp.solver.DEFAULT_LP_SOLVER_VARIANT)})
 
 
 @MasterSocketListener.app.route("/getSlavesList", methods=["GET"])
