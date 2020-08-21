@@ -22,7 +22,7 @@ MASTER_HOST = "137.226.117.71"
 THIS_HOST = "137.226.117.71"
 
 THIS_START = 6000
-THIS_COUNT = 1
+THIS_COUNT = 19
 
 for i in range(THIS_COUNT):
     conf = "slave"+str(THIS_START+i+1)
