@@ -390,7 +390,7 @@ class ClassicDistrLogObject(DistrLogObj):
             PARAM_MAX_ALIGN_TIME] if PARAM_MAX_ALIGN_TIME in parameters else DEFAULT_MAX_ALIGN_TIME
         max_align_time_trace = parameters[
             PARAM_MAX_ALIGN_TIME_TRACE] if PARAM_MAX_ALIGN_TIME_TRACE in parameters else DEFAULT_MAX_ALIGN_TIME_TRACE
-        align_variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_less_memory"
+        align_variant = parameters["align_variant"] if "align_variant" in parameters else "state_equation_less_memory"
         classic_alignments_variant = parameters[
             "classic_alignments_variant"] if "classic_alignments_variant" in parameters else "state_equation_less_memory"
         tree_align_variant = parameters["tree_align_variant"] if "tree_align_variant" in parameters else "matrix_lp"

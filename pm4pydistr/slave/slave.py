@@ -89,7 +89,7 @@ def perform_alignments(petri_string, var_list, parameters=None):
     if parameters is None:
         parameters = {}
 
-    variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_no_heuristics"
+    variant = parameters["align_variant"] if "align_variant" in parameters else "state_equation_less_memory"
     parameters["ret_tuple_as_trans_desc"] = True
 
     if variant == "dijkstra_no_heuristics":
