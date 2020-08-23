@@ -706,13 +706,16 @@ class Master:
                 threads.append(m)
 
         ret_dict = {}
-        rem_waiting_time = min(max_thread_join_time, 4000000)
+        rem_waiting_time = 0 + max_thread_join_time
 
         for index, thread in enumerate(threads):
             try:
                 # max align time
                 aa = time.time()
-                thread.join(rem_waiting_time)
+                if rem_waiting_time < 4000000:
+                    thread.join(rem_waiting_time)
+                else:
+                    thread.join()
                 bb = time.time()
                 rem_waiting_time = max(0.001, rem_waiting_time - (bb - aa))
 
