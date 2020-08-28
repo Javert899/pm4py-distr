@@ -2,7 +2,7 @@ from pm4pydistr.remote_wrapper import factory as wrapper_factory
 from pm4py.evaluation.replay_fitness.versions import alignment_based
 import time
 
-wrapper = wrapper_factory.apply("127.0.0.1", "5001", "hello", "receipt")
+wrapper = wrapper_factory.apply("137.226.117.71", "7001", "hello", "receipt")
 net, im, fm = wrapper.get_imd_net_im_fm_from_dfg()
 aa = time.time()
 alignments = wrapper.perform_alignments_net_variants(net, im, fm,
