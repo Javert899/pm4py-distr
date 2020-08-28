@@ -3,8 +3,8 @@ from pm4py.objects.process_tree.importer import importer as pt_importer
 from pm4py.evaluation.replay_fitness.versions import alignment_based
 import time
 
-wrapper = wrapper_factory.apply("137.226.117.71", "7001", "hello", "receipt")
-tree = pt_importer.apply('../tests/receipt.ptml')
+wrapper = wrapper_factory.apply("137.226.117.71", "7001", "hello", "bpic2017_application")
+tree = pt_importer.apply('../tests/bpic2017_application.ptml')
 # tree = wrapper.get_imd_tree_from_dfg()
 aa = time.time()
 alignments = wrapper.perform_alignments_tree_variants(tree,
