@@ -19,3 +19,6 @@ print(fitness)
 print("total traces = ", len(alignments))
 print("successful alignments = ", len([x for x in alignments if x is not None]))
 # print(alignments)
+if False:
+    for align in alignments:
+        print(align)
