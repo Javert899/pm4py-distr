@@ -18,7 +18,7 @@ import sys
 from pm4py.objects.petri.align_utils import get_visible_transitions_eventually_enabled_by_marking
 from pm4py.algo.discovery.causal import algorithm as causal_discovery
 from pm4py.algo.discovery.inductive import algorithm as inductive_miner
-from pm4py.algo.discovery.inductive.versions.dfg import dfg_based
+from pm4py.algo.discovery.inductive.versions.im_d import dfg_based
 from pm4py.objects.conversion.process_tree import converter
 import numpy as np
 
