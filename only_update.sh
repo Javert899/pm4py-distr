@@ -5,8 +5,6 @@ rm -rRf slave*
 rm -f nohup.out
 git pull
 pip3 uninstall ortools
-pip3 uninstall pm4py
-pip3 uninstall pm4pyexperimental
 pip3 install -U pm4pydistr
 pip3 install -U -r requirements.txt
 pip3 install -U cvxopt
