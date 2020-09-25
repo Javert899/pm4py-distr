@@ -18,7 +18,7 @@ import sys
 from pm4py.objects.petri.align_utils import get_visible_transitions_eventually_enabled_by_marking
 from pm4py.algo.discovery.causal import algorithm as causal_discovery
 from pm4py.algo.discovery.inductive import algorithm as inductive_miner
-from pm4py.algo.discovery.inductive.versions.dfg import dfg_based
+from pm4py.algo.discovery.inductive.versions.im_d import dfg_based
 from pm4py.objects.conversion.process_tree import converter
 import numpy as np
 
@@ -101,6 +101,8 @@ class ClassicDistrLogObject(DistrLogObj):
                 stru = stru + "&attribute_key=" + str(parameters["attribute_key"])
             elif parameter == "timestamp_key":
                 stru = stru + "&timestamp_key=" + str(parameters["timestamp_key"])
+            elif parameter == "window_size":
+                stru = stru + "&window_size=" + str(parameters["window_size"])
             elif parameter == "performance_required":
                 stru = stru + "&performance_required=" + str(parameters["performance_required"])
             elif PARAMETER_NUM_RET_ITEMS in parameters:
@@ -362,6 +364,7 @@ class ClassicDistrLogObject(DistrLogObj):
         if parameters is None:
             parameters = {}
         if var_list is None:
+            parameters["window_size"] = 1000000000000
             variants = self.get_variants(parameters=parameters)
             var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
         petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
@@ -373,6 +376,7 @@ class ClassicDistrLogObject(DistrLogObj):
         if "align_variant" not in parameters:
             parameters["align_variant"] = "tree_approximated"
         if var_list is None:
+            parameters["window_size"] = 1000000000000
             variants = self.get_variants(parameters=parameters)
             var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
         ptml_string = ptml_exporter.export_tree_as_string(tree, parameters=parameters)
@@ -386,14 +390,23 @@ class ClassicDistrLogObject(DistrLogObj):
             PARAM_MAX_ALIGN_TIME] if PARAM_MAX_ALIGN_TIME in parameters else DEFAULT_MAX_ALIGN_TIME
         max_align_time_trace = parameters[
             PARAM_MAX_ALIGN_TIME_TRACE] if PARAM_MAX_ALIGN_TIME_TRACE in parameters else DEFAULT_MAX_ALIGN_TIME_TRACE
-        align_variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_less_memory"
+        align_variant = parameters["align_variant"] if "align_variant" in parameters else "state_equation_less_memory"
         classic_alignments_variant = parameters[
             "classic_alignments_variant"] if "classic_alignments_variant" in parameters else "state_equation_less_memory"
+        tree_align_variant = parameters["tree_align_variant"] if "tree_align_variant" in parameters else "matrix_lp"
+        petri_conversion_version = parameters[
+            "petri_conversion_version"] if "petri_conversion_version" in parameters else "to_petri_net"
+        require_ilp_computation = parameters[
+            "require_ilp_computation"] if "require_ilp_computation" in parameters else "False"
+        max_thread_join_time = parameters[
+            "max_thread_join_time"] if "max_thread_join_time" in parameters else sys.maxsize
 
         url = self.get_url("performAlignments", parameters=parameters)
         dictio = {"petri_string": petri_string, "var_list": var_list, "max_align_time": max_align_time,
                   "max_align_time_trace": max_align_time_trace, "align_variant": align_variant,
-                  "classic_alignments_variant": classic_alignments_variant}
+                  "classic_alignments_variant": classic_alignments_variant,
+                  "tree_align_variant": tree_align_variant, "petri_conversion_version": petri_conversion_version,
+                  "require_ilp_computation": require_ilp_computation, "max_thread_join_time": max_thread_join_time}
 
         r = requests.post(url, json=dictio)
         ret_text = r.text
@@ -426,6 +439,7 @@ class ClassicDistrLogObject(DistrLogObj):
         if parameters is None:
             parameters = {}
         if var_list is None:
+            parameters["window_size"] = 1000000000000
             variants = self.get_variants(parameters=parameters)
             var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
         petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
@@ -611,6 +625,10 @@ class ClassicDistrLogObject(DistrLogObj):
         return net, im, fm
 
     def get_im_tree_from_variants(self, parameters=None):
+        if parameters is None:
+            parameters = {}
+
+        parameters["window_size"] = 1000000000000
         variants = {x["variant"]: x["count"] for x in self.get_variants(parameters=parameters)["variants"]}
         tree = inductive_miner.apply_tree_variants(variants, parameters=parameters)
         return tree
@@ -625,6 +643,7 @@ class ClassicDistrLogObject(DistrLogObj):
             parameters = {}
         min_var_freq = parameters["min_var_freq"] if "min_var_freq" in parameters else 0
 
+        parameters["window_size"] = 1000000000000
         variants = self.get_variants(parameters=parameters)
         var_list = [[x["variant"], x["count"]] for x in variants["variants"] if x["count"] >= min_var_freq]
 
@@ -632,6 +651,10 @@ class ClassicDistrLogObject(DistrLogObj):
         return classic.apply_from_variants_list(var_list)
 
     def conformance_skeleton(self, model, parameters=None):
+        if parameters is None:
+            parameters = {}
+
+        parameters["window_size"] = 1000000000000
         variants = self.get_variants()
         var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
 
@@ -652,10 +675,10 @@ class ClassicDistrLogObject(DistrLogObj):
         activities_counter = self.get_attribute_values(activity_key)
 
         if activities is None:
-            activities_counter = {x:y for x,y in activities_counter.items() if y >= min_act_freq}
+            activities_counter = {x: y for x, y in activities_counter.items() if y >= min_act_freq}
             activities = sorted(list(activities_counter.keys()))
 
-        activities_counter = {x:y for x,y in activities_counter.items() if x in activities}
+        activities_counter = {x: y for x, y in activities_counter.items() if x in activities}
 
         content = {}
         content["activities"] = activities

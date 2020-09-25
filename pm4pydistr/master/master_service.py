@@ -633,8 +633,12 @@ def perform_alignments():
         var_list = content["var_list"]
         max_align_time = content["max_align_time"]
         max_align_time_trace = content["max_align_time_trace"]
+        max_thread_join_time = content["max_thread_join_time"]
         align_variant = content["align_variant"]
         classic_alignments_variant = content["classic_alignments_variant"]
+        tree_align_variant = content["tree_align_variant"]
+        petri_conversion_version = content["petri_conversion_version"]
+        require_ilp_computation = content["require_ilp_computation"]
 
         if keyphrase == configuration.KEYPHRASE:
             alignments = MasterVariableContainer.master.perform_alignments(session, process, use_transition, no_samples,
@@ -642,7 +646,11 @@ def perform_alignments():
                                                                            max_align_time=max_align_time,
                                                                            max_align_time_trace=max_align_time_trace,
                                                                            align_variant=align_variant,
-                                                                           classic_alignments_variant=classic_alignments_variant)
+                                                                           classic_alignments_variant=classic_alignments_variant,
+                                                                           tree_align_variant=tree_align_variant,
+                                                                           petri_conversion_version=petri_conversion_version,
+                                                                           require_ilp_computation=require_ilp_computation,
+                                                                           max_thread_join_time=max_thread_join_time)
             return jsonify({"alignments": alignments})
 
         return jsonify({})

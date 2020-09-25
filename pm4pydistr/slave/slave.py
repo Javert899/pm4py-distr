@@ -89,7 +89,7 @@ def perform_alignments(petri_string, var_list, parameters=None):
     if parameters is None:
         parameters = {}
 
-    variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_no_heuristics"
+    variant = parameters["align_variant"] if "align_variant" in parameters else "state_equation_less_memory"
     parameters["ret_tuple_as_trans_desc"] = True
 
     if variant == "dijkstra_no_heuristics":
@@ -117,7 +117,18 @@ def perform_alignments(petri_string, var_list, parameters=None):
                 parameters["classic_alignments_variant"] = state_equation_less_memory
             elif parameters["classic_alignments_variant"] == "state_equation_a_star":
                 parameters["classic_alignments_variant"] = state_equation_a_star
-        from pm4py.algo.conformance.tree_alignments.variants.approximated import matrix_lp as approx_alignments
+        from pm4py.objects.conversion.process_tree import converter
+        if parameters["petri_conversion_version"] == "to_petri_net":
+            parameters["petri_conversion_version"] = converter.Variants.TO_PETRI_NET
+        elif parameters["petri_conversion_version"] == "to_petri_net_transition_bordered":
+            parameters["petri_conversion_version"] = converter.Variants.TO_PETRI_NET_TRANSITION_BORDERED
+        tree_align_variant = parameters["tree_align_variant"]
+        if tree_align_variant == "matrix_lp":
+            from pm4py.algo.conformance.tree_alignments.variants.approximated import matrix_lp as approx_alignments
+
+        else:
+            from pm4py.algo.conformance.tree_alignments.variants.approximated import original as approx_alignments
+
         alignments = approx_alignments.apply_from_variants_tree_string(var_list, petri_string,
                                                                        parameters=parameters)
         return alignments
