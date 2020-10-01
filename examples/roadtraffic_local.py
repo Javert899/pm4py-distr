@@ -50,7 +50,7 @@ print(wrapper.get_log_summary())
 x, y = wrapper.get_events_per_time()
 # print(x, y)
 # apply a filter on cases contained in the interval [09-2014, 01-2008]
-wrapper.add_filter("timestamp_trace_containing", "1100000000@@@1200000000")
+wrapper.add_filter("timestamp_trace_containing", ["time:timestamp", "1100000000@@@1200000000"])
 # see if the number of events changes
 print(wrapper.get_log_summary())
 

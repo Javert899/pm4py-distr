@@ -4,7 +4,7 @@ from pm4pydistr.configuration import PARAMETERS_PORT, PARAMETERS_HOST, PARAMETER
 from pm4pydistr.slave.slave_service import SlaveSocketListener
 from pm4pydistr.slave.slave_requests import SlaveRequests
 from pathlib import Path
-from pm4py.objects.log.importer.parquet import factory as parquet_importer
+from pm4pydistr.util.parquet_importer import importer as parquet_importer
 from pm4pydistr.slave.do_ms_ping import DoMasterPing
 import uuid
 import socket

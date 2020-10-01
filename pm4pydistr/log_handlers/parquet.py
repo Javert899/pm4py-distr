@@ -1,5 +1,5 @@
 import os
-from pm4py.objects.log.importer.parquet import factory as parquet_importer
+from pm4pydistr.util.parquet_importer import importer as parquet_importer
 from collections import Counter
 from pm4py.algo.discovery.dfg.adapters.pandas import df_statistics
 from pm4py.algo.filtering.pandas.end_activities import end_activities_filter

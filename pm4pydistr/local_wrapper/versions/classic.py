@@ -1,6 +1,6 @@
 from pm4pydistr.local_wrapper.distr_log_obj import LocalDistrLogObj
 from pm4pydistr.log_handlers import parquet as parquet_handler
-from pm4py.objects.log.importer.parquet import factory as parquet_factory
+from pm4pydistr.util.parquet_importer import importer as parquet_importer
 from pm4py.util import constants as pm4py_constants
 from pathlib import Path
 from pm4py.algo.filtering.common.attributes import attributes_common
@@ -31,7 +31,7 @@ class ClassicDistrLogObject(LocalDistrLogObj):
         parquet_handler.do_caching(".", self.distr_log_path, list_logs, parameters=parameters)
 
     def get_list_logs(self):
-        lp = parquet_factory.get_list_parquet(self.distr_log_path)
+        lp = parquet_importer.get_list_parquet(self.distr_log_path)
 
         return [Path(log).name for log in lp]
 
