@@ -7,8 +7,6 @@ from pm4py.util import exec_utils
 COLUMNS = Parameters.COLUMNS.value
 
 
-@deprecation.deprecated(deprecated_in='1.3.0', removed_in='2.0.0', current_version='',
-                        details='Please import the parquet to a pandas df, then convert it to an event log, if needed')
 def apply(path, parameters=None):
     """
     Import a Parquet file
