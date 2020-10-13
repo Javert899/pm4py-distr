@@ -33,7 +33,7 @@ setup(
         'Flask',
         'flask-cors',
         'psutil',
-        'pyarrow==0.15.1',
+        'pyarrow==1.0.1',
         "pm4pycvxopt==0.0.10"
     ],
     project_urls={
