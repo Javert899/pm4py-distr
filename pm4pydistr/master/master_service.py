@@ -1,5 +1,6 @@
 import cvxopt
 import pm4pycvxopt
+import pyarrow
 from threading import Thread
 from pm4pydistr import configuration
 from flask import Flask, request, jsonify
@@ -147,7 +148,8 @@ def check_versions():
 
     return jsonify({"pm4py": pm4py.__version__, "pm4pydistr": pm4pydistr.__version__,
                     "default_lp_solver": str(pm4py.util.lp.solver.DEFAULT_LP_SOLVER_VARIANT),
-                    "cvxopt": str(cvxopt.__version__), "pm4pycvxopt": str(pm4pycvxopt.__version__)})
+                    "cvxopt": str(cvxopt.__version__), "pm4pycvxopt": str(pm4pycvxopt.__version__),
+                    "pyarrow": str(pyarrow.__version__), "python": str(sys.version)})
 
 
 @MasterSocketListener.app.route("/getSlavesList", methods=["GET"])
