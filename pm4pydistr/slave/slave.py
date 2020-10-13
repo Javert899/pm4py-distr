@@ -15,10 +15,10 @@ import shutil
 
 import time
 
-from pm4py.algo.conformance.alignments.versions import dijkstra_no_heuristics, state_equation_a_star, \
+from pm4py.algo.conformance.alignments.variants import dijkstra_no_heuristics, state_equation_a_star, \
     dijkstra_less_memory, state_equation_less_memory
-from pm4py.algo.conformance.decomp_alignments.versions import recompos_maximal
-from pm4py.algo.conformance.tokenreplay.versions import token_replay
+from pm4py.algo.conformance.decomp_alignments.variants import recompos_maximal
+from pm4py.algo.conformance.tokenreplay.variants import token_replay
 
 
 def find_free_port():
