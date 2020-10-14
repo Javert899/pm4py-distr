@@ -19,20 +19,22 @@ setup(
     author_email=pm4pydistr.__author_email__,
     py_modules=[pm4pydistr.__name__],
     include_package_data=True,
-    packages=['pm4pydistr', 'pm4pydistr.util', 'pm4pydistr.slave', 'pm4pydistr.master', 'pm4pydistr.master.rqsts',
-              'pm4pydistr.log_handlers', 'pm4pydistr.log_handlers.parquet_filtering',
+    packages=['pm4pydistr', 'pm4pydistr.util', 'pm4pydistr.util.parquet_exporter',
+              'pm4pydistr.util.parquet_exporter.versions', 'pm4pydistr.util.parquet_importer',
+              'pm4pydistr.util.parquet_importer.versions', 'pm4pydistr.slave', 'pm4pydistr.master',
+              'pm4pydistr.master.rqsts', 'pm4pydistr.log_handlers', 'pm4pydistr.log_handlers.parquet_filtering',
               'pm4pydistr.log_handlers.parquet_filtering.versions', 'pm4pydistr.local_wrapper',
               'pm4pydistr.local_wrapper.versions', 'pm4pydistr.remote_wrapper', 'pm4pydistr.remote_wrapper.versions'],
     url='http://www.pm4py.org',
     license='GPL 3.0',
     install_requires=[
-        'pm4py==1.5.2.1',
+        'pm4py==2.0.0',
         'requests',
         'Flask',
         'flask-cors',
         'psutil',
-        'pyarrow==0.15.1',
-        "pm4pycvxopt==0.0.9"
+        'pyarrow==1.0.1',
+        "pm4pycvxopt==0.0.10"
     ],
     project_urls={
         'Documentation': 'http://pm4py.pads.rwth-aachen.de/documentation/',

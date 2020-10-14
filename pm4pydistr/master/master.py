@@ -2,7 +2,7 @@ from pm4pydistr.master.master_service import MasterSocketListener
 from pm4pydistr.master.variable_container import MasterVariableContainer
 
 from pm4pydistr.configuration import PARAMETERS_PORT, PARAMETERS_HOST, PARAMETERS_CONF, BASE_FOLDER_LIST_OPTIONS
-from pm4py.objects.log.importer.parquet import factory as parquet_importer
+from pm4pydistr.util.parquet_importer import importer as parquet_importer
 from pm4pydistr.master.rqsts.master_assign_request import MasterAssignRequest
 from pm4pydistr.master.rqsts.dfg_calc_request import DfgCalcRequest
 from pm4pydistr.master.rqsts.ea_request import EaRequest
