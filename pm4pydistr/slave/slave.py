@@ -4,7 +4,7 @@ from pm4pydistr.configuration import PARAMETERS_PORT, PARAMETERS_HOST, PARAMETER
 from pm4pydistr.slave.slave_service import SlaveSocketListener
 from pm4pydistr.slave.slave_requests import SlaveRequests
 from pathlib import Path
-from pm4py.objects.log.importer.parquet import factory as parquet_importer
+from pm4pydistr.util.parquet_importer import importer as parquet_importer
 from pm4pydistr.slave.do_ms_ping import DoMasterPing
 import uuid
 import socket
@@ -15,10 +15,10 @@ import shutil
 
 import time
 
-from pm4py.algo.conformance.alignments.versions import dijkstra_no_heuristics, state_equation_a_star, \
+from pm4py.algo.conformance.alignments.variants import dijkstra_no_heuristics, state_equation_a_star, \
     dijkstra_less_memory, state_equation_less_memory
-from pm4py.algo.conformance.decomp_alignments.versions import recompos_maximal
-from pm4py.algo.conformance.tokenreplay.versions import token_replay
+from pm4py.algo.conformance.decomp_alignments.variants import recompos_maximal
+from pm4py.algo.conformance.tokenreplay.variants import token_replay
 
 
 def find_free_port():

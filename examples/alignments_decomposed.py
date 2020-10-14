@@ -1,5 +1,5 @@
 from pm4pydistr.remote_wrapper import factory as wrapper_factory
-from pm4py.evaluation.replay_fitness.versions import alignment_based
+from pm4py.evaluation.replay_fitness.variants import alignment_based
 import time
 
 wrapper = wrapper_factory.apply("127.0.0.1", "5001", "hello", "receipt")
