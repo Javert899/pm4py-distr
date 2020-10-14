@@ -958,7 +958,7 @@ def correlation_miner(path, log_name, managed_logs, parameters=None):
     complete_timestamp = parameters["complete_timestamp"] if "complete_timestamp" in parameters else DEFAULT_TIMESTAMP_KEY
     start_timestamp = parameters["start_timestamp"] if "start_timestamp" in parameters else DEFAULT_TIMESTAMP_KEY
 
-    from pm4py.algo.discovery.correlation_mining.versions import classic
+    from pm4py.algo.discovery.correlation_mining.variants import classic
 
     no_samples = parameters[PARAMETER_NO_SAMPLES] if PARAMETER_NO_SAMPLES in parameters else DEFAULT_MAX_NO_SAMPLES
     use_transition = parameters[

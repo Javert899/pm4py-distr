@@ -6,12 +6,12 @@ from pathlib import Path
 from pm4py.algo.filtering.common.attributes import attributes_common
 from pm4py.statistics.traces.common import case_duration as case_duration_commons
 from datetime import datetime
-from pm4py.objects.petri.exporter.versions import pnml as pnml_exporter
+from pm4py.objects.petri.exporter.variants import pnml as pnml_exporter
 from pm4py.algo.filtering.log.variants import variants_filter as log_variants_filter
 from pm4pydistr.slave import slave
 from pm4py.algo.discovery.causal import algorithm as causal_discovery
 from pm4py.algo.discovery.inductive import algorithm as inductive_miner
-from pm4py.algo.discovery.inductive.versions.im_d import dfg_based
+from pm4py.algo.discovery.inductive.variants.im_d import dfg_based
 from pm4py.objects.conversion.process_tree import converter
 import numpy as np
 import json
@@ -388,7 +388,7 @@ class ClassicDistrLogObject(LocalDistrLogObj):
         PS_matrix = np.asmatrix(json.loads(ret["PS_matrix"]))
         duration_matrix = np.asmatrix(json.loads(ret["duration_matrix"]))
 
-        from pm4py.algo.discovery.correlation_mining.versions import classic
+        from pm4py.algo.discovery.correlation_mining.variants import classic
 
         dfg, performance_dfg = classic.resolve_lp_get_dfg(PS_matrix, duration_matrix, activities, activities_counter)
 
