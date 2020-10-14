@@ -9,16 +9,16 @@ import json
 import time
 from pm4py.util import constants
 from pm4py.objects.petri import align_utils
-from pm4py.algo.conformance.alignments.versions import state_equation_a_star
+from pm4py.algo.conformance.alignments.variants import state_equation_a_star
 from datetime import datetime
-from pm4py.objects.petri.exporter.versions import pnml as pnml_exporter
+from pm4py.objects.petri.exporter.variants import pnml as pnml_exporter
 from pm4py.objects.process_tree.exporter.variants import ptml as ptml_exporter
 from pm4py.algo.filtering.log.variants import variants_filter as log_variants_filter
 import sys
 from pm4py.objects.petri.align_utils import get_visible_transitions_eventually_enabled_by_marking
 from pm4py.algo.discovery.causal import algorithm as causal_discovery
 from pm4py.algo.discovery.inductive import algorithm as inductive_miner
-from pm4py.algo.discovery.inductive.versions.im_d import dfg_based
+from pm4py.algo.discovery.inductive.variants.im_d import dfg_based
 from pm4py.objects.conversion.process_tree import converter
 import numpy as np
 
@@ -550,7 +550,7 @@ class ClassicDistrLogObject(DistrLogObj):
 
     def calculate_precision_with_tbr(self, net, im, fm, log, parameters=None):
         from pm4py import util as pmutil
-        from pm4py.algo.conformance.tokenreplay import factory as token_replay
+        from pm4py.algo.conformance.tokenreplay import algorithm as token_replay
         from pm4py.objects import log as log_lib
         from pm4py.evaluation.precision import utils as precision_utils
 
@@ -647,7 +647,7 @@ class ClassicDistrLogObject(DistrLogObj):
         variants = self.get_variants(parameters=parameters)
         var_list = [[x["variant"], x["count"]] for x in variants["variants"] if x["count"] >= min_var_freq]
 
-        from pm4py.algo.discovery.log_skeleton.versions import classic
+        from pm4py.algo.discovery.log_skeleton.variants import classic
         return classic.apply_from_variants_list(var_list)
 
     def conformance_skeleton(self, model, parameters=None):
@@ -658,7 +658,7 @@ class ClassicDistrLogObject(DistrLogObj):
         variants = self.get_variants()
         var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
 
-        from pm4py.algo.conformance.log_skeleton.versions import classic
+        from pm4py.algo.conformance.log_skeleton.variants import classic
         return classic.apply_from_variants_list(var_list, model)
 
     def correlation_miner(self, parameters=None):
@@ -692,7 +692,7 @@ class ClassicDistrLogObject(DistrLogObj):
         PS_matrix = np.asmatrix(resp["PS_matrix"]).reshape(len(activities), len(activities))
         duration_matrix = np.asmatrix(resp["duration_matrix"]).reshape(len(activities), len(activities))
 
-        from pm4py.algo.discovery.correlation_mining.versions import classic
+        from pm4py.algo.discovery.correlation_mining.variants import classic
 
         dfg, performance_dfg = classic.resolve_lp_get_dfg(PS_matrix, duration_matrix, activities, activities_counter)
 
