@@ -1,6 +1,6 @@
 from pm4pydistr.remote_wrapper import factory as wrapper_factory
 from pm4py.objects.process_tree.importer import importer as pt_importer
-from pm4py.evaluation.replay_fitness.versions import alignment_based
+from pm4py.evaluation.replay_fitness.variants import alignment_based
 import time
 
 wrapper = wrapper_factory.apply("137.226.117.71", "7001", "hello", "bpic2017_application")
