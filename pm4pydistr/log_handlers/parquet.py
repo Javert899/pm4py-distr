@@ -142,7 +142,7 @@ def calculate_dfg(path, log_name, managed_logs, parameters=None):
     activity_key = DEFAULT_NAME_KEY if not use_transition else PARAMETER_PM4PYWS_CLASSIFIER
     filters = parameters[FILTERS] if FILTERS in parameters else []
     parameters[pm4py_constants.PARAMETER_CONSTANT_ACTIVITY_KEY] = activity_key
-    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY], use_transition=use_transition)
+    columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY, DEFAULT_TIMESTAMP_KEY], use_transition=use_transition)
 
     if pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY in parameters:
         columns.append(parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY])
