@@ -23,6 +23,7 @@ print(wrapper.get_start_activities())
 print(wrapper.get_end_activities())
 # gets the path of the log (frequency DFG) along with their count
 print(wrapper.calculate_dfg())
+print(wrapper.calculate_performance_dfg())
 # add a filter on the presence of the "Send Fine" activity
 wrapper.add_filter("attributes_pos_trace", ["concept:name", ["Send Fine"]])
 # see if the number of events changes
