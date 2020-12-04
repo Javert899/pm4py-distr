@@ -241,7 +241,7 @@ def calculate_process_schema_composite_object(path, log_name, managed_logs, para
         columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY, DEFAULT_TIMESTAMP_KEY],
                                         use_transition=use_transition)
     else:
-        columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY], use_transition=use_transition)
+        columns = get_columns_to_import(filters, [CASE_CONCEPT_NAME, DEFAULT_NAME_KEY, DEFAULT_TIMESTAMP_KEY], use_transition=use_transition)
 
     if pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY in parameters:
         columns.append(parameters[pm4py_constants.PARAMETER_CONSTANT_ATTRIBUTE_KEY])
