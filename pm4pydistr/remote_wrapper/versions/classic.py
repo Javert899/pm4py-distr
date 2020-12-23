@@ -367,7 +367,7 @@ class ClassicDistrLogObject(DistrLogObj):
             parameters["window_size"] = 1000000000000
             variants = self.get_variants(parameters=parameters)
             var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
-        petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
+        petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters).decode("utf-8")
         return self.perform_alignments(petri_string, var_list, parameters=parameters)
 
     def perform_alignments_tree_variants(self, tree, var_list=None, parameters=None):
@@ -379,7 +379,7 @@ class ClassicDistrLogObject(DistrLogObj):
             parameters["window_size"] = 1000000000000
             variants = self.get_variants(parameters=parameters)
             var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
-        ptml_string = ptml_exporter.export_tree_as_string(tree, parameters=parameters)
+        ptml_string = ptml_exporter.export_tree_as_string(tree, parameters=parameters).decode("utf-8")
         return self.perform_alignments(ptml_string, var_list, parameters=parameters)
 
     def perform_alignments(self, petri_string, var_list, parameters=None):
@@ -442,7 +442,7 @@ class ClassicDistrLogObject(DistrLogObj):
             parameters["window_size"] = 1000000000000
             variants = self.get_variants(parameters=parameters)
             var_list = [[x["variant"], x["count"]] for x in variants["variants"]]
-        petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters)
+        petri_string = pnml_exporter.export_petri_as_string(net, im, fm, parameters=parameters).decode("utf-8")
         return self.perform_token_replay(petri_string, var_list, parameters=parameters)
 
     def perform_token_replay(self, petri_string, var_list, parameters=None):
