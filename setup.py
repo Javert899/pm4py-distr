@@ -28,7 +28,7 @@ setup(
     url='http://www.pm4py.org',
     license='GPL 3.0',
     install_requires=[
-        'pm4py==2.1.3',
+        'pm4py==2.1.4',
         'requests',
         'Flask',
         'flask-cors',
