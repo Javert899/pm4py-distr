@@ -28,13 +28,13 @@ setup(
     url='http://www.pm4py.org',
     license='GPL 3.0',
     install_requires=[
-        'pm4py==2.2.0',
+        'pm4py==2.2.2',
         'requests',
         'Flask',
         'flask-cors',
         'psutil',
         'pyarrow==2.0.0',
-        "pm4pycvxopt==0.0.10"
+        "pm4pycvxopt==0.0.11"
     ],
     project_urls={
         'Documentation': 'http://pm4py.pads.rwth-aachen.de/documentation/',

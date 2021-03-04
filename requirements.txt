@@ -1,8 +1,8 @@
-pm4py==2.2.0
+pm4py==2.2.2
 requests
 Flask
 flask-cors
 netifaces
 psutil
 pyarrow==2.0.0
-pm4pycvxopt==0.0.10
+pm4pycvxopt==0.0.11
