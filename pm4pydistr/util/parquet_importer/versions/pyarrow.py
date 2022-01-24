@@ -30,7 +30,7 @@ def apply(path, parameters=None):
     columns = exec_utils.get_param_value(Parameters.COLUMNS, parameters, None)
 
     if columns:
-        df = pq.read_pandas(path, columns=columns).to_pandas()
+        df = pq.read_pandas(path, columns=set(columns)).to_pandas()
     else:
         df = pq.read_pandas(path).to_pandas()
 
