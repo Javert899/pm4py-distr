@@ -16,8 +16,7 @@ import shutil
 import time
 
 from pm4py.algo.conformance.alignments.variants import dijkstra_no_heuristics, state_equation_a_star, \
-    dijkstra_less_memory, state_equation_less_memory
-from pm4py.algo.conformance.decomp_alignments.variants import recompos_maximal
+    dijkstra_less_memory
 from pm4py.algo.conformance.tokenreplay.variants import token_replay
 
 
@@ -89,7 +88,7 @@ def perform_alignments(petri_string, var_list, parameters=None):
     if parameters is None:
         parameters = {}
 
-    variant = parameters["align_variant"] if "align_variant" in parameters else "state_equation_less_memory"
+    variant = parameters["align_variant"] if "align_variant" in parameters else "dijkstra_less_memory"
     parameters["ret_tuple_as_trans_desc"] = True
 
     if variant == "dijkstra_no_heuristics":
@@ -100,21 +99,12 @@ def perform_alignments(petri_string, var_list, parameters=None):
                                                                            parameters=parameters)
     elif variant == "dijkstra_less_memory":
         return dijkstra_less_memory.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
-    elif variant == "recomp_maximal":
-        return recompos_maximal.apply_from_variants_list_petri_string(var_list, petri_string, parameters=parameters)
-    elif variant == "state_equation_less_memory":
-        return state_equation_less_memory.apply_from_variants_list_petri_string(var_list, petri_string,
-                                                                                parameters=parameters)
     elif variant == "tree_approximated":
         if "classic_alignments_variant" in parameters:
             if parameters["classic_alignments_variant"] == "dijkstra_no_heuristics":
                 parameters["classic_alignments_variant"] = dijkstra_no_heuristics
             elif parameters["classic_alignments_variant"] == "dijkstra_less_memory":
                 parameters["classic_alignments_variant"] = dijkstra_less_memory
-            elif parameters["classic_alignments_variant"] == "recomp_maximal":
-                parameters["classic_alignments_variant"] = recompos_maximal
-            elif parameters["classic_alignments_variant"] == "state_equation_less_memory":
-                parameters["classic_alignments_variant"] = state_equation_less_memory
             elif parameters["classic_alignments_variant"] == "state_equation_a_star":
                 parameters["classic_alignments_variant"] = state_equation_a_star
         from pm4py.objects.conversion.process_tree import converter
